@@ -24,7 +24,7 @@ use tokio::{
 
 use spl_network::PlayerNumber;
 
-pub const SDK_VERSION: &str = "5.0";
+pub const SDK_VERSION: &str = "1.0";
 
 pub struct Repository {
     root: PathBuf,
