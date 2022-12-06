@@ -14,7 +14,6 @@ use color_eyre::{
     eyre::{bail, eyre, Context},
     Result,
 };
-use constants::SDK_VERSION;
 use futures_util::{stream::FuturesUnordered, StreamExt};
 use glob::glob;
 use home::home_dir;
@@ -33,6 +32,7 @@ use tokio::{
 use spl_network_messages::PlayerNumber;
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
+pub const SDK_VERSION: &str = "1.0";
 
 #[derive(Clone)]
 pub struct Repository {
