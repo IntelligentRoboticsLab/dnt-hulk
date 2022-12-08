@@ -2,14 +2,13 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use communication::Cycler;
-use eframe::{
-    egui::{ComboBox, Ui},
-    Storage,
-};
+use convert_case::Casing;
+use eframe::egui::Ui;
+use serde_json::{json, Value};
 
 use crate::{nao::Nao, twix_painter::TwixPainter};
 
-use super::overlays::LineDetection;
+use super::overlays::{BallDetection, LineDetection};
 
 pub trait Overlay {
     const NAME: &'static str;
@@ -32,13 +31,14 @@ where
 {
     pub fn new(
         nao: Arc<Nao>,
-        storage: Option<&dyn Storage>,
+        value: Option<&Value>,
         active: bool,
         selected_cycler: Cycler,
     ) -> Self {
-        let active = storage
-            .and_then(|storage| storage.get_string(&format!("image.{}", T::NAME)))
-            .and_then(|value| value.parse().ok())
+        let active = value
+            .and_then(|value| value.get(T::NAME.to_case(convert_case::Case::Snake)))
+            .and_then(|value| value.get("active"))
+            .and_then(|value| value.as_bool())
             .unwrap_or(active);
         let layer = active.then(|| T::new(nao.clone(), selected_cycler));
         Self {
@@ -71,39 +71,48 @@ where
         Ok(())
     }
 
-    pub fn save(&self, storage: &mut dyn Storage) {
-        storage.set_string(&format!("image.{}", T::NAME), self.active.to_string());
+    pub fn save(&self) -> Value {
+        json!({"active": self.active})
     }
 }
 
 pub struct Overlays {
     pub line_detection: EnabledOverlay<LineDetection>,
+    pub ball_detection: EnabledOverlay<BallDetection>,
 }
 
 impl Overlays {
-    pub fn new(nao: Arc<Nao>, storage: Option<&dyn Storage>, selected_cycler: Cycler) -> Self {
-        let line_detection = EnabledOverlay::new(nao, storage, true, selected_cycler);
-        Self { line_detection }
+    pub fn new(nao: Arc<Nao>, storage: Option<&Value>, selected_cycler: Cycler) -> Self {
+        let line_detection = EnabledOverlay::new(nao.clone(), storage, true, selected_cycler);
+        let ball_detection = EnabledOverlay::new(nao, storage, true, selected_cycler);
+        Self {
+            line_detection,
+            ball_detection,
+        }
     }
 
     pub fn update_cycler(&mut self, selected_cycler: Cycler) {
         self.line_detection.update_cycler(selected_cycler);
+        self.ball_detection.update_cycler(selected_cycler);
     }
 
     pub fn combo_box(&mut self, ui: &mut Ui, selected_cycler: Cycler) {
-        ComboBox::from_id_source("Overlays")
-            .selected_text("Overlays")
-            .show_ui(ui, |ui| {
-                self.line_detection.checkbox(ui, selected_cycler);
-            });
+        ui.menu_button("Overlays", |ui| {
+            self.line_detection.checkbox(ui, selected_cycler);
+            self.ball_detection.checkbox(ui, selected_cycler);
+        });
     }
 
     pub fn paint(&self, painter: &TwixPainter) -> Result<()> {
         let _ = self.line_detection.paint(painter);
+        let _ = self.ball_detection.paint(painter);
         Ok(())
     }
 
-    pub fn save(&self, storage: &mut dyn Storage) {
-        self.line_detection.save(storage);
+    pub fn save(&self) -> Value {
+        json!({
+            "line_detection": self.line_detection.save(),
+            "ball_detection": self.ball_detection.save(),
+        })
     }
 }

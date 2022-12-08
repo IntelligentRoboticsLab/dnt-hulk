@@ -1,11 +1,9 @@
 use std::{str::FromStr, sync::Arc};
 
 use communication::CyclerOutput;
-use eframe::{
-    egui::{ScrollArea, Widget},
-    Storage,
-};
+use eframe::egui::{ScrollArea, Widget};
 use log::error;
+use serde_json::{json, Value};
 
 use crate::{completion_edit::CompletionEdit, nao::Nao, panel::Panel, value_buffer::ValueBuffer};
 
@@ -18,10 +16,10 @@ pub struct TextPanel {
 impl Panel for TextPanel {
     const NAME: &'static str = "Text";
 
-    fn new(nao: Arc<Nao>, storage: Option<&dyn Storage>) -> Self {
-        let output = match storage.and_then(|storage| storage.get_string("text_panel_output")) {
-            Some(stored_output) => stored_output,
-            None => String::new(),
+    fn new(nao: Arc<Nao>, value: Option<&Value>) -> Self {
+        let output = match value.and_then(|value| value.get("subscribe_key")) {
+            Some(Value::String(string)) => string.to_string(),
+            _ => String::new(),
         };
         let values = if !output.is_empty() {
             let output = CyclerOutput::from_str(&output);
@@ -42,8 +40,10 @@ impl Panel for TextPanel {
         }
     }
 
-    fn save(&mut self, storage: &mut dyn Storage) {
-        storage.set_string("text_panel_output", self.output.clone());
+    fn save(&self) -> Value {
+        json!({
+            "subscribe_key": self.output.clone()
+        })
     }
 }
 

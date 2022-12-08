@@ -5,11 +5,11 @@ use communication::Cycler;
 use eframe::{
     egui::{Response, Ui, Widget},
     emath::Rect,
-    Storage,
 };
 use egui_extras::RetainedImage;
 use log::error;
 use nalgebra::{vector, Similarity2};
+use serde_json::{json, Value};
 
 use crate::{
     image_buffer::ImageBuffer,
@@ -34,18 +34,23 @@ pub struct ImagePanel {
 impl Panel for ImagePanel {
     const NAME: &'static str = "Image";
 
-    fn new(nao: Arc<Nao>, storage: Option<&dyn Storage>) -> Self {
-        let cycler_name = storage
-            .and_then(|storage| storage.get_string("image.cycler"))
-            .unwrap_or_else(|| "vision_top".to_string());
-        let cycler = match cycler_name.as_str() {
+    fn new(nao: Arc<Nao>, value: Option<&Value>) -> Self {
+        let cycler_name = value
+            .and_then(|value| value.get("cycler"))
+            .and_then(|value| value.as_str())
+            .unwrap_or("vision_top");
+        let cycler = match cycler_name {
             "vision_top" => Cycler::VisionTop,
             "vision_bottom" => Cycler::VisionBottom,
             _ => panic!("Unknown cycler '{cycler_name}'"),
         };
         let image_buffer = nao.subscribe_image(cycler);
         let cycler_selector = VisionCyclerSelector::new(cycler);
-        let overlays = Overlays::new(nao.clone(), storage, cycler_selector.selected_cycler());
+        let overlays = Overlays::new(
+            nao.clone(),
+            value.and_then(|value| value.get("overlays")),
+            cycler_selector.selected_cycler(),
+        );
         Self {
             nao,
             image_buffer,
@@ -54,14 +59,23 @@ impl Panel for ImagePanel {
         }
     }
 
-    fn save(&mut self, storage: &mut dyn Storage) {
-        match self.cycler_selector.selected_cycler() {
-            Cycler::VisionTop => storage.set_string("image.cycler", "vision_top".to_string()),
-            Cycler::VisionBottom => storage.set_string("image.cycler", "vision_bottom".to_string()),
-            cycler => error!("Invalid camera cycler: {cycler}"),
+    fn save(&self) -> Value {
+        let cycler = match self.cycler_selector.selected_cycler() {
+            Cycler::VisionTop => "vision_top",
+            Cycler::VisionBottom => "vision_bottom",
+            cycler => {
+                error!("Invalid camera cycler: {cycler}");
+                "vision_top"
+            }
         }
+        .to_string();
 
-        self.overlays.save(storage)
+        let overlays = self.overlays.save();
+
+        json!({
+            "cycler": cycler,
+            "overlays":overlays,
+        })
     }
 }
 

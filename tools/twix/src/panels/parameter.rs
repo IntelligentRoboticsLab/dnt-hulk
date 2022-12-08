@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-use eframe::{
-    egui::{Response, ScrollArea, TextEdit, Ui, Widget},
-    Storage,
-};
+use eframe::egui::{Response, ScrollArea, TextEdit, Ui, Widget};
 use log::error;
+use serde_json::{json, Value};
 use tokio::sync::mpsc;
 
 use crate::{completion_edit::CompletionEdit, nao::Nao, panel::Panel, value_buffer::ValueBuffer};
@@ -21,16 +19,25 @@ pub struct ParameterPanel {
 impl Panel for ParameterPanel {
     const NAME: &'static str = "Parameter";
 
-    fn new(nao: Arc<Nao>, _storage: Option<&dyn Storage>) -> Self {
+    fn new(nao: Arc<Nao>, value: Option<&Value>) -> Self {
+        let path = match value.and_then(|value| value.get("subscribe_key")) {
+            Some(Value::String(string)) => string.clone(),
+            _ => String::new(),
+        };
         let (update_notify_sender, update_notify_receiver) = mpsc::channel(1);
         Self {
             nao,
-            path: String::new(),
+            path,
             value_buffer: None,
             parameter_value: String::new(),
             update_notify_sender,
             update_notify_receiver,
         }
+    }
+    fn save(&self) -> Value {
+        json!({
+            "subscribe_key": self.path.clone()
+        })
     }
 }
 
