@@ -287,7 +287,7 @@ impl Repository {
         let sdk = installation_directory.join(version);
         if !sdk.exists() {
             let downloads_directory = installation_directory.join("downloads");
-            let installer_name = format!("HULKs-OS-toolchain-{version}.sh");
+            let installer_name = format!("HULKs-DNT-OS-toolchain-{version}.sh");
             let installer_path = downloads_directory.join(&installer_name);
             if !installer_path.exists() {
                 download_sdk(&downloads_directory, version, &installer_name)
@@ -499,10 +499,18 @@ async fn download_sdk(
             .context("Failed to create download directory")?;
     }
     let installer_path = downloads_directory.as_ref().join(installer_name);
-    let urls = [
-        format!("http://bighulk.hulks.dev/sdk/{installer_name}"),
-        format!("https://github.com/HULKs/meta-hulks/releases/download/{version}/{installer_name}"),
-    ];
+    // let url = format!("http://bighulk.hulks.dev/sdk/{installer_name}");
+    let url = format!("https://www.dropbox.com/s/xq2b779lfb2dkd4/{installer_name}?dl=1");
+    println!("Downloading SDK from {url}");
+    let status = Command::new("curl")
+        .arg("-L")
+        .arg("--progress-bar")
+        .arg("--output")
+        .arg(&installer_path)
+        .arg(url)
+        .status()
+        .await
+        .context("Failed to spawn command")?;
 
     println!("Downloading SDK from {}", urls[0]);
     download_with_fallback(&installer_path, urls, CONNECT_TIMEOUT).await?;
