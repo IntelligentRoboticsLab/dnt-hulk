@@ -142,6 +142,7 @@ types = { workspace = true }
 uvcvideo = { workspace = true, optional = true }
 v4l = { workspace = true, optional = true }
 webots = { workspace = true, optional = true }
+bifrost = { git = "ssh://git@github.com/IntelligentRoboticsLab/bifrost.git" }
 
 [build-dependencies]
 module_attributes = { path = "crates/module_attributes" }
