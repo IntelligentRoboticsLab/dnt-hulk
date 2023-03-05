@@ -290,7 +290,7 @@ impl Repository {
             let installer_name = format!("HULKs-DNT-OS-toolchain-{version}.sh");
             let installer_path = downloads_directory.join(&installer_name);
             if !installer_path.exists() {
-                download_sdk(&downloads_directory, version, &installer_name)
+                download_sdk(&downloads_directory, &installer_name)
                     .await
                     .wrap_err("failed to download SDK")?;
             }
@@ -488,11 +488,7 @@ pub async fn get_image_path(version: &str) -> Result<PathBuf> {
     Ok(image_path)
 }
 
-async fn download_sdk(
-    downloads_directory: impl AsRef<Path>,
-    version: &str,
-    installer_name: &str,
-) -> Result<()> {
+async fn download_sdk(downloads_directory: impl AsRef<Path>, installer_name: &str) -> Result<()> {
     if !downloads_directory.as_ref().exists() {
         create_dir_all(&downloads_directory)
             .await
@@ -511,9 +507,9 @@ async fn download_sdk(
         .status()
         .await
         .context("Failed to spawn command")?;
-
-    println!("Downloading SDK from {}", urls[0]);
-    download_with_fallback(&installer_path, urls, CONNECT_TIMEOUT).await?;
+    if !status.success() {
+        bail!("curl exited with {status}");
+    }
 
     set_permissions(&installer_path, Permissions::from_mode(0o755))
         .await
