@@ -74,7 +74,7 @@ impl PerspectiveGridCandidatesProvider {
 
         let mut rows = vec![];
 
-        while row_vertical_center >= higher_horizon_point.y as f32
+        while row_vertical_center >= higher_horizon_point.y
             && row_vertical_center + ball_radius > 0.0
         {
             radius444 = camera_matrix
