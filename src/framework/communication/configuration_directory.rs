@@ -84,7 +84,7 @@ fn from_path<P: AsRef<Path>>(file_path: P) -> anyhow::Result<Value> {
 
 fn merge_json(own: &mut Value, other: &Value) {
     match (own, other) {
-        (&mut Value::Object(ref mut own), &Value::Object(ref other)) => {
+        (&mut Value::Object(ref mut own), Value::Object(other)) => {
             for (key, value) in other {
                 merge_json(own.entry(key.clone()).or_insert(Value::Null), value);
             }
