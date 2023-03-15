@@ -21,6 +21,7 @@ members = [
   "tools/fanta",
   "tools/pepsi",
   "tools/twix",
+  "tools/dr_pepper",
 ]
 # HuLA is built independently by yocto
 exclude = [

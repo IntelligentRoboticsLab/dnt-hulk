@@ -940,6 +940,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
+name = "dr_pepper"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "communication",
+ "convert_case",
+ "eframe",
+ "egui_dock",
+ "egui_extras",
+ "fern",
+ "fuzzy-matcher",
+ "image",
+ "itertools",
+ "log",
+ "nalgebra",
+ "serde",
+ "serde_json",
+ "tokio",
+ "types",
+]
+
+[[package]]
 name = "dwrote"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

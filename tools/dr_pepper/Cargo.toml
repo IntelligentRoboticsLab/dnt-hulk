@@ -1,0 +1,23 @@
+[package]
+name = "dr_pepper"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+
+[dependencies]
+anyhow = { workspace = true }
+communication = { workspace = true }
+eframe = { workspace = true }
+convert_case = { workspace = true }
+egui_extras = { workspace = true }
+egui_dock = { workspace = true }
+fern = { workspace = true }
+fuzzy-matcher = { workspace = true }
+image = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
+nalgebra = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+types = { workspace = true }
