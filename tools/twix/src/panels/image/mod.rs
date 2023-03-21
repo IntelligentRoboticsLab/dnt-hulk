@@ -83,6 +83,7 @@ impl Widget for &mut ImagePanel {
     fn ui(self, ui: &mut Ui) -> Response {
         ui.horizontal(|ui| {
             if self.cycler_selector.ui(ui).changed() {
+                // subscribe image called here
                 self.image_buffer = self
                     .nao
                     .subscribe_image(self.cycler_selector.selected_cycler());
@@ -101,6 +102,7 @@ impl Widget for &mut ImagePanel {
 }
 
 impl ImagePanel {
+    // images are received and processed here
     fn show_image(&self, ui: &mut Ui) -> Result<Response> {
         let image_data = self
             .image_buffer

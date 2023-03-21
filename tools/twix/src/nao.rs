@@ -37,7 +37,8 @@ impl Nao {
         let _guard = self.runtime.enter();
         ValueBuffer::output(self.communication.clone(), output)
     }
-
+    // subscribe to image here, required to get image input?
+    // uses image_buffer.rs
     pub fn subscribe_image(&self, cycler: Cycler) -> ImageBuffer {
         let _guard = self.runtime.enter();
         ImageBuffer::new(self.communication.clone(), cycler)
