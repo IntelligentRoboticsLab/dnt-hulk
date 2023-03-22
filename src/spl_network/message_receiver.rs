@@ -57,6 +57,10 @@ pub async fn receive_message<'buffer>(
                     .await;
 
                 select! {
+                    // Some message that lets us know we should send a return message to the GameController
+                    // From ROLEASSIGNMENT ??!?!?!?!?! WHAT!!!!
+                    // Link to file: hulk/src/control/modules/role_assignment.rs
+                    // Here message is already defined.
                     message = game_controller_return_message_receiver.recv() => {
                         match message {
                             Some(message) => return Ok(Some(MessageEvent::GameControllerReturnMessageToBeSent{
@@ -73,6 +77,7 @@ pub async fn receive_message<'buffer>(
                             None => bail!("Failed to receive from SPL message receiver"),
                         }
                     },
+                    // Received a message from the GameController, we need to parse it and send a return message
                     message_result = incoming_game_controller_state_messages.recv_from(
                         game_controller_state_message_buffer
                     ) => {

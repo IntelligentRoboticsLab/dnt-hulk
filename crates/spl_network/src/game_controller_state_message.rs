@@ -1,16 +1,14 @@
 use std::{
     convert::{TryFrom, TryInto},
-    ffi::c_char,
-    mem::size_of,
-    ptr::read,
     time::Duration,
 };
 
 use anyhow::bail;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    bindings::{
+use crate::HULKS_TEAM_NUMBER;
+use bifrost::{
+    communication::game_controller_message::{
         RoboCupGameControlData, RobotInfo, GAMECONTROLLER_STRUCT_HEADER,
         GAMECONTROLLER_STRUCT_VERSION, GAME_PHASE_NORMAL, GAME_PHASE_OVERTIME,
         GAME_PHASE_PENALTYSHOOT, GAME_PHASE_TIMEOUT, MAX_NUM_PLAYERS, PENALTY_MANUAL, PENALTY_NONE,
@@ -23,7 +21,7 @@ use crate::{
         STATE_PLAYING, STATE_READY, STATE_SET, TEAM_BLACK, TEAM_BLUE, TEAM_BROWN, TEAM_GRAY,
         TEAM_GREEN, TEAM_ORANGE, TEAM_PURPLE, TEAM_RED, TEAM_WHITE, TEAM_YELLOW,
     },
-    HULKS_TEAM_NUMBER,
+    serialization::Decode,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -42,12 +40,8 @@ pub struct GameControllerStateMessage {
 impl TryFrom<&[u8]> for GameControllerStateMessage {
     type Error = anyhow::Error;
 
-    fn try_from(buffer: &[u8]) -> anyhow::Result<Self> {
-        if buffer.len() < size_of::<RoboCupGameControlData>() {
-            bail!("Buffer too small");
-        }
-        let message = unsafe { read(buffer.as_ptr() as *const RoboCupGameControlData) };
-        message.try_into()
+    fn try_from(mut buffer: &[u8]) -> anyhow::Result<Self> {
+        RoboCupGameControlData::decode(&mut buffer)?.try_into()
     }
 }
 
@@ -55,86 +49,101 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
     type Error = anyhow::Error;
 
     fn try_from(message: RoboCupGameControlData) -> anyhow::Result<Self> {
-        if message.header[0] != GAMECONTROLLER_STRUCT_HEADER[0] as c_char
-            && message.header[1] != GAMECONTROLLER_STRUCT_HEADER[1] as c_char
-            && message.header[2] != GAMECONTROLLER_STRUCT_HEADER[2] as c_char
-            && message.header[3] != GAMECONTROLLER_STRUCT_HEADER[3] as c_char
-        {
+        if message.header != GAMECONTROLLER_STRUCT_HEADER {
             bail!("Unexpected header");
         }
+
         if message.version != GAMECONTROLLER_STRUCT_VERSION {
             bail!("Unexpected version");
         }
+
         let (hulks_team_index, opponent_team_index) =
-            match (message.teams[0].teamNumber, message.teams[1].teamNumber) {
+            match (message.teams[0].team_number, message.teams[1].team_number) {
                 (HULKS_TEAM_NUMBER, _) => (0, 1),
                 (_, HULKS_TEAM_NUMBER) => (1, 0),
                 _ => bail!("Failed to find HULKs team"),
             };
+
         const MAXIMUM_NUMBER_OF_PENALTY_SHOOTS: u8 = 16;
-        if message.teams[hulks_team_index].penaltyShot >= MAXIMUM_NUMBER_OF_PENALTY_SHOOTS {
+        if message.teams[hulks_team_index].penalty_shot >= MAXIMUM_NUMBER_OF_PENALTY_SHOOTS {
             bail!("Unexpected penalty shoot index for team HULKs");
         }
-        if message.teams[opponent_team_index].penaltyShot >= MAXIMUM_NUMBER_OF_PENALTY_SHOOTS {
+        if message.teams[opponent_team_index].penalty_shot >= MAXIMUM_NUMBER_OF_PENALTY_SHOOTS {
             bail!("Unexpected penalty shoot index for opponent team");
         }
-        let hulks_penalty_shoots = (0..message.teams[hulks_team_index].penaltyShot)
+
+        let hulks_penalty_shoots = (0..message.teams[hulks_team_index].penalty_shot)
             .map(|shoot_index| {
-                if message.teams[hulks_team_index].singleShots & (1 << shoot_index) != 0 {
+                if message.teams[hulks_team_index].single_shots & (1 << shoot_index) != 0 {
                     PenaltyShoot::Successful
                 } else {
                     PenaltyShoot::Unsuccessful
                 }
             })
             .collect();
-        let opponent_penalty_shoots = (0..message.teams[opponent_team_index].penaltyShot)
+
+        let opponent_penalty_shoots = (0..message.teams[opponent_team_index].penalty_shot)
             .map(|shoot_index| {
-                if message.teams[opponent_team_index].singleShots & (1 << shoot_index) != 0 {
+                if message.teams[opponent_team_index].single_shots & (1 << shoot_index) != 0 {
                     PenaltyShoot::Successful
                 } else {
                     PenaltyShoot::Unsuccessful
                 }
             })
             .collect();
-        if message.playersPerTeam >= MAX_NUM_PLAYERS {
+
+        if message.players_per_team >= MAX_NUM_PLAYERS {
             bail!("Unexpected number of players per team");
         }
-        let hulks_players = (0..message.playersPerTeam)
+
+        let hulks_players = (0..message.players_per_team)
             .map(|player_index| {
                 message.teams[hulks_team_index].players[player_index as usize].try_into()
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
-        let opponent_players = (0..message.playersPerTeam)
+
+        let opponent_players = (0..message.players_per_team)
             .map(|player_index| {
                 message.teams[opponent_team_index].players[player_index as usize].try_into()
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
+
         Ok(GameControllerStateMessage {
-            game_phase: GamePhase::try_from(message.gamePhase, message.kickingTeam)?,
+            game_phase: GamePhase::try_from(message.game_phase, message.kicking_team)?,
             game_state: GameState::try_from(message.state)?,
-            set_play: SetPlay::try_from(message.setPlay)?,
-            half: message.firstHalf.try_into()?,
-            remaining_time_in_half: Duration::from_secs(message.secsRemaining.max(0).try_into()?),
-            secondary_time: Duration::from_secs(message.secondaryTime.max(0).try_into()?),
+            set_play: SetPlay::try_from(message.set_play)?,
+            half: message.first_half.try_into()?,
+            remaining_time_in_half: Duration::from_secs(message.secs_remaining.max(0).try_into()?),
+            secondary_time: Duration::from_secs(message.secondary_time.max(0).try_into()?),
             hulks_team: TeamState {
-                team_number: message.teams[hulks_team_index].teamNumber,
-                color: message.teams[hulks_team_index].teamColour.try_into()?,
+                team_number: message.teams[hulks_team_index].team_number,
+                field_player_colour: message.teams[hulks_team_index]
+                    .field_player_colour
+                    .try_into()?,
+                goalkeeper_colour: message.teams[hulks_team_index]
+                    .goalkeeper_colour
+                    .try_into()?,
                 score: message.teams[hulks_team_index].score,
-                penalty_shoot_index: message.teams[hulks_team_index].penaltyShot,
+                penalty_shoot_index: message.teams[hulks_team_index].penalty_shot,
                 penalty_shoots: hulks_penalty_shoots,
-                remaining_amount_of_messages: message.teams[hulks_team_index].messageBudget,
+                remaining_amount_of_messages: message.teams[hulks_team_index].message_budget,
                 players: hulks_players,
             },
             opponent_team: TeamState {
-                team_number: message.teams[opponent_team_index].teamNumber,
-                color: message.teams[opponent_team_index].teamColour.try_into()?,
+                team_number: message.teams[opponent_team_index].team_number,
+                field_player_colour: message.teams[opponent_team_index]
+                    .field_player_colour
+                    .try_into()?,
+                goalkeeper_colour: message.teams[opponent_team_index]
+                    .goalkeeper_colour
+                    .try_into()?,
                 score: message.teams[opponent_team_index].score,
-                penalty_shoot_index: message.teams[opponent_team_index].penaltyShot,
+                penalty_shoot_index: message.teams[opponent_team_index].penalty_shot,
                 penalty_shoots: opponent_penalty_shoots,
-                remaining_amount_of_messages: message.teams[opponent_team_index].messageBudget,
+                remaining_amount_of_messages: message.teams[opponent_team_index].message_budget,
                 players: opponent_players,
             },
-            kicking_team: Team::try_from(message.kickingTeam)?,
+            kicking_team: Team::try_from(message.kicking_team)?,
         })
     }
 }
@@ -263,7 +272,8 @@ impl TryFrom<u8> for Half {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct TeamState {
     pub team_number: u8,
-    pub color: TeamColor,
+    pub field_player_colour: TeamColor,
+    pub goalkeeper_colour: TeamColor,
     pub score: u8,
     pub penalty_shoot_index: u8,
     pub penalty_shoots: Vec<PenaltyShoot>,
@@ -320,7 +330,7 @@ impl TryFrom<RobotInfo> for Player {
     type Error = anyhow::Error;
 
     fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
-        let remaining = Duration::from_secs(player.secsTillUnpenalised.try_into()?);
+        let remaining = Duration::from_secs(player.secs_till_unpenalised.try_into()?);
         Ok(Self {
             penalty: Penalty::try_from(remaining, player.penalty)?,
         })

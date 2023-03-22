@@ -13,3 +13,4 @@ approx = { workspace = true }
 byteorder = { workspace = true }
 nalgebra = { workspace = true }
 serde = { workspace = true }
+bifrost = { workspace = true }

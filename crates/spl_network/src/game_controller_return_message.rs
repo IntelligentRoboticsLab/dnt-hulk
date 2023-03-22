@@ -1,14 +1,14 @@
-use std::{ffi::c_char, mem::size_of, slice::from_raw_parts};
-
 use nalgebra::Isometry2;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    bindings::{
+use crate::{BallPosition, PlayerNumber, HULKS_TEAM_NUMBER};
+
+use bifrost::{
+    communication::game_controller_message::{
         RoboCupGameControlReturnData, GAMECONTROLLER_RETURN_STRUCT_HEADER,
         GAMECONTROLLER_RETURN_STRUCT_VERSION,
     },
-    BallPosition, PlayerNumber, HULKS_TEAM_NUMBER,
+    serialization::Encode,
 };
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
@@ -21,14 +21,11 @@ pub struct GameControllerReturnMessage {
 
 impl From<GameControllerReturnMessage> for Vec<u8> {
     fn from(message: GameControllerReturnMessage) -> Self {
-        let message = message.into();
-        unsafe {
-            from_raw_parts(
-                &message as *const RoboCupGameControlReturnData as *const u8,
-                size_of::<RoboCupGameControlReturnData>(),
-            )
-        }
-        .to_vec()
+        let message: RoboCupGameControlReturnData = message.into();
+        let mut buffer = Vec::new();
+
+        message.encode(&mut buffer).unwrap();
+        buffer
     }
 }
 
@@ -45,28 +42,23 @@ impl From<GameControllerReturnMessage> for RoboCupGameControlReturnData {
             None => ([0.0; 2], -1.0),
         };
         RoboCupGameControlReturnData {
-            header: [
-                GAMECONTROLLER_RETURN_STRUCT_HEADER[0] as c_char,
-                GAMECONTROLLER_RETURN_STRUCT_HEADER[1] as c_char,
-                GAMECONTROLLER_RETURN_STRUCT_HEADER[2] as c_char,
-                GAMECONTROLLER_RETURN_STRUCT_HEADER[3] as c_char,
-            ],
+            header: GAMECONTROLLER_RETURN_STRUCT_HEADER,
             version: GAMECONTROLLER_RETURN_STRUCT_VERSION,
-            playerNum: match message.player_number {
+            player_num: match message.player_number {
                 PlayerNumber::One => 1,
                 PlayerNumber::Two => 2,
                 PlayerNumber::Three => 3,
                 PlayerNumber::Four => 4,
                 PlayerNumber::Five => 5,
             },
-            teamNum: HULKS_TEAM_NUMBER,
+            team_num: HULKS_TEAM_NUMBER,
             fallen: u8::from(message.fallen),
             pose: [
                 message.robot_to_field.translation.vector.x * 1000.0,
                 message.robot_to_field.translation.vector.y * 1000.0,
                 message.robot_to_field.rotation.angle(),
             ],
-            ballAge: ball_age,
+            ball_age: ball_age,
             ball: ball_position,
         }
     }

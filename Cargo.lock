@@ -192,7 +192,7 @@ checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 [[package]]
 name = "bifrost"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git#d169b00f392978e08b2199d6048df7e0b3f349d4"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=fklein/bf-52#aa9669e3a0c7ebbe833687c822f89a5f8be01415"
 dependencies = [
  "async-trait",
  "bifrost_derive",
@@ -207,7 +207,7 @@ dependencies = [
 [[package]]
 name = "bifrost_derive"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git#d169b00f392978e08b2199d6048df7e0b3f349d4"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=fklein/bf-52#aa9669e3a0c7ebbe833687c822f89a5f8be01415"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3069,6 +3069,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "approx",
+ "bifrost",
  "bindgen 0.61.0",
  "byteorder",
  "nalgebra",
