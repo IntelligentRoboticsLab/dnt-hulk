@@ -104,7 +104,7 @@ uvcvideo = { path = "crates/uvcvideo" }
 v4l = { version = "0.12.1", git = "https://github.com/HULKs/libv4l-rs", branch = "hulksChanges" }
 walkdir = "2.3.2"
 webots = { version = "0.5.0" }
-bifrost = { git = "ssh://git@github.com/IntelligentRoboticsLab/bifrost.git", branch = "fklein/bf-52" }
+bifrost = { git = "ssh://git@github.com/IntelligentRoboticsLab/bifrost.git", branch="fklein/bf-56" }
 
 [dependencies]
 alsa = { workspace = true, optional = true }
