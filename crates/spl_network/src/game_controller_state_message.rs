@@ -9,15 +9,20 @@ use serde::{Deserialize, Serialize};
 use crate::HULKS_TEAM_NUMBER;
 use bifrost::{
     communication::game_controller_message::{
-        GamePhase, GameState, Half, Penalty, RoboCupGameControlData, RobotInfo, SetPlay, TeamColor,
-        GAMECONTROLLER_STRUCT_HEADER, GAMECONTROLLER_STRUCT_VERSION, MAX_NUM_PLAYERS,
+        GamePhase as BifrostGamePhase, GameState as BifrostGameState, Half as BifrostHalf,
+        Penalty as BifrostPenalty, RoboCupGameControlData, RobotInfo, SetPlay as BifrostSetPlay,
+        TeamColor, GAMECONTROLLER_STRUCT_HEADER, GAMECONTROLLER_STRUCT_VERSION, MAX_NUM_PLAYERS,
     },
     serialization::{Decode, Encode},
 };
 
+pub type GameState = BifrostGameState;
+pub type Half = BifrostHalf;
+pub type SetPlay = BifrostSetPlay;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GameControllerStateMessage {
-    pub game_phase: LocalGamePhase,
+    pub game_phase: GamePhase,
     pub game_state: GameState,
     pub set_play: SetPlay,
     pub half: Half,
@@ -100,8 +105,8 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         Ok(GameControllerStateMessage {
-            game_phase: LocalGamePhase::try_from(message.game_phase, message.kicking_team)?,
-            game_state: GameState::try_from(message.state)?,
+            game_phase: GamePhase::try_from(message.game_phase, message.kicking_team)?,
+            game_state: message.state,
             set_play: message.set_play,
             half: message.first_half,
             remaining_time_in_half: Duration::from_secs(message.secs_remaining.max(0).try_into()?),
@@ -136,7 +141,7 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
-pub enum LocalGamePhase {
+pub enum GamePhase {
     #[default]
     Normal,
     PenaltyShootout {
@@ -146,18 +151,18 @@ pub enum LocalGamePhase {
     Timeout,
 }
 
-impl LocalGamePhase {
-    fn try_from(game_phase: GamePhase, kicking_team: u8) -> anyhow::Result<Self> {
+impl GamePhase {
+    fn try_from(game_phase: BifrostGamePhase, kicking_team: u8) -> anyhow::Result<Self> {
         let team = if kicking_team == HULKS_TEAM_NUMBER {
             Team::Hulks
         } else {
             Team::Opponent
         };
         match game_phase {
-            GamePhase::Normal => Ok(LocalGamePhase::Normal),
-            GamePhase::PenaltyShoot => Ok(LocalGamePhase::PenaltyShootout { kicking_team: team }),
-            GamePhase::Overtime => Ok(LocalGamePhase::Overtime),
-            GamePhase::Timeout => Ok(LocalGamePhase::Timeout),
+            BifrostGamePhase::Normal => Ok(GamePhase::Normal),
+            BifrostGamePhase::PenaltyShoot => Ok(GamePhase::PenaltyShootout { kicking_team: team }),
+            BifrostGamePhase::Overtime => Ok(GamePhase::Overtime),
+            BifrostGamePhase::Timeout => Ok(GamePhase::Timeout),
         }
     }
 }
@@ -276,7 +281,7 @@ pub enum PenaltyShoot {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Player {
-    pub penalty: LocalPenalty,
+    pub penalty: Penalty,
 }
 
 impl TryFrom<RobotInfo> for Player {
@@ -285,13 +290,13 @@ impl TryFrom<RobotInfo> for Player {
     fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
         let remaining = Duration::from_secs(player.secs_till_unpenalised as u64);
         Ok(Self {
-            penalty: LocalPenalty::try_from(remaining, player.penalty)?,
+            penalty: Penalty::try_from(remaining, player.penalty)?,
         })
     }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
-pub enum LocalPenalty {
+pub enum Penalty {
     None,
     IllegalBallContact { remaining: Duration },
     PlayerPushing { remaining: Duration },
@@ -306,22 +311,30 @@ pub enum LocalPenalty {
     Manual { remaining: Duration },
 }
 
-impl LocalPenalty {
-    fn try_from(remaining: Duration, penalty: Penalty) -> anyhow::Result<Self> {
+impl Penalty {
+    fn try_from(remaining: Duration, penalty: BifrostPenalty) -> anyhow::Result<Self> {
         match penalty {
-            Penalty::None => Ok(LocalPenalty::None),
-            Penalty::IllegalBallContact => Ok(LocalPenalty::IllegalBallContact { remaining }),
-            Penalty::PlayerPushing => Ok(LocalPenalty::PlayerPushing { remaining }),
-            Penalty::IllegalMotionInSet => Ok(LocalPenalty::IllegalMotionInSet { remaining }),
-            Penalty::InactivePlayer => Ok(LocalPenalty::InactivePlayer { remaining }),
-            Penalty::IllegalPosition => Ok(LocalPenalty::IllegalPosition { remaining }),
-            Penalty::LeavingTheField => Ok(LocalPenalty::LeavingTheField { remaining }),
-            Penalty::RequestForPickup => Ok(LocalPenalty::RequestForPickup { remaining }),
-            Penalty::LocalGameStuck => Ok(LocalPenalty::LocalGameStuck { remaining }),
-            Penalty::IllegalPositionInSet => Ok(LocalPenalty::IllegalPositionInSet { remaining }),
-            Penalty::Substitute => Ok(LocalPenalty::Substitute { remaining }),
-            Penalty::Manual => Ok(LocalPenalty::Manual { remaining }),
+            BifrostPenalty::None => Ok(Penalty::None),
+            BifrostPenalty::IllegalBallContact => Ok(Penalty::IllegalBallContact { remaining }),
+            BifrostPenalty::PlayerPushing => Ok(Penalty::PlayerPushing { remaining }),
+            BifrostPenalty::IllegalMotionInSet => Ok(Penalty::IllegalMotionInSet { remaining }),
+            BifrostPenalty::InactivePlayer => Ok(Penalty::InactivePlayer { remaining }),
+            BifrostPenalty::IllegalPosition => Ok(Penalty::IllegalPosition { remaining }),
+            BifrostPenalty::LeavingTheField => Ok(Penalty::LeavingTheField { remaining }),
+            BifrostPenalty::RequestForPickup => Ok(Penalty::RequestForPickup { remaining }),
+            BifrostPenalty::LocalGameStuck => Ok(Penalty::LocalGameStuck { remaining }),
+            BifrostPenalty::IllegalPositionInSet => Ok(Penalty::IllegalPositionInSet { remaining }),
+            BifrostPenalty::Substitute => Ok(Penalty::Substitute { remaining }),
+            BifrostPenalty::Manual => Ok(Penalty::Manual { remaining }),
             _ => bail!("Unexpected penalty type"),
         }
+    }
+
+    pub fn is_some(&self) -> bool {
+        !matches!(self, Penalty::None)
+    }
+
+    pub fn is_none(&self) -> bool {
+        matches!(self, Penalty::None)
     }
 }

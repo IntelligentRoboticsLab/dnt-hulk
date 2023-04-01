@@ -8,7 +8,7 @@ use crate::GameControllerState;
 use crate::PenaltyShotDirection;
 
 use super::{FallState, FilteredGameState, Obstacle, PrimaryState, Role, Side};
-use spl_network::LocalGamePhase;
+use spl_network::GamePhase;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, SerializeHierarchy)]
 pub struct WorldState {
@@ -18,7 +18,7 @@ pub struct WorldState {
     #[leaf]
     pub game_controller_state: Option<GameControllerState>,
     #[leaf]
-    pub game_phase: LocalGamePhase,
+    pub game_phase: GamePhase,
     pub obstacles: Vec<Obstacle>,
     pub robot: RobotState,
 }

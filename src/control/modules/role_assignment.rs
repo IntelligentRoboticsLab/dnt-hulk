@@ -679,7 +679,7 @@ fn generate_role(
 
 fn pick_role_with_penalties(
     own_player_number: PlayerNumber,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     striker_player_number: PlayerNumber,
 ) -> Role {
     let mut role_assignment: Players<Option<Role>> = Players {

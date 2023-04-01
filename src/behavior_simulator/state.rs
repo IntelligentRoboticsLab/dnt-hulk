@@ -44,11 +44,11 @@ impl TryFrom<SimulationConfiguration> for State {
                 kicking_team: Team::Hulks,
                 last_game_state_change: UNIX_EPOCH,
                 penalties: Players {
-                    one: None,
-                    two: None,
-                    three: None,
-                    four: None,
-                    five: None,
+                    one: Penalty::None,
+                    two: Penalty::None,
+                    three: Penalty::None,
+                    four: Penalty::None,
+                    five: Penalty::None,
                 },
                 remaining_amount_of_messages: 1200,
                 set_play: None,
@@ -146,11 +146,11 @@ impl State {
                         robots.get(robot_index).unwrap().configuration.player_number;
                     if is_penalized {
                         self.game_controller_state.penalties[player_number] =
-                            Some(Penalty::PlayerPushing {
+                            Penalty::PlayerPushing {
                                 remaining: Duration::from_secs(60),
-                            })
+                            }
                     } else {
-                        self.game_controller_state.penalties[player_number] = None
+                        self.game_controller_state.penalties[player_number] = Penalty::None
                     }
                 }
                 Action::SetRobotToField {

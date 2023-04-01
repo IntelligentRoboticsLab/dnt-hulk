@@ -58,7 +58,7 @@ impl From<GameControllerReturnMessage> for RoboCupGameControlReturnData {
                 message.robot_to_field.translation.vector.y * 1000.0,
                 message.robot_to_field.rotation.angle(),
             ],
-            ball_age: ball_age,
+            ball_age,
             ball: ball_position,
         }
     }

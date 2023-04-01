@@ -1,18 +1,18 @@
 use std::time::SystemTime;
 
-use bifrost::communication::game_controller_message::{GameState, Penalty, SetPlay};
+// use bifrost::communication::game_controller_message::{};
 use serde::{Deserialize, Serialize};
-use spl_network::{LocalGamePhase, Team};
+use spl_network::{GamePhase, GameState, Penalty, SetPlay, Team};
 
 use super::Players;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct GameControllerState {
     pub game_state: GameState,
-    pub game_phase: LocalGamePhase,
+    pub game_phase: GamePhase,
     pub kicking_team: Team,
     pub last_game_state_change: SystemTime,
-    pub penalties: Players<Option<Penalty>>,
+    pub penalties: Players<Penalty>,
     pub remaining_amount_of_messages: u16,
     pub set_play: Option<SetPlay>,
 }
