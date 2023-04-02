@@ -9,7 +9,9 @@ use nalgebra::Point2;
 use serde::{Deserialize, Serialize};
 
 pub use game_controller_return_message::GameControllerReturnMessage;
-pub use game_controller_state_message::*;
+pub use game_controller_state_message::{
+    GameControllerStateMessage, GamePhase, GameState, Penalty, SetPlay, Team, TeamState,
+};
 pub use spl_message::SplMessage;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
