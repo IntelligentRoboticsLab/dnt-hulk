@@ -57,10 +57,8 @@ pub async fn receive_message<'buffer>(
                     .await;
 
                 select! {
-                    // Some message that lets us know we should send a return message to the GameController
-                    // From ROLEASSIGNMENT ??!?!?!?!?! WHAT!!!!
+                    // Internal message that lets us know we should send a return message to the GameController
                     // Link to file: hulk/src/control/modules/role_assignment.rs
-                    // Here message is already defined.
                     message = game_controller_return_message_receiver.recv() => {
                         match message {
                             Some(message) => return Ok(Some(MessageEvent::GameControllerReturnMessageToBeSent{
