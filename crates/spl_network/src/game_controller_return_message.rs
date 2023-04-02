@@ -11,6 +11,8 @@ use bifrost::{
     serialization::Encode,
 };
 
+// Internal representation of the game controller return message,
+// with compacted data from the GameControllerReturnMessage.
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub struct GameControllerReturnMessage {
     pub player_number: PlayerNumber,

@@ -16,10 +16,14 @@ use bifrost::{
     serialization::{Decode, Encode},
 };
 
+// Redefining types for the internal game controller structs.
+// Makes the structs available in the rest of the code.
 pub type GameState = BifrostGameState;
 pub type Half = BifrostHalf;
 pub type SetPlay = BifrostSetPlay;
 
+// Internal representation of the game controller state,
+// with compacted data from the RoboCupGameControlData struct.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GameControllerStateMessage {
     pub game_phase: GamePhase,
@@ -96,8 +100,6 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
 
-        // let hps = Vec<Player> =
-
         let opponent_players: Vec<Player> = (0..message.players_per_team)
             .map(|player_index| {
                 message.teams[opponent_team_index].players[player_index as usize].try_into()
@@ -121,14 +123,10 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
                 remaining_amount_of_messages: message.teams[hulks_team_index].message_budget,
                 players: hulks_players,
             },
-            // hulks_team: message.teams[hulks_team_index],
-            // opponent_team: message.teams[opponent_team_index],
             opponent_team: TeamState {
                 team_number: message.teams[opponent_team_index].team_number,
                 field_player_colour: message.teams[opponent_team_index].field_player_colour,
-                // .try_into()?,
                 goalkeeper_colour: message.teams[opponent_team_index].goalkeeper_colour,
-                // .try_into()?,
                 score: message.teams[opponent_team_index].score,
                 penalty_shoot_index: message.teams[opponent_team_index].penalty_shot,
                 penalty_shoots: opponent_penalty_shoots,
@@ -167,28 +165,6 @@ impl GamePhase {
     }
 }
 
-// #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-// pub enum GameState {
-//     Initial,
-//     Ready,
-//     Set,
-//     Playing,
-//     Finished,
-// }
-
-// impl GameState {
-//     fn try_from(game_state: u8) -> anyhow::Result<Self> {
-//         match game_state {
-//             STATE_INITIAL => Ok(GameState::Initial),
-//             STATE_READY => Ok(GameState::Ready),
-//             STATE_SET => Ok(GameState::Set),
-//             STATE_PLAYING => Ok(GameState::Playing),
-//             STATE_FINISHED => Ok(GameState::Finished),
-//             _ => bail!("Unexpected game state"),
-//         }
-//     }
-// }
-
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum Team {
     Hulks,
@@ -212,53 +188,6 @@ impl Team {
         Ok(team)
     }
 }
-
-// impl SetPlay {
-//     fn try_from(set_play: u8) -> anyhow::Result<Option<Self>> {
-//         match set_play {
-//             SET_PLAY_NONE => Ok(None),
-//             SET_PLAY_GOAL_KICK => Ok(Some(SetPlay::GoalKick)),
-//             SET_PLAY_PUSHING_FREE_KICK => Ok(Some(SetPlay::PushingFreeKick)),
-//             SET_PLAY_CORNER_KICK => Ok(Some(SetPlay::CornerKick)),
-//             SET_PLAY_KICK_IN => Ok(Some(SetPlay::KickIn)),
-//             SET_PLAY_PENALTY_KICK => Ok(Some(SetPlay::PenaltyKick)),
-//             _ => bail!("Unexpected set play"),
-//         }
-//     }
-// }
-
-// #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
-// pub enum SetPlay {
-//     GoalKick,
-//     PushingFreeKick,
-//     CornerKick,
-//     KickIn,
-//     PenaltyKick,
-// }
-
-// impl Default for SetPlay {
-//     fn default() -> Self {
-//         SetPlay::GoalKick
-//     }
-// }
-
-// #[derive(Clone, Debug, Deserialize, Serialize)]
-// pub enum Half {
-//     First,
-//     Second,
-// }
-
-// impl TryFrom<u8> for Half {
-//     type Error = anyhow::Error;
-
-//     fn try_from(half: u8) -> anyhow::Result<Self> {
-//         match half {
-//             1 => Ok(Half::First),
-//             0 => Ok(Half::Second),
-//             _ => bail!("Unexpected half"),
-//         }
-//     }
-// }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TeamState {
