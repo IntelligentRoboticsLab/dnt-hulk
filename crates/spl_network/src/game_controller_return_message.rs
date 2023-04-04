@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{BallPosition, PlayerNumber, HULKS_TEAM_NUMBER};
 
 use bifrost::{
-    communication::game_controller_message::{
+    communication::{
         RoboCupGameControlReturnData, GAMECONTROLLER_RETURN_STRUCT_HEADER,
         GAMECONTROLLER_RETURN_STRUCT_VERSION,
     },

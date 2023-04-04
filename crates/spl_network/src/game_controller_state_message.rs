@@ -6,21 +6,17 @@ use std::{
 use anyhow::bail;
 use serde::{Deserialize, Serialize};
 
-use crate::HULKS_TEAM_NUMBER;
-use bifrost::{
-    communication::game_controller_message::{
-        GamePhase as BifrostGamePhase, GameState as BifrostGameState, Half as BifrostHalf,
-        Penalty as BifrostPenalty, RoboCupGameControlData, RobotInfo, SetPlay as BifrostSetPlay,
-        TeamColor, GAMECONTROLLER_STRUCT_HEADER, GAMECONTROLLER_STRUCT_VERSION, MAX_NUM_PLAYERS,
-    },
-    serialization::{Decode, Encode},
+use crate::{
+    GamePhase, GameState, Half, PenaltyShoot, Player, SetPlay, Team, TeamColor, TeamState,
+    HULKS_TEAM_NUMBER,
 };
-
-// Redefining types for the internal game controller structs.
-// Makes the structs available in the rest of the code.
-pub type GameState = BifrostGameState;
-pub type Half = BifrostHalf;
-pub type SetPlay = BifrostSetPlay;
+use bifrost::{
+    communication::{
+        RoboCupGameControlData, GAMECONTROLLER_STRUCT_HEADER, GAMECONTROLLER_STRUCT_VERSION,
+        MAX_NUM_PLAYERS,
+    },
+    serialization::Decode,
+};
 
 // Internal representation of the game controller state,
 // with compacted data from the RoboCupGameControlData struct.
@@ -108,15 +104,19 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
 
         Ok(GameControllerStateMessage {
             game_phase: GamePhase::try_from(message.game_phase, message.kicking_team)?,
-            game_state: message.state,
-            set_play: message.set_play,
-            half: message.first_half,
+            game_state: GameState::try_from(message.state)?,
+            set_play: SetPlay::try_from(message.set_play)?,
+            half: Half::try_from(message.first_half)?,
             remaining_time_in_half: Duration::from_secs(message.secs_remaining.max(0).try_into()?),
             secondary_time: Duration::from_secs(message.secondary_time.max(0).try_into()?),
             hulks_team: TeamState {
                 team_number: message.teams[hulks_team_index].team_number,
-                field_player_colour: message.teams[hulks_team_index].field_player_colour,
-                goalkeeper_colour: message.teams[hulks_team_index].goalkeeper_colour,
+                field_player_colour: TeamColor::try_from(
+                    message.teams[hulks_team_index].field_player_colour,
+                )?,
+                goalkeeper_colour: TeamColor::try_from(
+                    message.teams[hulks_team_index].goalkeeper_colour,
+                )?,
                 score: message.teams[hulks_team_index].score,
                 penalty_shoot_index: message.teams[hulks_team_index].penalty_shot,
                 penalty_shoots: hulks_penalty_shoots,
@@ -125,8 +125,12 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             },
             opponent_team: TeamState {
                 team_number: message.teams[opponent_team_index].team_number,
-                field_player_colour: message.teams[opponent_team_index].field_player_colour,
-                goalkeeper_colour: message.teams[opponent_team_index].goalkeeper_colour,
+                field_player_colour: TeamColor::try_from(
+                    message.teams[opponent_team_index].field_player_colour,
+                )?,
+                goalkeeper_colour: TeamColor::try_from(
+                    message.teams[opponent_team_index].goalkeeper_colour,
+                )?,
                 score: message.teams[opponent_team_index].score,
                 penalty_shoot_index: message.teams[opponent_team_index].penalty_shot,
                 penalty_shoots: opponent_penalty_shoots,
@@ -135,135 +139,5 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             },
             kicking_team: Team::try_from(message.kicking_team)?,
         })
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
-pub enum GamePhase {
-    #[default]
-    Normal,
-    PenaltyShootout {
-        kicking_team: Team,
-    },
-    Overtime,
-    Timeout,
-}
-
-impl GamePhase {
-    fn try_from(game_phase: BifrostGamePhase, kicking_team: u8) -> anyhow::Result<Self> {
-        let team = if kicking_team == HULKS_TEAM_NUMBER {
-            Team::Hulks
-        } else {
-            Team::Opponent
-        };
-        match game_phase {
-            BifrostGamePhase::Normal => Ok(GamePhase::Normal),
-            BifrostGamePhase::PenaltyShoot => Ok(GamePhase::PenaltyShootout { kicking_team: team }),
-            BifrostGamePhase::Overtime => Ok(GamePhase::Overtime),
-            BifrostGamePhase::Timeout => Ok(GamePhase::Timeout),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum Team {
-    Hulks,
-    Opponent,
-    Uncertain,
-}
-
-impl Default for Team {
-    fn default() -> Self {
-        Team::Uncertain
-    }
-}
-
-impl Team {
-    fn try_from(team_number: u8) -> anyhow::Result<Self> {
-        let team = if team_number == HULKS_TEAM_NUMBER {
-            Team::Hulks
-        } else {
-            Team::Opponent
-        };
-        Ok(team)
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct TeamState {
-    pub team_number: u8,
-    pub field_player_colour: TeamColor,
-    pub goalkeeper_colour: TeamColor,
-    pub score: u8,
-    pub penalty_shoot_index: u8,
-    pub penalty_shoots: Vec<PenaltyShoot>,
-    pub remaining_amount_of_messages: u16,
-    pub players: Vec<Player>,
-}
-
-#[derive(Encode, Decode, Clone, Debug, Serialize, Deserialize)]
-#[repr(u8)]
-pub enum PenaltyShoot {
-    Successful = 1,
-    Unsuccessful = 0,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Player {
-    pub penalty: Penalty,
-}
-
-impl TryFrom<RobotInfo> for Player {
-    type Error = anyhow::Error;
-
-    fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
-        let remaining = Duration::from_secs(player.secs_till_unpenalised as u64);
-        Ok(Self {
-            penalty: Penalty::try_from(remaining, player.penalty)?,
-        })
-    }
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
-pub enum Penalty {
-    None,
-    IllegalBallContact { remaining: Duration },
-    PlayerPushing { remaining: Duration },
-    IllegalMotionInSet { remaining: Duration },
-    InactivePlayer { remaining: Duration },
-    IllegalPosition { remaining: Duration },
-    LeavingTheField { remaining: Duration },
-    RequestForPickup { remaining: Duration },
-    LocalGameStuck { remaining: Duration },
-    IllegalPositionInSet { remaining: Duration },
-    Substitute { remaining: Duration },
-    Manual { remaining: Duration },
-}
-
-impl Penalty {
-    fn try_from(remaining: Duration, penalty: BifrostPenalty) -> anyhow::Result<Self> {
-        match penalty {
-            BifrostPenalty::None => Ok(Penalty::None),
-            BifrostPenalty::IllegalBallContact => Ok(Penalty::IllegalBallContact { remaining }),
-            BifrostPenalty::PlayerPushing => Ok(Penalty::PlayerPushing { remaining }),
-            BifrostPenalty::IllegalMotionInSet => Ok(Penalty::IllegalMotionInSet { remaining }),
-            BifrostPenalty::InactivePlayer => Ok(Penalty::InactivePlayer { remaining }),
-            BifrostPenalty::IllegalPosition => Ok(Penalty::IllegalPosition { remaining }),
-            BifrostPenalty::LeavingTheField => Ok(Penalty::LeavingTheField { remaining }),
-            BifrostPenalty::RequestForPickup => Ok(Penalty::RequestForPickup { remaining }),
-            BifrostPenalty::LocalGameStuck => Ok(Penalty::LocalGameStuck { remaining }),
-            BifrostPenalty::IllegalPositionInSet => Ok(Penalty::IllegalPositionInSet { remaining }),
-            BifrostPenalty::Substitute => Ok(Penalty::Substitute { remaining }),
-            BifrostPenalty::Manual => Ok(Penalty::Manual { remaining }),
-            _ => bail!("Unexpected penalty type"),
-        }
-    }
-
-    pub fn is_some(&self) -> bool {
-        !matches!(self, Penalty::None)
-    }
-
-    pub fn is_none(&self) -> bool {
-        matches!(self, Penalty::None)
     }
 }
