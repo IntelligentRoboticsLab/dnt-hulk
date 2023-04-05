@@ -9,5 +9,5 @@ jobs:
   cicd:
     uses: IntelligentRoboticsLab/bondi/.github/workflows/rust.yml@main
     secrets:
-      BONDI_DEPLOY_KEY: ${{ secrets.BONDI_DEPLOY_KEY }}
+      BONDI_DEPLOY_KEY: ${{ secrets.BIFROST_DEPLOY_KEY }}
 
