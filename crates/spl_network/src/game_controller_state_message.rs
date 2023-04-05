@@ -10,13 +10,7 @@ use crate::{
     GamePhase, GameState, Half, PenaltyShoot, Player, SetPlay, Team, TeamColor, TeamState,
     HULKS_TEAM_NUMBER,
 };
-use bifrost::{
-    communication::{
-        RoboCupGameControlData, GAMECONTROLLER_STRUCT_HEADER, GAMECONTROLLER_STRUCT_VERSION,
-        MAX_NUM_PLAYERS,
-    },
-    serialization::Decode,
-};
+use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
 
 // Internal representation of the game controller state,
 // with compacted data from the RoboCupGameControlData struct.
@@ -37,7 +31,13 @@ impl TryFrom<&[u8]> for GameControllerStateMessage {
     type Error = anyhow::Error;
 
     fn try_from(mut buffer: &[u8]) -> anyhow::Result<Self> {
-        RoboCupGameControlData::decode(&mut buffer)?.try_into()
+        let message = RoboCupGameControlData::decode(&mut buffer)?;
+
+        if !message.is_valid() {
+            bail!("GameControllerStateMessage is not valid");
+        }
+
+        message.try_into()
     }
 }
 
@@ -45,14 +45,6 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
     type Error = anyhow::Error;
 
     fn try_from(message: RoboCupGameControlData) -> anyhow::Result<Self> {
-        if message.header != GAMECONTROLLER_STRUCT_HEADER {
-            bail!("Unexpected header");
-        }
-
-        if message.version != GAMECONTROLLER_STRUCT_VERSION {
-            bail!("Unexpected version");
-        }
-
         let (hulks_team_index, opponent_team_index) =
             match (message.teams[0].team_number, message.teams[1].team_number) {
                 (HULKS_TEAM_NUMBER, _) => (0, 1),
@@ -85,10 +77,6 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
                 PenaltyShoot::decode(&mut &shoot.to_le_bytes()[..]).unwrap()
             })
             .collect();
-
-        if message.players_per_team >= MAX_NUM_PLAYERS {
-            bail!("Unexpected number of players per team");
-        }
 
         let hulks_players: Vec<Player> = (0..message.players_per_team)
             .map(|player_index| {

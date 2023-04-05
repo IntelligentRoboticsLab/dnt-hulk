@@ -3,13 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{BallPosition, PlayerNumber, HULKS_TEAM_NUMBER};
 
-use bifrost::{
-    communication::{
-        RoboCupGameControlReturnData, GAMECONTROLLER_RETURN_STRUCT_HEADER,
-        GAMECONTROLLER_RETURN_STRUCT_VERSION,
-    },
-    serialization::Encode,
-};
+use bifrost::{communication::RoboCupGameControlReturnData, serialization::Encode};
 
 // Internal representation of the game controller return message,
 // with compacted data from the GameControllerReturnMessage.
@@ -43,26 +37,24 @@ impl From<GameControllerReturnMessage> for RoboCupGameControlReturnData {
             ),
             None => ([0.0; 2], -1.0),
         };
-        RoboCupGameControlReturnData {
-            header: GAMECONTROLLER_RETURN_STRUCT_HEADER,
-            version: GAMECONTROLLER_RETURN_STRUCT_VERSION,
-            player_num: match message.player_number {
+        RoboCupGameControlReturnData::new(
+            match message.player_number {
                 PlayerNumber::One => 1,
                 PlayerNumber::Two => 2,
                 PlayerNumber::Three => 3,
                 PlayerNumber::Four => 4,
                 PlayerNumber::Five => 5,
             },
-            team_num: HULKS_TEAM_NUMBER,
-            fallen: u8::from(message.fallen),
-            pose: [
+            HULKS_TEAM_NUMBER,
+            u8::from(message.fallen),
+            [
                 message.robot_to_field.translation.vector.x * 1000.0,
                 message.robot_to_field.translation.vector.y * 1000.0,
                 message.robot_to_field.rotation.angle(),
             ],
             ball_age,
-            ball: ball_position,
-        }
+            ball_position,
+        )
     }
 }
 
