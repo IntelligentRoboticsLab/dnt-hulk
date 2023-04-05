@@ -200,6 +200,7 @@ pub enum Penalty {
     RequestForPickup { remaining: Duration },
     LocalGameStuck { remaining: Duration },
     IllegalPositionInSet { remaining: Duration },
+    PlayerStance { remaining: Duration },
     Substitute { remaining: Duration },
     Manual { remaining: Duration },
 }
@@ -217,6 +218,7 @@ impl Penalty {
             BifrostPenalty::RequestForPickup => Ok(Penalty::RequestForPickup { remaining }),
             BifrostPenalty::LocalGameStuck => Ok(Penalty::LocalGameStuck { remaining }),
             BifrostPenalty::IllegalPositionInSet => Ok(Penalty::IllegalPositionInSet { remaining }),
+            BifrostPenalty::PlayerStance => Ok(Penalty::PlayerStance { remaining }),
             BifrostPenalty::Substitute => Ok(Penalty::Substitute { remaining }),
             BifrostPenalty::Manual => Ok(Penalty::Manual { remaining }),
         }
