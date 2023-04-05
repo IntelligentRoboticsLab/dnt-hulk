@@ -1,4 +1,3 @@
-use anyhow::bail;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -220,7 +219,6 @@ impl Penalty {
             BifrostPenalty::IllegalPositionInSet => Ok(Penalty::IllegalPositionInSet { remaining }),
             BifrostPenalty::Substitute => Ok(Penalty::Substitute { remaining }),
             BifrostPenalty::Manual => Ok(Penalty::Manual { remaining }),
-            _ => bail!("Unexpected penalty type"),
         }
     }
 
