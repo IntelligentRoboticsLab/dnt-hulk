@@ -24,17 +24,12 @@ pub struct BallPosition {
 
 pub const HULKS_TEAM_NUMBER: u8 = 24;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Hash)]
 pub enum PlayerNumber {
     One,
     Two,
     Three,
     Four,
+    #[default]
     Five,
-}
-
-impl Default for PlayerNumber {
-    fn default() -> Self {
-        PlayerNumber::Five
-    }
 }

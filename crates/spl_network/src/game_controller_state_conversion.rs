@@ -98,17 +98,12 @@ impl SetPlay {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum Team {
     Hulks,
     Opponent,
+    #[default]
     Uncertain,
-}
-
-impl Default for Team {
-    fn default() -> Self {
-        Team::Uncertain
-    }
 }
 
 impl Team {
