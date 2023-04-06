@@ -54,7 +54,7 @@ impl GameControllerFilter {
                     .remaining_amount_of_messages,
                 set_play: match game_controller_state_message.set_play {
                     spl_network::SetPlay::None => None,
-                    _ => Some(game_controller_state_message.set_play),
+                    set_play => Some(set_play),
                 },
             });
         }
