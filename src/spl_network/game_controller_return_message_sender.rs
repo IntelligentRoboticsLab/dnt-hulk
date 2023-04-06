@@ -16,7 +16,18 @@ pub async fn send_game_controller_return_message(
             return;
         }
     };
-    let message: Vec<u8> = message.into();
+
+    let message: Vec<u8> = match message.try_into() {
+        Ok(message) => message,
+        Err(error) => {
+            warn!(
+                "Failed to parse GameController return message (will be discarded): {:?}",
+                error
+            );
+            return;
+        }
+    };
+
     match game_controller_state_messages
         .send_to(
             message.as_slice(),
