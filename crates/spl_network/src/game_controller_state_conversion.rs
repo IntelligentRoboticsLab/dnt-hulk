@@ -18,8 +18,8 @@ pub enum Half {
     Second,
 }
 
-impl Half {
-    pub fn from(half: BifrostHalf) -> Self {
+impl From<BifrostHalf> for Half {
+    fn from(half: BifrostHalf) -> Self {
         match half {
             BifrostHalf::First => Half::First,
             BifrostHalf::Second => Half::Second,
@@ -36,8 +36,8 @@ pub enum GameState {
     Finished,
 }
 
-impl GameState {
-    pub fn from(state: BifrostGameState) -> Self {
+impl From<BifrostGameState> for GameState {
+    fn from(state: BifrostGameState) -> Self {
         match state {
             BifrostGameState::Initial => GameState::Initial,
             BifrostGameState::Ready => GameState::Ready,
@@ -59,8 +59,8 @@ pub enum GamePhase {
     Timeout,
 }
 
-impl GamePhase {
-    pub fn from(game_phase: BifrostGamePhase, kicking_team: u8) -> Self {
+impl From<(BifrostGamePhase, u8)> for GamePhase {
+    fn from((game_phase, kicking_team): (BifrostGamePhase, u8)) -> Self {
         let team = if kicking_team == HULKS_TEAM_NUMBER {
             Team::Hulks
         } else {
@@ -85,8 +85,8 @@ pub enum SetPlay {
     PenaltyKick,
 }
 
-impl SetPlay {
-    pub fn from(set_play: BifrostSetPlay) -> Self {
+impl From<BifrostSetPlay> for SetPlay {
+    fn from(set_play: BifrostSetPlay) -> Self {
         match set_play {
             BifrostSetPlay::None => SetPlay::None,
             BifrostSetPlay::GoalKick => SetPlay::GoalKick,
@@ -106,8 +106,8 @@ pub enum Team {
     Uncertain,
 }
 
-impl Team {
-    pub fn from(team_number: u8) -> Self {
+impl From<u8> for Team {
+    fn from(team_number: u8) -> Self {
         if team_number == HULKS_TEAM_NUMBER {
             Team::Hulks
         } else {
@@ -130,8 +130,8 @@ pub enum TeamColor {
     Gray,
 }
 
-impl TeamColor {
-    pub fn from(color: BifrostTeamColor) -> Self {
+impl From<BifrostTeamColor> for TeamColor {
+    fn from(color: BifrostTeamColor) -> Self {
         match color {
             BifrostTeamColor::Blue => TeamColor::Blue,
             BifrostTeamColor::Red => TeamColor::Red,
@@ -177,7 +177,7 @@ impl TryFrom<RobotInfo> for Player {
     fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
         let remaining = Duration::from_secs(player.secs_till_unpenalised as u64);
         Ok(Self {
-            penalty: Penalty::from(remaining, player.penalty),
+            penalty: Penalty::from((remaining, player.penalty)),
         })
     }
 }
@@ -199,8 +199,8 @@ pub enum Penalty {
     Manual { remaining: Duration },
 }
 
-impl Penalty {
-    pub fn from(remaining: Duration, penalty: BifrostPenalty) -> Self {
+impl From<(Duration, BifrostPenalty)> for Penalty {
+    fn from((remaining, penalty): (Duration, BifrostPenalty)) -> Self {
         match penalty {
             BifrostPenalty::None => Penalty::None,
             BifrostPenalty::IllegalBallContact => Penalty::IllegalBallContact { remaining },
@@ -217,7 +217,9 @@ impl Penalty {
             BifrostPenalty::Manual => Penalty::Manual { remaining },
         }
     }
+}
 
+impl Penalty {
     pub fn is_some(&self) -> bool {
         !matches!(self, Penalty::None)
     }

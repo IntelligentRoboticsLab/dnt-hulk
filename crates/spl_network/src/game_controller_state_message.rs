@@ -91,7 +91,7 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         Ok(GameControllerStateMessage {
-            game_phase: GamePhase::from(message.game_phase, message.kicking_team),
+            game_phase: GamePhase::from((message.game_phase, message.kicking_team)),
             game_state: GameState::from(message.state),
             set_play: SetPlay::from(message.set_play),
             half: Half::from(message.first_half),
