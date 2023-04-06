@@ -19,10 +19,10 @@ pub enum Half {
 }
 
 impl Half {
-    pub fn try_from(half: BifrostHalf) -> anyhow::Result<Self> {
+    pub fn from(half: BifrostHalf) -> Self {
         match half {
-            BifrostHalf::First => Ok(Half::First),
-            BifrostHalf::Second => Ok(Half::Second),
+            BifrostHalf::First => Half::First,
+            BifrostHalf::Second => Half::Second,
         }
     }
 }
@@ -37,13 +37,13 @@ pub enum GameState {
 }
 
 impl GameState {
-    pub fn try_from(state: BifrostGameState) -> anyhow::Result<Self> {
+    pub fn from(state: BifrostGameState) -> Self {
         match state {
-            BifrostGameState::Initial => Ok(GameState::Initial),
-            BifrostGameState::Ready => Ok(GameState::Ready),
-            BifrostGameState::Set => Ok(GameState::Set),
-            BifrostGameState::Playing => Ok(GameState::Playing),
-            BifrostGameState::Finished => Ok(GameState::Finished),
+            BifrostGameState::Initial => GameState::Initial,
+            BifrostGameState::Ready => GameState::Ready,
+            BifrostGameState::Set => GameState::Set,
+            BifrostGameState::Playing => GameState::Playing,
+            BifrostGameState::Finished => GameState::Finished,
         }
     }
 }
@@ -60,17 +60,17 @@ pub enum GamePhase {
 }
 
 impl GamePhase {
-    pub fn try_from(game_phase: BifrostGamePhase, kicking_team: u8) -> anyhow::Result<Self> {
+    pub fn from(game_phase: BifrostGamePhase, kicking_team: u8) -> Self {
         let team = if kicking_team == HULKS_TEAM_NUMBER {
             Team::Hulks
         } else {
             Team::Opponent
         };
         match game_phase {
-            BifrostGamePhase::Normal => Ok(GamePhase::Normal),
-            BifrostGamePhase::PenaltyShoot => Ok(GamePhase::PenaltyShootout { kicking_team: team }),
-            BifrostGamePhase::Overtime => Ok(GamePhase::Overtime),
-            BifrostGamePhase::Timeout => Ok(GamePhase::Timeout),
+            BifrostGamePhase::Normal => GamePhase::Normal,
+            BifrostGamePhase::PenaltyShoot => GamePhase::PenaltyShootout { kicking_team: team },
+            BifrostGamePhase::Overtime => GamePhase::Overtime,
+            BifrostGamePhase::Timeout => GamePhase::Timeout,
         }
     }
 }
@@ -86,14 +86,14 @@ pub enum SetPlay {
 }
 
 impl SetPlay {
-    pub fn try_from(set_play: BifrostSetPlay) -> anyhow::Result<Self> {
+    pub fn from(set_play: BifrostSetPlay) -> Self {
         match set_play {
-            BifrostSetPlay::None => Ok(SetPlay::None),
-            BifrostSetPlay::GoalKick => Ok(SetPlay::GoalKick),
-            BifrostSetPlay::PushingFreeKick => Ok(SetPlay::PushingFreeKick),
-            BifrostSetPlay::CornerKick => Ok(SetPlay::CornerKick),
-            BifrostSetPlay::KickIn => Ok(SetPlay::KickIn),
-            BifrostSetPlay::PenaltyKick => Ok(SetPlay::PenaltyKick),
+            BifrostSetPlay::None => SetPlay::None,
+            BifrostSetPlay::GoalKick => SetPlay::GoalKick,
+            BifrostSetPlay::PushingFreeKick => SetPlay::PushingFreeKick,
+            BifrostSetPlay::CornerKick => SetPlay::CornerKick,
+            BifrostSetPlay::KickIn => SetPlay::KickIn,
+            BifrostSetPlay::PenaltyKick => SetPlay::PenaltyKick,
         }
     }
 }
@@ -112,13 +112,12 @@ impl Default for Team {
 }
 
 impl Team {
-    pub fn try_from(team_number: u8) -> anyhow::Result<Self> {
-        let team = if team_number == HULKS_TEAM_NUMBER {
+    pub fn from(team_number: u8) -> Self {
+        if team_number == HULKS_TEAM_NUMBER {
             Team::Hulks
         } else {
             Team::Opponent
-        };
-        Ok(team)
+        }
     }
 }
 
@@ -137,18 +136,18 @@ pub enum TeamColor {
 }
 
 impl TeamColor {
-    pub fn try_from(color: BifrostTeamColor) -> anyhow::Result<Self> {
+    pub fn from(color: BifrostTeamColor) -> Self {
         match color {
-            BifrostTeamColor::Blue => Ok(TeamColor::Blue),
-            BifrostTeamColor::Red => Ok(TeamColor::Red),
-            BifrostTeamColor::Yellow => Ok(TeamColor::Yellow),
-            BifrostTeamColor::Black => Ok(TeamColor::Black),
-            BifrostTeamColor::White => Ok(TeamColor::White),
-            BifrostTeamColor::Green => Ok(TeamColor::Green),
-            BifrostTeamColor::Orange => Ok(TeamColor::Orange),
-            BifrostTeamColor::Purple => Ok(TeamColor::Purple),
-            BifrostTeamColor::Brown => Ok(TeamColor::Brown),
-            BifrostTeamColor::Gray => Ok(TeamColor::Gray),
+            BifrostTeamColor::Blue => TeamColor::Blue,
+            BifrostTeamColor::Red => TeamColor::Red,
+            BifrostTeamColor::Yellow => TeamColor::Yellow,
+            BifrostTeamColor::Black => TeamColor::Black,
+            BifrostTeamColor::White => TeamColor::White,
+            BifrostTeamColor::Green => TeamColor::Green,
+            BifrostTeamColor::Orange => TeamColor::Orange,
+            BifrostTeamColor::Purple => TeamColor::Purple,
+            BifrostTeamColor::Brown => TeamColor::Brown,
+            BifrostTeamColor::Gray => TeamColor::Gray,
         }
     }
 }
@@ -183,7 +182,7 @@ impl TryFrom<RobotInfo> for Player {
     fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
         let remaining = Duration::from_secs(player.secs_till_unpenalised as u64);
         Ok(Self {
-            penalty: Penalty::try_from(remaining, player.penalty)?,
+            penalty: Penalty::from(remaining, player.penalty),
         })
     }
 }
@@ -206,21 +205,21 @@ pub enum Penalty {
 }
 
 impl Penalty {
-    pub fn try_from(remaining: Duration, penalty: BifrostPenalty) -> anyhow::Result<Self> {
+    pub fn from(remaining: Duration, penalty: BifrostPenalty) -> Self {
         match penalty {
-            BifrostPenalty::None => Ok(Penalty::None),
-            BifrostPenalty::IllegalBallContact => Ok(Penalty::IllegalBallContact { remaining }),
-            BifrostPenalty::PlayerPushing => Ok(Penalty::PlayerPushing { remaining }),
-            BifrostPenalty::IllegalMotionInSet => Ok(Penalty::IllegalMotionInSet { remaining }),
-            BifrostPenalty::InactivePlayer => Ok(Penalty::InactivePlayer { remaining }),
-            BifrostPenalty::IllegalPosition => Ok(Penalty::IllegalPosition { remaining }),
-            BifrostPenalty::LeavingTheField => Ok(Penalty::LeavingTheField { remaining }),
-            BifrostPenalty::RequestForPickup => Ok(Penalty::RequestForPickup { remaining }),
-            BifrostPenalty::LocalGameStuck => Ok(Penalty::LocalGameStuck { remaining }),
-            BifrostPenalty::IllegalPositionInSet => Ok(Penalty::IllegalPositionInSet { remaining }),
-            BifrostPenalty::PlayerStance => Ok(Penalty::PlayerStance { remaining }),
-            BifrostPenalty::Substitute => Ok(Penalty::Substitute { remaining }),
-            BifrostPenalty::Manual => Ok(Penalty::Manual { remaining }),
+            BifrostPenalty::None => Penalty::None,
+            BifrostPenalty::IllegalBallContact => Penalty::IllegalBallContact { remaining },
+            BifrostPenalty::PlayerPushing => Penalty::PlayerPushing { remaining },
+            BifrostPenalty::IllegalMotionInSet => Penalty::IllegalMotionInSet { remaining },
+            BifrostPenalty::InactivePlayer => Penalty::InactivePlayer { remaining },
+            BifrostPenalty::IllegalPosition => Penalty::IllegalPosition { remaining },
+            BifrostPenalty::LeavingTheField => Penalty::LeavingTheField { remaining },
+            BifrostPenalty::RequestForPickup => Penalty::RequestForPickup { remaining },
+            BifrostPenalty::LocalGameStuck => Penalty::LocalGameStuck { remaining },
+            BifrostPenalty::IllegalPositionInSet => Penalty::IllegalPositionInSet { remaining },
+            BifrostPenalty::PlayerStance => Penalty::PlayerStance { remaining },
+            BifrostPenalty::Substitute => Penalty::Substitute { remaining },
+            BifrostPenalty::Manual => Penalty::Manual { remaining },
         }
     }
 

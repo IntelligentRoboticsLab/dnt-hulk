@@ -91,20 +91,20 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         Ok(GameControllerStateMessage {
-            game_phase: GamePhase::try_from(message.game_phase, message.kicking_team)?,
-            game_state: GameState::try_from(message.state)?,
-            set_play: SetPlay::try_from(message.set_play)?,
-            half: Half::try_from(message.first_half)?,
+            game_phase: GamePhase::from(message.game_phase, message.kicking_team),
+            game_state: GameState::from(message.state),
+            set_play: SetPlay::from(message.set_play),
+            half: Half::from(message.first_half),
             remaining_time_in_half: Duration::from_secs(message.secs_remaining.max(0).try_into()?),
             secondary_time: Duration::from_secs(message.secondary_time.max(0).try_into()?),
             hulks_team: TeamState {
                 team_number: message.teams[hulks_team_index].team_number,
-                field_player_colour: TeamColor::try_from(
+                field_player_colour: TeamColor::from(
                     message.teams[hulks_team_index].field_player_colour,
-                )?,
-                goalkeeper_colour: TeamColor::try_from(
+                ),
+                goalkeeper_colour: TeamColor::from(
                     message.teams[hulks_team_index].goalkeeper_colour,
-                )?,
+                ),
                 score: message.teams[hulks_team_index].score,
                 penalty_shoot_index: message.teams[hulks_team_index].penalty_shot,
                 penalty_shoots: hulks_penalty_shoots,
@@ -113,19 +113,19 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             },
             opponent_team: TeamState {
                 team_number: message.teams[opponent_team_index].team_number,
-                field_player_colour: TeamColor::try_from(
+                field_player_colour: TeamColor::from(
                     message.teams[opponent_team_index].field_player_colour,
-                )?,
-                goalkeeper_colour: TeamColor::try_from(
+                ),
+                goalkeeper_colour: TeamColor::from(
                     message.teams[opponent_team_index].goalkeeper_colour,
-                )?,
+                ),
                 score: message.teams[opponent_team_index].score,
                 penalty_shoot_index: message.teams[opponent_team_index].penalty_shot,
                 penalty_shoots: opponent_penalty_shoots,
                 remaining_amount_of_messages: message.teams[opponent_team_index].message_budget,
                 players: opponent_players,
             },
-            kicking_team: Team::try_from(message.kicking_team)?,
+            kicking_team: Team::from(message.kicking_team),
         })
     }
 }
