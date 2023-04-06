@@ -15,13 +15,15 @@ pub struct GameControllerReturnMessage {
     pub ball_position: Option<BallPosition>,
 }
 
-impl From<GameControllerReturnMessage> for Vec<u8> {
-    fn from(message: GameControllerReturnMessage) -> Self {
+impl TryFrom<GameControllerReturnMessage> for Vec<u8> {
+    type Error = anyhow::Error;
+
+    fn try_from(message: GameControllerReturnMessage) -> anyhow::Result<Self> {
         let message: RoboCupGameControlReturnData = message.into();
         let mut buffer = Vec::new();
 
-        message.encode(&mut buffer).unwrap();
-        buffer
+        message.encode(&mut buffer)?;
+        Ok(buffer)
     }
 }
 
