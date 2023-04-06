@@ -167,7 +167,7 @@ where
             // process
             match message_event {
                 // Here we redirect again to send the message
-                // Eventhough it was originally defined in RoleAssignment and redirected in message_receiver.rs
+                // eventhough it was originally defined in RoleAssignment and redirected in message_receiver.rs
                 MessageEvent::GameControllerReturnMessageToBeSent { message } => {
                     send_game_controller_return_message(
                         game_controller_state_messages,
@@ -187,7 +187,7 @@ where
                         .game_controller_state_message =
                         parse_game_controller_state_message(message);
 
-                    // If parsing was successful, store the sender address
+                    // If parsing was successful, store the sender's address.
                     if spl_network_database
                         .main_outputs
                         .game_controller_state_message
