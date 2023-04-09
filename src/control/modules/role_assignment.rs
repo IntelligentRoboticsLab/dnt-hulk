@@ -125,6 +125,8 @@ impl RoleAssignment {
             None => true,
         };
 
+        // GAMECONTROLLER RETURN MESSAGE
+        // When a certain time has passed since the last transmission, send a new return message
         if send_game_controller_return_message {
             self.last_transmitted_game_controller_return_message = Some(cycle_start_time);
             self.game_controller_return_message_sender
@@ -677,7 +679,7 @@ fn generate_role(
 
 fn pick_role_with_penalties(
     own_player_number: PlayerNumber,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     striker_player_number: PlayerNumber,
 ) -> Role {
     let mut role_assignment: Players<Option<Role>> = Players {

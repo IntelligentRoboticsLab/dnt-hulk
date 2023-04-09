@@ -11,7 +11,7 @@ pub struct GameControllerState {
     pub game_phase: GamePhase,
     pub kicking_team: Team,
     pub last_game_state_change: SystemTime,
-    pub penalties: Players<Option<Penalty>>,
+    pub penalties: Players<Penalty>,
     pub remaining_amount_of_messages: u16,
     pub set_play: Option<SetPlay>,
 }

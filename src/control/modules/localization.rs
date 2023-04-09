@@ -83,8 +83,7 @@ impl Localization {
         let primary_state = *require_some!(context.primary_state);
         let penalty = context
             .game_controller_state
-            .map(|game_controller_state| game_controller_state.penalties[*context.player_number])
-            .flatten();
+            .map(|game_controller_state| game_controller_state.penalties[*context.player_number]);
         let game_phase = context
             .game_controller_state
             .map(|game_controller_state| game_controller_state.game_phase);
