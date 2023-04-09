@@ -50,7 +50,7 @@ impl<T> IndexMut<PlayerNumber> for Players<T> {
     }
 }
 
-impl From<TeamState> for Players<Option<Penalty>> {
+impl From<TeamState> for Players<Penalty> {
     fn from(team_state: TeamState) -> Self {
         Self {
             one: team_state.players[0].penalty,

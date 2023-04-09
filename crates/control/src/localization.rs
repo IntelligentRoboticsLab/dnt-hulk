@@ -137,7 +137,7 @@ impl Localization {
         primary_state: PrimaryState,
         game_phase: Option<GamePhase>,
         context: &CycleContext,
-        penalty: &Option<Penalty>,
+        penalty: &Penalty,
     ) {
         match (self.last_primary_state, primary_state, game_phase) {
             (PrimaryState::Initial, PrimaryState::Ready, _) => {
@@ -192,11 +192,10 @@ impl Localization {
             }
             (PrimaryState::Playing, PrimaryState::Penalized, _) => {
                 match penalty {
-                    Some(Penalty::IllegalMotionInSet { remaining: _ }) => {
+                    Penalty::IllegalMotionInSet { remaining: _ } => {
                         self.is_penalized_with_motion_in_set = true;
                     }
-                    Some(_) => {}
-                    None => {}
+                    _ => {}
                 };
             }
             (PrimaryState::Penalized, _, _) if primary_state != PrimaryState::Penalized => {
@@ -474,11 +473,12 @@ impl Localization {
 
     pub fn cycle(&mut self, mut context: CycleContext) -> Result<MainOutputs> {
         let primary_state = *context.primary_state;
-        let penalty = context
+        let penalty: Penalty = context
             .game_controller_state
             .and_then(|game_controller_state| {
-                game_controller_state.penalties[*context.player_number]
-            });
+                Some(game_controller_state.penalties[*context.player_number])
+            })
+            .unwrap_or(Penalty::None);
         let game_phase = context
             .game_controller_state
             .map(|game_controller_state| game_controller_state.game_phase);

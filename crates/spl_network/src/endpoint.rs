@@ -87,7 +87,7 @@ impl Endpoint {
             OutgoingMessage::GameController(message) => {
                 let last_game_controller_address = *self.last_game_controller_address.lock().await;
                 if let Some(last_game_controller_address) = last_game_controller_address {
-                    let message: Vec<u8> = message.into();
+                    let message: Vec<u8> = message.try_into().expect("Failed to serialize message");
                     if let Err(error) = self
                         .game_controller_state_socket
                         .send_to(
