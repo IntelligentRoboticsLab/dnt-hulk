@@ -10,6 +10,7 @@ bindgen = { workspace = true }
 
 [dependencies]
 approx = { workspace = true }
+bifrost = { workspace = true }
 byteorder = { workspace = true }
 color-eyre = { workspace = true }
 nalgebra = { workspace = true }

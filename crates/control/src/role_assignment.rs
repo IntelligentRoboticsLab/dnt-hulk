@@ -137,6 +137,8 @@ impl RoleAssignment {
             None => true,
         };
 
+        // GAMECONTROLLER RETURN MESSAGE
+        // When a certain time has passed since the last transmission, send a new return message
         if send_game_controller_return_message {
             self.last_transmitted_game_controller_return_message = Some(cycle_start_time);
             context
@@ -656,7 +658,7 @@ fn generate_role(
 
 fn pick_role_with_penalties(
     own_player_number: PlayerNumber,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     striker_player_number: PlayerNumber,
     optional_roles: &[Role],
 ) -> Role {
@@ -704,7 +706,7 @@ fn pick_role_with_penalties(
 
 fn needs_assignment(
     player_number: PlayerNumber,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     role_assignment: &Players<Option<Role>>,
 ) -> bool {
     role_assignment[player_number].is_none() && penalties[player_number].is_none()
@@ -712,7 +714,7 @@ fn needs_assignment(
 
 fn assign_keeper_or_replacement_keeper(
     unassigned_robots: usize,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     role_assignment: &mut Players<Option<Role>>,
 ) -> usize {
     if needs_assignment(PlayerNumber::One, penalties, role_assignment) {

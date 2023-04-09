@@ -1,5 +1,6 @@
 use framework::AdditionalOutput;
 use nalgebra::{point, Isometry2, Point2, UnitComplex};
+use spl_network_messages::Penalty;
 use types::{
     configuration::Search as SearchConfiguration, FieldDimensions, HeadMotion, MotionCommand,
     OrientationMode, PathObstacle, Side, WorldState,
@@ -99,8 +100,8 @@ fn assign_search_role(world_state: &WorldState) -> Option<SearchRole> {
     let available_players = penalties
         .iter()
         .filter_map(|(number, penalty)| match penalty {
-            Some(_) => None,
-            None => Some(number),
+            Penalty::None => Some(number),
+            _ => None,
         });
 
     available_players
