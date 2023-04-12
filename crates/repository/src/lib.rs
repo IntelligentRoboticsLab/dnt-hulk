@@ -494,7 +494,7 @@ async fn download_sdk(downloads_directory: impl AsRef<Path>, installer_name: &st
     }
     let installer_path = downloads_directory.as_ref().join(installer_name);
     // let url = format!("http://bighulk.hulks.dev/sdk/{installer_name}");
-    let url = format!("https://www.dropbox.com/s/xq2b779lfb2dkd4/{installer_name}?dl=1");
+    let url = format!("https://www.dropbox.com/s/7rriuz8xp5yv9kf/{installer_name}?dl=1");
     println!("Downloading SDK from {url}");
     let status = Command::new("curl")
         .arg("-L")
