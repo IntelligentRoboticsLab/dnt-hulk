@@ -338,8 +338,10 @@ mod tests {
     const PRECLASSIFIER_PATH: &str = "etc/neural_networks/preclassifier.hdf5";
     const CLASSIFIER_PATH: &str = "etc/neural_networks/classifier.hdf5";
     const POSITIONER_PATH: &str = "etc/neural_networks/positioner.hdf5";
+    const REFEREE_PATH: &str = "etc/neural_networks/best_pose_model.hdf5";
 
     const BALL_SAMPLE_PATH: &str = "tests/data/ball_sample.png";
+    const POSE_SAMPLE_PATH: &str = " tests/data/pose_sample.jpg";
 
     #[test]
     fn preclassify_ball() {
@@ -356,6 +358,18 @@ mod tests {
 
         println!("{:?}", confidence);
         assert_relative_eq!(confidence, 1.0, epsilon = 0.01);
+    }
+
+    // function for testing referee challenge model in Hulks.
+    #[test]
+    fn test_hdf5() {
+        let mut network = CompiledNN::default();
+        network.compile(REFEREE_PATH);
+        let image = 0; // input should be here
+
+        let confidence = 0; // prediction should be here
+
+        println!("{:?}", confidence);
     }
 
     #[test]
