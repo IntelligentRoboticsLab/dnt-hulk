@@ -1,0 +1,13 @@
+name: check, test, lints and build
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cicd:
+    uses: IntelligentRoboticsLab/bondi/.github/workflows/rust.yml@main
+    secrets:
+      BONDI_DEPLOY_KEY: ${{ secrets.BIFROST_DEPLOY_KEY }}
+
