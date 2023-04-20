@@ -16,6 +16,7 @@ use color_eyre::{
 use futures_util::{stream::FuturesUnordered, StreamExt};
 use glob::glob;
 use home::home_dir;
+use indicatif::{ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use serde_json::{from_slice, to_value, to_vec_pretty, Value};
 use tempfile::{tempdir, TempDir};
@@ -31,7 +32,14 @@ use tokio::{
 use spl_network_messages::PlayerNumber;
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
-pub const SDK_VERSION: &str = "1.0";
+
+// How to obtain:
+// Right-click file > Under "general access" give view access to anyone with the link
+// After clicking copy link you should get a link in your clipboard like this:
+// https://drive.google.com/file/d/1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI/view?usp=sharing
+//                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ The file id
+const GOOGLE_DRIVE_FILE_ID: &str = "1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI";
+pub const SDK_VERSION: &str = "5.7.1";
 
 pub struct Repository {
     root: PathBuf,
@@ -486,28 +494,43 @@ pub async fn get_image_path(version: &str) -> Result<PathBuf> {
     Ok(image_path)
 }
 
+async fn download_sdk_from_google_drive(file_id: &str, path: impl AsRef<Path>) -> Result<()> {
+    let fetch_url = format!("https://drive.google.com/uc?export=download&confirm&id={file_id}");
+    let response = reqwest::get(fetch_url).await?;
+
+    let file_size = response
+        .content_length()
+        .ok_or_else(|| eyre!("SDK has no file size!"))?;
+
+    let pb = ProgressBar::new(file_size);
+    pb.set_style(ProgressStyle::with_template(
+        "{spinner:.yellow} [{elapsed_precise}] {bytes}/{total_bytes} (ETA: {eta}) [{wide_bar:.yellow/red}] {msg} ",
+    )?.progress_chars("#>-"));
+
+    let mut stream = response.bytes_stream();
+    let mut file = File::create(path.as_ref()).await?;
+    let mut downloaded = 0;
+    while let Some(Ok(bytes)) = stream.next().await {
+        file.write_all(&bytes).await?;
+        downloaded = (downloaded + bytes.len() as u64).min(file_size);
+        pb.set_position(downloaded);
+    }
+
+    pb.finish_with_message("Successfully downloaded SDK!");
+
+    Ok(())
+}
+
 async fn download_sdk(downloads_directory: impl AsRef<Path>, installer_name: &str) -> Result<()> {
     if !downloads_directory.as_ref().exists() {
         create_dir_all(&downloads_directory)
             .await
             .context("Failed to create download directory")?;
     }
+
     let installer_path = downloads_directory.as_ref().join(installer_name);
-    // let url = format!("http://bighulk.hulks.dev/sdk/{installer_name}");
-    let url = format!("https://www.dropbox.com/s/7rriuz8xp5yv9kf/{installer_name}?dl=1");
-    println!("Downloading SDK from {url}");
-    let status = Command::new("curl")
-        .arg("-L")
-        .arg("--progress-bar")
-        .arg("--output")
-        .arg(&installer_path)
-        .arg(url)
-        .status()
-        .await
-        .context("Failed to spawn command")?;
-    if !status.success() {
-        bail!("curl exited with {status}");
-    }
+
+    download_sdk_from_google_drive(GOOGLE_DRIVE_FILE_ID, &installer_path).await?;
 
     set_permissions(&installer_path, Permissions::from_mode(0o755))
         .await
