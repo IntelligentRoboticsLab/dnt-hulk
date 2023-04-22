@@ -22,7 +22,6 @@ spl_network_messages = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 bincode = { workspace = true }
-spl_network = { workspace = true }
 bifrost = { workspace = true }
 
 [build-dependencies]
