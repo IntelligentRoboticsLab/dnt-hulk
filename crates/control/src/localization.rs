@@ -477,7 +477,8 @@ impl Localization {
             .game_controller_state
             .and_then(|game_controller_state| {
                 Some(game_controller_state.penalties[*context.player_number])
-            }).unwrap();
+            })
+            .unwrap_or(Penalty::None);
         let game_phase = context
             .game_controller_state
             .map(|game_controller_state| game_controller_state.game_phase);
