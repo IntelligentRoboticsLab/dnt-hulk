@@ -1,6 +1,6 @@
 use framework::AdditionalOutput;
 use nalgebra::{point, Isometry2, Point2, UnitComplex};
-use spl_network::Penalty;
+use spl_network_messages::Penalty;
 use types::{
     configuration::Search as SearchConfiguration, FieldDimensions, HeadMotion, MotionCommand,
     OrientationMode, PathObstacle, Side, WorldState,

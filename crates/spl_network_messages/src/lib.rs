@@ -1,5 +1,6 @@
 mod bindings;
 mod game_controller_return_message;
+mod game_controller_state_conversion;
 mod game_controller_state_message;
 mod spl_message;
 

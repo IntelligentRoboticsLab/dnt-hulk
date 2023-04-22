@@ -5,3 +5,5 @@ pub mod message_receiver;
 pub enum CyclerInstance {
     SplNetwork,
 }
+
+pub use spl_network_messages::GameControllerReturnMessage;

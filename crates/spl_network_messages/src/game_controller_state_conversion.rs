@@ -1,4 +1,6 @@
+use color_eyre::{Report, Result};
 use serde::{Deserialize, Serialize};
+use serialize_hierarchy::SerializeHierarchy;
 use std::time::Duration;
 
 use crate::HULKS_TEAM_NUMBER;
@@ -12,7 +14,7 @@ use bifrost::{
     serialization::{Decode, Encode},
 };
 
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq, SerializeHierarchy)]
 pub enum Half {
     First,
     Second,
@@ -27,7 +29,7 @@ impl From<BifrostHalf> for Half {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq, SerializeHierarchy)]
 pub enum GameState {
     Initial,
     Ready,
@@ -48,7 +50,7 @@ impl From<BifrostGameState> for GameState {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
 pub enum GamePhase {
     #[default]
     Normal,
@@ -85,20 +87,22 @@ pub enum SubState {
     PenaltyKick,
 }
 
-impl From<BifrostSubState> for SubState {
-    fn from(set_play: BifrostSubState) -> Self {
+impl From<BifrostSetPlay> for SubState {
+    fn from(set_play: BifrostSetPlay) -> Self {
         match set_play {
-            BifrostSubState::None => SubState::None,
-            BifrostSubState::GoalKick => SubState::GoalKick,
-            BifrostSubState::PushingFreeKick => SubState::PushingFreeKick,
-            BifrostSubState::CornerKick => SubState::CornerKick,
-            BifrostSubState::KickIn => SubState::KickIn,
-            BifrostSubState::PenaltyKick => SubState::PenaltyKick,
+            BifrostSetPlay::None => SubState::None,
+            BifrostSetPlay::GoalKick => SubState::GoalKick,
+            BifrostSetPlay::PushingFreeKick => SubState::PushingFreeKick,
+            BifrostSetPlay::CornerKick => SubState::CornerKick,
+            BifrostSetPlay::KickIn => SubState::KickIn,
+            BifrostSetPlay::PenaltyKick => SubState::PenaltyKick,
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize, SerializeHierarchy,
+)]
 pub enum Team {
     Hulks,
     Opponent,
@@ -116,7 +120,7 @@ impl From<u8> for Team {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq, SerializeHierarchy)]
 pub enum TeamColor {
     Blue,
     Red,
@@ -147,7 +151,7 @@ impl From<BifrostTeamColor> for TeamColor {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, SerializeHierarchy)]
 pub struct TeamState {
     pub team_number: u8,
     pub field_player_colour: TeamColor,
@@ -172,17 +176,17 @@ pub struct Player {
 }
 
 impl TryFrom<RobotInfo> for Player {
-    type Error = anyhow::Error;
+    type Error = Report;
 
-    fn try_from(player: RobotInfo) -> anyhow::Result<Self> {
+    fn try_from(player: RobotInfo) -> Result<Self> {
         let remaining = Duration::from_secs(player.secs_till_unpenalised as u64);
         Ok(Self {
-            penalty: Penalty::from((remaining, player.penalty)),
+            penalty: Penalty::from(remaining, player.penalty),
         })
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, SerializeHierarchy)]
 pub enum Penalty {
     None,
     IllegalBallContact { remaining: Duration },
@@ -199,8 +203,8 @@ pub enum Penalty {
     Manual { remaining: Duration },
 }
 
-impl From<(Duration, BifrostPenalty)> for Penalty {
-    fn from((remaining, penalty): (Duration, BifrostPenalty)) -> Self {
+impl Penalty {
+    fn from(remaining: Duration, penalty: BifrostPenalty) -> Self {
         match penalty {
             BifrostPenalty::None => Penalty::None,
             BifrostPenalty::IllegalBallContact => Penalty::IllegalBallContact { remaining },

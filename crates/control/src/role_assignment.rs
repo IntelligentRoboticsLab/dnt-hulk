@@ -702,7 +702,7 @@ fn pick_role_with_penalties(
 
 fn needs_assignment(
     player_number: PlayerNumber,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     role_assignment: &Players<Option<Role>>,
 ) -> bool {
     role_assignment[player_number].is_none() && penalties[player_number].is_none()
@@ -710,7 +710,7 @@ fn needs_assignment(
 
 fn assign_keeper_or_replacement_keeper(
     unassigned_robots: usize,
-    penalties: &Players<Option<Penalty>>,
+    penalties: &Players<Penalty>,
     role_assignment: &mut Players<Option<Role>>,
 ) -> usize {
     if needs_assignment(PlayerNumber::One, penalties, role_assignment) {

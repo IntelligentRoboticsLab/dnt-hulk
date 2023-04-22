@@ -64,7 +64,7 @@ impl GameControllerFilter {
                     .hulks_team
                     .remaining_amount_of_messages,
                 sub_state: match game_controller_state_message.sub_state {
-                    spl_network_messages::SetPlay::None => None,
+                    spl_network_messages::SubState::None => None,
                     set_play => Some(set_play),
                 },
             });

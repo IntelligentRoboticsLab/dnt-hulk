@@ -14,5 +14,5 @@ pub struct GameControllerState {
     pub last_game_state_change: SystemTime,
     pub penalties: Players<Penalty>,
     pub remaining_amount_of_messages: u16,
-    pub sub_state: SubState,
+    pub sub_state: Option<SubState>,
 }

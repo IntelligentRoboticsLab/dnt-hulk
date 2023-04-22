@@ -4320,6 +4320,7 @@ dependencies = [
  "framework",
  "log",
  "serde",
+ "spl_network_messages",
  "thiserror",
  "tokio",
  "types",

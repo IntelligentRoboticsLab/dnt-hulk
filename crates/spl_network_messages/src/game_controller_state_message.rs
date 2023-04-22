@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
-    GamePhase, GameState, Half, PenaltyShoot, Player, SetPlay, Team, TeamColor, TeamState,
+    GamePhase, GameState, Half, PenaltyShoot, Player, SubState, Team, TeamColor, TeamState,
     HULKS_TEAM_NUMBER,
 };
 use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
@@ -19,7 +19,7 @@ use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
 pub struct GameControllerStateMessage {
     pub game_phase: GamePhase,
     pub game_state: GameState,
-    pub sub_state: Option<SubState>,
+    pub sub_state: SubState,
     pub half: Half,
     pub remaining_time_in_half: Duration,
     pub secondary_time: Duration,
@@ -31,8 +31,8 @@ pub struct GameControllerStateMessage {
 impl TryFrom<&[u8]> for GameControllerStateMessage {
     type Error = Report;
 
-    fn try_from(buffer: &[u8]) -> Result<Self> {
-        let message = RoboCupGameControlData::decode(&buffer)?;
+    fn try_from(mut buffer: &[u8]) -> Result<Self> {
+        let message = RoboCupGameControlData::decode(&mut buffer)?;
 
         if !message.is_valid() {
             bail!("GameControllerStateMessage is not valid");
@@ -83,18 +83,18 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .map(|player_index| {
                 message.teams[hulks_team_index].players[player_index as usize].try_into()
             })
-            .collect::<anyhow::Result<Vec<_>>>()?;
+            .collect::<Result<Vec<_>>>()?;
 
         let opponent_players: Vec<Player> = (0..message.players_per_team)
             .map(|player_index| {
                 message.teams[opponent_team_index].players[player_index as usize].try_into()
             })
-            .collect::<anyhow::Result<Vec<_>>>()?;
+            .collect::<Result<Vec<_>>>()?;
 
         Ok(GameControllerStateMessage {
             game_phase: GamePhase::from((message.game_phase, message.kicking_team)),
             game_state: GameState::from(message.state),
-            sub_state: SubState::try_from(message.setPlay)?,
+            sub_state: SubState::try_from(message.set_play)?,
             half: Half::from(message.first_half),
             remaining_time_in_half: Duration::from_secs(message.secs_remaining.max(0).try_into()?),
             secondary_time: Duration::from_secs(message.secondary_time.max(0).try_into()?),

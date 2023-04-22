@@ -1,3 +1,4 @@
+use color_eyre::{Result, Report};
 use nalgebra::Isometry2;
 use serde::{Deserialize, Serialize};
 
@@ -16,9 +17,9 @@ pub struct GameControllerReturnMessage {
 }
 
 impl TryFrom<GameControllerReturnMessage> for Vec<u8> {
-    type Error = anyhow::Error;
+    type Error = Report;
 
-    fn try_from(message: GameControllerReturnMessage) -> anyhow::Result<Self> {
+    fn try_from(message: GameControllerReturnMessage) -> Result<Self> {
         let message: RoboCupGameControlReturnData = message.into();
         let mut buffer = Vec::new();
 
