@@ -28,8 +28,21 @@ pub struct BallPosition {
 
 pub const HULKS_TEAM_NUMBER: u8 = 24;
 
+use bifrost::serialization::{Decode, Encode};
+
 #[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize, SerializeHierarchy,
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    Encode,
+    Decode,
+    Eq,
+    Hash,
+    PartialEq,
+    Serialize,
+    SerializeHierarchy,
 )]
 pub enum PlayerNumber {
     One,

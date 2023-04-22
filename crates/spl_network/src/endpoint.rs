@@ -5,6 +5,7 @@ use std::{
 
 use log::warn;
 use serde::Deserialize;
+use spl_network_messages::SplMessage;
 use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
@@ -67,8 +68,8 @@ impl Endpoint {
                     }
                 },
                 result = self.spl_socket.recv_from(&mut spl_buffer) => {
-                    let (received_bytes, _address) = result.map_err(Error::ReadError)?;
-                    match spl_buffer[0..received_bytes].try_into() {
+                    let (_received_bytes, _address) = result.map_err(Error::ReadError)?;
+                    match SplMessage::try_from(&mut spl_buffer.as_slice()) {
                         Ok(parsed_message) => {
                             break Ok(IncomingMessage::Spl(parsed_message));
                         }
