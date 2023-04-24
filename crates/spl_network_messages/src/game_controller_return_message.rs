@@ -2,7 +2,7 @@ use color_eyre::{Report, Result};
 use nalgebra::Isometry2;
 use serde::{Deserialize, Serialize};
 
-use crate::{BallPosition, PlayerNumber, HULKS_TEAM_NUMBER};
+use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
 
 use bifrost::{communication::RoboCupGameControlReturnData, serialization::Encode};
 
@@ -50,7 +50,7 @@ impl From<GameControllerReturnMessage> for RoboCupGameControlReturnData {
                 PlayerNumber::Six => 6,
                 PlayerNumber::Seven => 7,
             },
-            HULKS_TEAM_NUMBER,
+            DNT_TEAM_NUMBER,
             u8::from(message.fallen),
             [
                 message.robot_to_field.translation.vector.x * 1000.0,

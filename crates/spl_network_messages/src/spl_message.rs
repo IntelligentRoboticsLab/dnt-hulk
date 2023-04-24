@@ -11,7 +11,7 @@ use serialize_hierarchy::SerializeHierarchy;
 use crate::{
     BallPosition,
     PlayerNumber,
-    HULKS_TEAM_NUMBER,
+    DNT_TEAM_NUMBER,
 };
 
 use bifrost::communication::SPLStandardMessage;
@@ -117,7 +117,7 @@ impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
                 PlayerNumber::Six => 6,
                 PlayerNumber::Seven => 7,
             },
-            HULKS_TEAM_NUMBER,
+            DNT_TEAM_NUMBER,
             u8::from(message.fallen),
             [
                 message.robot_to_field.translation.vector.x * 1000.0,

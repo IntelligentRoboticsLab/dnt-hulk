@@ -9,7 +9,7 @@ use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
     GamePhase, GameState, Half, PenaltyShoot, Player, SubState, Team, TeamColor, TeamState,
-    HULKS_TEAM_NUMBER,
+    DNT_TEAM_NUMBER,
 };
 use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
 
@@ -48,8 +48,8 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
     fn try_from(message: RoboCupGameControlData) -> Result<Self> {
         let (hulks_team_index, opponent_team_index) =
             match (message.teams[0].team_number, message.teams[1].team_number) {
-                (HULKS_TEAM_NUMBER, _) => (0, 1),
-                (_, HULKS_TEAM_NUMBER) => (1, 0),
+                (DNT_TEAM_NUMBER, _) => (0, 1),
+                (_, DNT_TEAM_NUMBER) => (1, 0),
                 _ => bail!("failed to find HULKs team"),
             };
 
