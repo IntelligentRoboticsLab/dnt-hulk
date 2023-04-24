@@ -22,7 +22,7 @@ See [Nao Image and SDK](./nao_image_and_sdk.md) to learn how to acquire or build
 
     In the HULKs code release, the SPL team number is hardcoded in a few places. Change this to your own team number before continuing.
 
-    - `crates/spl_network/src/lib.rs` contains a constant called HULKS_TEAM_NUMBER. You may also wish to rename this constant.
+    - `crates/spl_network/src/lib.rs` contains a constant called DNT_TEAM_NUMBER. You may also wish to rename this constant.
     - `tools/pepsi` contains a bunch of `24`s, however most of them are in comments or CLI command help text.
         - `tools/pepsi/src/parsers.rs` has a default and a check value that use 24 literals.
     - `tools/twix/src/completion_edit.rs` generates IP address suggestions with a hardcoded team number.

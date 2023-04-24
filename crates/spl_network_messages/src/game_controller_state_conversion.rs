@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 use std::time::Duration;
 
-use crate::HULKS_TEAM_NUMBER;
+use crate::DNT_TEAM_NUMBER;
 
 use bifrost::{
     communication::{
@@ -63,7 +63,7 @@ pub enum GamePhase {
 
 impl From<(BifrostGamePhase, u8)> for GamePhase {
     fn from((game_phase, kicking_team): (BifrostGamePhase, u8)) -> Self {
-        let team = if kicking_team == HULKS_TEAM_NUMBER {
+        let team = if kicking_team == DNT_TEAM_NUMBER {
             Team::Hulks
         } else {
             Team::Opponent
@@ -112,7 +112,7 @@ pub enum Team {
 
 impl From<u8> for Team {
     fn from(team_number: u8) -> Self {
-        if team_number == HULKS_TEAM_NUMBER {
+        if team_number == DNT_TEAM_NUMBER {
             Team::Hulks
         } else {
             Team::Opponent

@@ -1,25 +1,34 @@
 use std::{
     convert::{TryFrom, TryInto},
-    ffi::c_char,
-    mem::size_of,
-    ptr::read,
-    slice::from_raw_parts,
     time::Duration,
 };
 
-use byteorder::{ByteOrder, NativeEndian};
 use color_eyre::{eyre::bail, Report, Result};
 use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
-    bindings::{
-        SPLStandardMessage, SPL_STANDARD_MESSAGE_DATA_SIZE, SPL_STANDARD_MESSAGE_STRUCT_HEADER,
-        SPL_STANDARD_MESSAGE_STRUCT_VERSION,
-    },
-    BallPosition, PlayerNumber, HULKS_TEAM_NUMBER,
+    BallPosition,
+    PlayerNumber,
+    DNT_TEAM_NUMBER,
 };
+
+use bifrost::communication::SPLStandardMessage;
+
+use bifrost::serialization::{Decode, Encode};
+
+#[derive(
+    Clone, Copy, Debug, Encode, Default, Decode, Serialize, Deserialize, SerializeHierarchy,
+)]
+pub enum SPLPacket {
+    HeardWhistle {
+        heard_whistle: bool,
+    },
+    #[default]
+    LookingForBall,
+    BallPosition([f32; 2]),
+}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
 pub struct SplMessage {
@@ -27,48 +36,24 @@ pub struct SplMessage {
     pub fallen: bool,
     pub robot_to_field: Isometry2<f32>,
     pub ball_position: Option<BallPosition>,
+    pub packet: Option<SPLPacket>,
 }
 
-impl TryFrom<&[u8]> for SplMessage {
+impl TryFrom<&mut &[u8]> for SplMessage {
     type Error = Report;
 
-    fn try_from(buffer: &[u8]) -> Result<Self> {
-        let buffer_offset_of_user_data =
-            size_of::<SPLStandardMessage>() - (SPL_STANDARD_MESSAGE_DATA_SIZE as usize);
-        if buffer.len() < buffer_offset_of_user_data {
-            bail!("buffer too small");
-        }
-        let number_of_bytes_of_user_data = NativeEndian::read_u16(
-            &buffer[buffer_offset_of_user_data - 2..buffer_offset_of_user_data],
-        );
-        let additional_number_of_bytes_in_message = buffer.len() - buffer_offset_of_user_data;
-        if number_of_bytes_of_user_data as usize != additional_number_of_bytes_in_message {
-            bail!("buffer size mismatch: numOfDataBytes != length of message remainder");
-        }
-        let message = unsafe { read(buffer.as_ptr() as *const SPLStandardMessage) };
+    fn try_from(buffer: &mut &[u8]) -> Result<Self> {
+        let message = SPLStandardMessage::decode(buffer)?;
         message.try_into()
     }
 }
 
-impl TryFrom<SPLStandardMessage> for SplMessage {
+impl TryFrom<SPLStandardMessage<SPLPacket>> for SplMessage {
     type Error = Report;
 
-    fn try_from(message: SPLStandardMessage) -> Result<Self> {
-        if message.header[0] != SPL_STANDARD_MESSAGE_STRUCT_HEADER[0] as c_char
-            && message.header[1] != SPL_STANDARD_MESSAGE_STRUCT_HEADER[1] as c_char
-            && message.header[2] != SPL_STANDARD_MESSAGE_STRUCT_HEADER[2] as c_char
-            && message.header[3] != SPL_STANDARD_MESSAGE_STRUCT_HEADER[3] as c_char
-        {
-            bail!("unexpected header");
-        }
-        if message.version != SPL_STANDARD_MESSAGE_STRUCT_VERSION {
-            bail!("unexpected version");
-        }
-        if message.teamNum != HULKS_TEAM_NUMBER {
-            bail!("unexpected team number != {}", HULKS_TEAM_NUMBER);
-        }
-        Ok(Self {
-            player_number: match message.playerNum {
+    fn try_from(message: SPLStandardMessage<SPLPacket>) -> Result<Self> {
+        Ok(SplMessage {
+            player_number: match message.player_num {
                 1 => PlayerNumber::One,
                 2 => PlayerNumber::Two,
                 3 => PlayerNumber::Three,
@@ -76,7 +61,7 @@ impl TryFrom<SPLStandardMessage> for SplMessage {
                 5 => PlayerNumber::Five,
                 6 => PlayerNumber::Six,
                 7 => PlayerNumber::Seven,
-                _ => bail!("unexpected player number {}", message.playerNum),
+                _ => bail!("unexpected player number {}", message.player_num),
             },
             fallen: match message.fallen {
                 1 => true,
@@ -87,33 +72,30 @@ impl TryFrom<SPLStandardMessage> for SplMessage {
                 vector![message.pose[0] / 1000.0, message.pose[1] / 1000.0],
                 message.pose[2],
             ),
-            ball_position: if message.ballAge == -1.0 {
+            ball_position: if message.ball_age == -1.0 {
                 None
             } else {
                 Some(BallPosition {
                     relative_position: point![message.ball[0] / 1000.0, message.ball[1] / 1000.0],
-                    age: Duration::from_secs_f32(message.ballAge),
+                    age: Duration::from_secs_f32(message.ball_age),
                 })
             },
+            packet: message.payload.data,
         })
     }
 }
 
-impl From<SplMessage> for Vec<u8> {
-    fn from(message: SplMessage) -> Self {
-        let message: SPLStandardMessage = message.into();
-        unsafe {
-            from_raw_parts(
-                &message as *const SPLStandardMessage as *const u8,
-                size_of::<SPLStandardMessage>() - (SPL_STANDARD_MESSAGE_DATA_SIZE as usize)
-                    + (message.numOfDataBytes as usize),
-            )
-        }
-        .to_vec()
+impl TryFrom<SplMessage> for Vec<u8> {
+    type Error = Report;
+    fn try_from(message: SplMessage) -> Result<Self> {
+        let mut buf = Vec::new();
+        SPLStandardMessage::<SPLPacket>::from(message).encode(&mut buf)?;
+
+        Ok(buf)
     }
 }
 
-impl From<SplMessage> for SPLStandardMessage {
+impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
     fn from(message: SplMessage) -> Self {
         let (ball_position, ball_age) = match &message.ball_position {
             Some(ball_position) => (
@@ -125,15 +107,8 @@ impl From<SplMessage> for SPLStandardMessage {
             ),
             None => ([0.0; 2], -1.0),
         };
-        Self {
-            header: [
-                SPL_STANDARD_MESSAGE_STRUCT_HEADER[0] as c_char,
-                SPL_STANDARD_MESSAGE_STRUCT_HEADER[1] as c_char,
-                SPL_STANDARD_MESSAGE_STRUCT_HEADER[2] as c_char,
-                SPL_STANDARD_MESSAGE_STRUCT_HEADER[3] as c_char,
-            ],
-            version: SPL_STANDARD_MESSAGE_STRUCT_VERSION,
-            playerNum: match message.player_number {
+        SPLStandardMessage::<SPLPacket>::new(
+            match message.player_number {
                 PlayerNumber::One => 1,
                 PlayerNumber::Two => 2,
                 PlayerNumber::Three => 3,
@@ -142,18 +117,17 @@ impl From<SplMessage> for SPLStandardMessage {
                 PlayerNumber::Six => 6,
                 PlayerNumber::Seven => 7,
             },
-            teamNum: HULKS_TEAM_NUMBER,
-            fallen: u8::from(message.fallen),
-            pose: [
+            DNT_TEAM_NUMBER,
+            u8::from(message.fallen),
+            [
                 message.robot_to_field.translation.vector.x * 1000.0,
                 message.robot_to_field.translation.vector.y * 1000.0,
                 message.robot_to_field.rotation.angle(),
             ],
-            ballAge: ball_age,
-            ball: ball_position,
-            numOfDataBytes: 0,
-            data: [0; SPL_STANDARD_MESSAGE_DATA_SIZE as usize],
-        }
+            ball_age,
+            ball_position,
+            message.packet.into(),
+        )
     }
 }
 
@@ -173,8 +147,9 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::default(),
             ball_position: None,
+            packet: None,
         };
-        let output_message: SPLStandardMessage = input_message.into();
+        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
 
         assert_relative_eq!(output_message.pose[0], 0.0);
         assert_relative_eq!(output_message.pose[1], 0.0);
@@ -192,8 +167,9 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::new(vector![0.0, 1.0], FRAC_PI_2),
             ball_position: None,
+            packet: None,
         };
-        let output_message: SPLStandardMessage = input_message.into();
+        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
 
         assert_relative_eq!(output_message.pose[0], 0.0, epsilon = 0.001);
         assert_relative_eq!(output_message.pose[1], 1000.0, epsilon = 0.001);
@@ -215,8 +191,9 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::new(vector![1.0, 1.0], FRAC_PI_4),
             ball_position: None,
+            packet: None,
         };
-        let output_message: SPLStandardMessage = input_message.into();
+        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
 
         assert_relative_eq!(
             input_message.robot_to_field * point![1.0 / SQRT_2, -1.0 / SQRT_2],
