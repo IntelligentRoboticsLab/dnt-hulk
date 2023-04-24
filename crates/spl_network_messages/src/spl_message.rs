@@ -9,10 +9,6 @@ use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
-    // bindings::{
-    //     SPLStandardMessage, SPL_STANDARD_MESSAGE_DATA_SIZE, SPL_STANDARD_MESSAGE_STRUCT_HEADER,
-    //     SPL_STANDARD_MESSAGE_STRUCT_VERSION,
-    // },
     BallPosition,
     PlayerNumber,
     HULKS_TEAM_NUMBER,
