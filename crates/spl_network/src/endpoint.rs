@@ -68,7 +68,7 @@ impl Endpoint {
                     }
                 },
                 result = self.spl_socket.recv_from(&mut spl_buffer) => {
-                    let (_received_bytes, _address) = result.map_err(Error::ReadError)?;
+                    result.map_err(Error::ReadError)?;
                     match SplMessage::try_from(&mut spl_buffer.as_slice()) {
                         Ok(parsed_message) => {
                             break Ok(IncomingMessage::Spl(parsed_message));
