@@ -1,4 +1,4 @@
-use color_eyre::{Result, Report};
+use color_eyre::{Report, Result};
 use nalgebra::Isometry2;
 use serde::{Deserialize, Serialize};
 
