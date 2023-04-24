@@ -98,7 +98,7 @@ pub fn number_to_ip(nao_number: u8, connection: Connection) -> Result<Ipv4Addr> 
         Connection::Wireless => 0,
         Connection::Wired => 1,
     };
-    Ok(Ipv4Addr::new(10, subnet, 24, nao_number))
+    Ok(Ipv4Addr::new(10, subnet, 8, nao_number))
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -128,7 +128,7 @@ impl TryFrom<NaoAddress> for NaoNumber {
     fn try_from(nao_address: NaoAddress) -> Result<Self> {
         if nao_address.ip.octets()[0] != 10
             || (nao_address.ip.octets()[1] != 0 && nao_address.ip.octets()[1] != 1)
-            || nao_address.ip.octets()[2] != 24
+            || nao_address.ip.octets()[2] != 8
         {
             bail!("failed to extract NAO number from IP {nao_address}");
         }
