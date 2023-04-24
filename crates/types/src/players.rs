@@ -7,7 +7,7 @@ use std::{
 use color_eyre::Result;
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializer};
 use serialize_hierarchy::{Error, SerializeHierarchy};
-use spl_network_messages::{Penalty, PlayerNumber, TeamState};
+use spl_network_messages::{Penalty, Player, PlayerNumber, TeamState};
 
 #[derive(Clone, Copy, Default, Debug, Deserialize, Serialize)]
 pub struct Players<T> {
@@ -50,16 +50,30 @@ impl<T> IndexMut<PlayerNumber> for Players<T> {
     }
 }
 
+trait PlayerPenalty {
+    fn get_penalty(&self, player_index: usize) -> Penalty;
+}
+
+impl PlayerPenalty for Vec<Player> {
+    fn get_penalty(&self, player_index: usize) -> Penalty {
+        if self.len() > player_index {
+            self[player_index].penalty
+        } else {
+            Penalty::None
+        }
+    }
+}
+
 impl From<TeamState> for Players<Penalty> {
     fn from(team_state: TeamState) -> Self {
         Self {
-            one: team_state.players[0].penalty,
-            two: team_state.players[1].penalty,
-            three: team_state.players[2].penalty,
-            four: team_state.players[3].penalty,
-            five: team_state.players[4].penalty,
-            six: team_state.players[5].penalty,
-            seven: team_state.players[6].penalty,
+            one: team_state.players.get_penalty(0),
+            two: team_state.players.get_penalty(1),
+            three: team_state.players.get_penalty(2),
+            four: team_state.players.get_penalty(3),
+            five: team_state.players.get_penalty(4),
+            six: team_state.players.get_penalty(5),
+            seven: team_state.players.get_penalty(6),
         }
     }
 }
