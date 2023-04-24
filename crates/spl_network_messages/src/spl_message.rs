@@ -48,7 +48,7 @@ impl TryFrom<&mut &[u8]> for SplMessage {
 
     fn try_from(buffer: &mut &[u8]) -> Result<Self> {
         let message = SPLStandardMessage::decode(buffer)?;
-        Ok(message.try_into()?)
+        message.try_into()
     }
 }
 

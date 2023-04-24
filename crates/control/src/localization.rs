@@ -191,11 +191,8 @@ impl Localization {
                 self.hypotheses_when_entered_playing = self.hypotheses.clone();
             }
             (PrimaryState::Playing, PrimaryState::Penalized, _) => {
-                match penalty {
-                    Penalty::IllegalMotionInSet { remaining: _ } => {
-                        self.is_penalized_with_motion_in_set = true;
-                    }
-                    _ => {}
+                if let Penalty::IllegalMotionInSet { remaining: _ } = penalty {
+                    self.is_penalized_with_motion_in_set = true;
                 };
             }
             (PrimaryState::Penalized, _, _) if primary_state != PrimaryState::Penalized => {
@@ -475,9 +472,7 @@ impl Localization {
         let primary_state = *context.primary_state;
         let penalty: Penalty = context
             .game_controller_state
-            .and_then(|game_controller_state| {
-                Some(game_controller_state.penalties[*context.player_number])
-            })
+            .map(|game_controller_state| game_controller_state.penalties[*context.player_number])
             .unwrap_or(Penalty::None);
         let game_phase = context
             .game_controller_state
