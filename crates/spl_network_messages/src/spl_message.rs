@@ -89,13 +89,13 @@ impl TryFrom<SPLStandardMessage<SPLPacket>> for SplMessage {
     }
 }
 
-impl From<SplMessage> for Vec<u8> {
-    fn from(message: SplMessage) -> Self {
+impl TryFrom<SplMessage> for Vec<u8> {
+    type Error = Report;
+    fn try_from(message: SplMessage) -> Result<Self> {
         let mut buf = Vec::new();
-        SPLStandardMessage::<SPLPacket>::from(message)
-            .encode(&mut buf)
-            .expect("From<SplMessage> for Vec<u8> could not write to vector");
-        buf
+        SPLStandardMessage::<SPLPacket>::from(message).encode(&mut buf)?;
+
+        Ok(buf)
     }
 }
 
