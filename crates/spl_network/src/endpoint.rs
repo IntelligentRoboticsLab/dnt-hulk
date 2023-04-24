@@ -5,6 +5,7 @@ use std::{
 
 use log::warn;
 use serde::Deserialize;
+use spl_network_messages::SplMessage;
 use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
@@ -67,8 +68,8 @@ impl Endpoint {
                     }
                 },
                 result = self.spl_socket.recv_from(&mut spl_buffer) => {
-                    let (received_bytes, _address) = result.map_err(Error::ReadError)?;
-                    match spl_buffer[0..received_bytes].try_into() {
+                    result.map_err(Error::ReadError)?;
+                    match SplMessage::try_from(&mut spl_buffer.as_slice()) {
                         Ok(parsed_message) => {
                             break Ok(IncomingMessage::Spl(parsed_message));
                         }
@@ -87,7 +88,9 @@ impl Endpoint {
             OutgoingMessage::GameController(message) => {
                 let last_game_controller_address = *self.last_game_controller_address.lock().await;
                 if let Some(last_game_controller_address) = last_game_controller_address {
-                    let message: Vec<u8> = message.try_into().expect("Failed to serialize message");
+                    let message: Vec<u8> = message
+                        .try_into()
+                        .expect("Failed to serialize GameController message");
                     if let Err(error) = self
                         .game_controller_state_socket
                         .send_to(
@@ -104,7 +107,7 @@ impl Endpoint {
                 }
             }
             OutgoingMessage::Spl(message) => {
-                let message: Vec<u8> = message.into();
+                let message: Vec<u8> = message.try_into().expect("Failed to serialize SPL message");
                 if let Err(error) = self
                     .spl_socket
                     .send_to(
