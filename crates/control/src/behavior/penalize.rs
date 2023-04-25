@@ -12,7 +12,7 @@ pub fn execute(world_state: &WorldState) -> Option<MotionCommand> {
         //         },
         //     })
         // }
-        // PrimaryState::Penalized | PrimaryState::Initial => Some(MotionCommand::Penalized),
+        PrimaryState::Penalized | PrimaryState::Initial => Some(MotionCommand::Penalized),
         _ => None,
     }
 }
