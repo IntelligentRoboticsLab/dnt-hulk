@@ -145,6 +145,7 @@ impl Behavior {
             .find_map(|action| match action {
                 Action::Unstiff => unstiff::execute(world_state),
                 Action::SitDown => sit_down::execute(world_state),
+                Action::Stand => stand::execute(world_state),
                 Action::Penalize => penalize::execute(world_state),
                 Action::FallSafely => fall_safely::execute(world_state),
                 Action::StandUp => stand_up::execute(world_state),
@@ -152,7 +153,6 @@ impl Behavior {
                 Action::DefendKickOff => defend.kick_off(&mut context.path_obstacles),
                 Action::DefendLeft => defend.left(&mut context.path_obstacles),
                 Action::DefendRight => defend.right(&mut context.path_obstacles),
-                Action::Stand => stand::execute(world_state),
                 Action::Dribble => dribble::execute(
                     world_state,
                     context.field_dimensions,
