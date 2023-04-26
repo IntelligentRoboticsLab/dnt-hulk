@@ -87,6 +87,7 @@ indicatif = "0.17.2"
 itertools = "0.10.5"
 ittapi = "0.3.3"
 kinematics = { path = "crates/kinematics" }
+kira = "0.7.3"
 libc = "0.2.137"
 log = "0.4.17"
 mlua = { version = "0.8.7", features = ["luajit", "serialize", "parking_lot"] }
