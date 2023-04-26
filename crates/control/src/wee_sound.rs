@@ -1,7 +1,7 @@
 use context_attribute::context;
 use std::time::Duration;
 
-use types::{CycleTime, FallState, SensorData, SolePressure};
+use types::FallState;
 
 use kira::{
     manager::{backend::cpal::CpalBackend, AudioManager, AudioManagerSettings},
@@ -16,21 +16,11 @@ pub struct PlaySound {
 }
 
 #[context]
-pub struct CreationContext {
-    pub hysteresis: Parameter<f32, "wee_sound.hysteresis">,
-    pub pressure_threshold: Parameter<f32, "wee_sound.pressure_threshold">,
-    pub timeout: Parameter<Duration, "wee_sound.timeout">,
-}
+pub struct CreationContext {}
 
 #[context]
 pub struct CycleContext {
-    pub sensor_data: Input<SensorData, "sensor_data">,
-    pub sole_pressure: Input<SolePressure, "sole_pressure">,
-    pub cycle_time: Input<CycleTime, "cycle_time">,
     pub fall_state: Input<FallState, "fall_state">,
-    pub hysteresis: Parameter<f32, "wee_sound.hysteresis">,
-    pub pressure_threshold: Parameter<f32, "wee_sound.pressure_threshold">,
-    pub timeout: Parameter<Duration, "wee_sound.timeout">,
     pub has_ground_contact: Input<bool, "has_ground_contact">,
 }
 
