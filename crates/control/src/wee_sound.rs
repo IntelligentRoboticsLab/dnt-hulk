@@ -52,6 +52,7 @@ impl PlaySound {
             && *context.fall_state == FallState::Upright
             && !self.sound_played
         {
+            self.sound_played = true;
             let sound_data =
                 StaticSoundData::from_file("/etc/sounds/weeeee.wav", StaticSoundSettings::new())
                     .unwrap();
@@ -65,7 +66,6 @@ impl PlaySound {
                     },
                 )
                 .unwrap();
-            self.sound_played = true;
         } else if *context.has_ground_contact {
             self.sound_played = false;
         }
