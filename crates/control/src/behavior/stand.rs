@@ -4,10 +4,7 @@ use types::{GameControllerState, HeadMotion, MotionCommand, PrimaryState, Role, 
 
 pub fn execute(world_state: &WorldState) -> Option<MotionCommand> {
     match world_state.robot.primary_state {
-        PrimaryState::Initial => Some(MotionCommand::Stand {
-            head: HeadMotion::ZeroAngles,
-        }),
-        PrimaryState::Set => {
+        PrimaryState::Initial | PrimaryState::Set => {
             let robot_to_field = world_state.robot.robot_to_field?;
             Some(MotionCommand::Stand {
                 head: HeadMotion::LookAt {
