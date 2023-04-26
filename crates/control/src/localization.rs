@@ -490,6 +490,13 @@ impl Localization {
                 self.update_state(&mut context)?;
                 Some(*context.robot_to_field)
             }
+            PrimaryState::Initial => {
+                *context.robot_to_field = generate_initial_pose(
+                    &context.initial_poses[*context.player_number],
+                    context.field_dimensions,
+                );
+                Some(*context.robot_to_field)
+            }
             _ => None,
         };
         Ok(MainOutputs {

@@ -9,11 +9,7 @@ pub fn execute(
     field_dimensions: &FieldDimensions,
 ) -> Option<MotionCommand> {
     match world_state.robot.primary_state {
-        PrimaryState::Initial => Some(MotionCommand::Stand {
-            head: HeadMotion::ZeroAngles,
-            is_energy_saving: true,
-        }),
-        PrimaryState::Set => {
+        PrimaryState::Initial | PrimaryState::Set => {
             let robot_to_field = world_state.robot.robot_to_field?;
             let fallback_target = match world_state.game_controller_state {
                 Some(GameControllerState {
