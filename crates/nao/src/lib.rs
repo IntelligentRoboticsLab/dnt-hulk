@@ -330,6 +330,7 @@ pub enum Network {
     SplD,
     SplE,
     SplF,
+    Dnt5G
 }
 
 impl Display for Network {
@@ -342,6 +343,7 @@ impl Display for Network {
             Network::SplD => formatter.write_str("SPL_D"),
             Network::SplE => formatter.write_str("SPL_E"),
             Network::SplF => formatter.write_str("SPL_F"),
+            Network::Dnt5G => formatter.write_str("DNT_5G")
         }
     }
 }
