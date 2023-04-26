@@ -11,7 +11,6 @@ use kira::{
 
 pub struct PlaySound {
     sound_played: bool,
-
     manager: AudioManager<CpalBackend>,
 }
 
@@ -32,7 +31,6 @@ impl PlaySound {
     pub fn new(_context: CreationContext) -> color_eyre::Result<Self> {
         Ok(Self {
             sound_played: false,
-
             manager: AudioManager::<CpalBackend>::new(AudioManagerSettings::default()).unwrap(),
         })
     }
