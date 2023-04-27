@@ -8,27 +8,11 @@ use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
-use crate::{
-    BallPosition,
-    PlayerNumber,
-    DNT_TEAM_NUMBER,
-};
+use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
 
 use bifrost::communication::SPLStandardMessage;
 
 use bifrost::serialization::{Decode, Encode};
-
-#[derive(
-    Clone, Copy, Debug, Encode, Default, Decode, Serialize, Deserialize, SerializeHierarchy,
-)]
-pub enum SPLPacket {
-    HeardWhistle {
-        heard_whistle: bool,
-    },
-    #[default]
-    LookingForBall,
-    BallPosition([f32; 2]),
-}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
 pub struct SplMessage {
@@ -36,7 +20,6 @@ pub struct SplMessage {
     pub fallen: bool,
     pub robot_to_field: Isometry2<f32>,
     pub ball_position: Option<BallPosition>,
-    pub packet: Option<SPLPacket>,
 }
 
 impl TryFrom<&mut &[u8]> for SplMessage {
@@ -48,10 +31,10 @@ impl TryFrom<&mut &[u8]> for SplMessage {
     }
 }
 
-impl TryFrom<SPLStandardMessage<SPLPacket>> for SplMessage {
+impl TryFrom<SPLStandardMessage> for SplMessage {
     type Error = Report;
 
-    fn try_from(message: SPLStandardMessage<SPLPacket>) -> Result<Self> {
+    fn try_from(message: SPLStandardMessage) -> Result<Self> {
         Ok(SplMessage {
             player_number: match message.player_num {
                 1 => PlayerNumber::One,
@@ -80,7 +63,6 @@ impl TryFrom<SPLStandardMessage<SPLPacket>> for SplMessage {
                     age: Duration::from_secs_f32(message.ball_age),
                 })
             },
-            packet: message.payload.data,
         })
     }
 }
@@ -89,13 +71,13 @@ impl TryFrom<SplMessage> for Vec<u8> {
     type Error = Report;
     fn try_from(message: SplMessage) -> Result<Self> {
         let mut buf = Vec::new();
-        SPLStandardMessage::<SPLPacket>::from(message).encode(&mut buf)?;
+        SPLStandardMessage::from(message).encode(&mut buf)?;
 
         Ok(buf)
     }
 }
 
-impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
+impl From<SplMessage> for SPLStandardMessage {
     fn from(message: SplMessage) -> Self {
         let (ball_position, ball_age) = match &message.ball_position {
             Some(ball_position) => (
@@ -107,7 +89,7 @@ impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
             ),
             None => ([0.0; 2], -1.0),
         };
-        SPLStandardMessage::<SPLPacket>::new(
+        SPLStandardMessage::new(
             match message.player_number {
                 PlayerNumber::One => 1,
                 PlayerNumber::Two => 2,
@@ -126,7 +108,6 @@ impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
             ],
             ball_age,
             ball_position,
-            message.packet.into(),
         )
     }
 }
@@ -147,9 +128,8 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::default(),
             ball_position: None,
-            packet: None,
         };
-        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
+        let output_message: SPLStandardMessage = input_message.into();
 
         assert_relative_eq!(output_message.pose[0], 0.0);
         assert_relative_eq!(output_message.pose[1], 0.0);
@@ -167,9 +147,8 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::new(vector![0.0, 1.0], FRAC_PI_2),
             ball_position: None,
-            packet: None,
         };
-        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
+        let output_message: SPLStandardMessage = input_message.into();
 
         assert_relative_eq!(output_message.pose[0], 0.0, epsilon = 0.001);
         assert_relative_eq!(output_message.pose[1], 1000.0, epsilon = 0.001);
@@ -191,9 +170,8 @@ mod test {
             fallen: false,
             robot_to_field: Isometry2::new(vector![1.0, 1.0], FRAC_PI_4),
             ball_position: None,
-            packet: None,
         };
-        let output_message: SPLStandardMessage<SPLPacket> = input_message.into();
+        let output_message: SPLStandardMessage = input_message.into();
 
         assert_relative_eq!(
             input_message.robot_to_field * point![1.0 / SQRT_2, -1.0 / SQRT_2],

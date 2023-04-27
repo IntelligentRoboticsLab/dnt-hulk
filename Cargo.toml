@@ -47,7 +47,7 @@ bat = { version = "0.21.0", default-features = false, features = [
   "regex-onig",
   "paging",
 ] }
-bifrost = { git = "ssh://git@github.com/IntelligentRoboticsLab/bifrost.git" }
+bifrost = { git = "ssh://git@github.com/IntelligentRoboticsLab/bifrost.git", branch = "gore" }
 bincode = "1.3.3"
 bindgen = "0.61.0"
 build_script_helpers = { path = "crates/build_script_helpers" }
