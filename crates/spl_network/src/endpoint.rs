@@ -107,9 +107,7 @@ impl Endpoint {
                 }
             }
             OutgoingMessage::Spl(message) => {
-                // eprintln!("Going to send an SPL message");
                 let message: Vec<u8> = message.try_into().expect("Failed to serialize SPL message");
-                eprintln!("port: {:?}", self.ports.spl);
                 if let Err(error) = self
                     .spl_socket
                     .send_to(
