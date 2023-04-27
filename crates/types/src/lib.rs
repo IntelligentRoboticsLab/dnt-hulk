@@ -122,7 +122,7 @@ pub use robot_kinematics::RobotKinematics;
 pub use robot_masses::RobotMass;
 pub use roles::Role;
 pub use sensor_data::{
-    Foot, ForceSensitiveResistors, InertialMeasurementUnitData, SensorData, SonarSensors,
+    Battery, Foot, ForceSensitiveResistors, InertialMeasurementUnitData, SensorData, SonarSensors,
     TouchSensors,
 };
 pub use sole_pressure::SolePressure;
