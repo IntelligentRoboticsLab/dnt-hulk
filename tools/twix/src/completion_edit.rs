@@ -41,8 +41,8 @@ impl<'key> CompletionEdit<'key> {
     pub fn addresses(key: &'key mut String, numbers: Range<u8>) -> Self {
         let completion_items = chain!(
             once("localhost".to_string()),
-            numbers.clone().map(|number| format!("10.1.24.{number}")),
-            numbers.map(|number| format!("10.0.24.{number}"))
+            numbers.clone().map(|number| format!("10.1.8.{number}")),
+            numbers.map(|number| format!("10.0.8.{number}"))
         )
         .collect();
 
