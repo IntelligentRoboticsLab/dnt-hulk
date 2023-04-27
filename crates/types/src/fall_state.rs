@@ -3,7 +3,7 @@ use serialize_hierarchy::SerializeHierarchy;
 
 use super::{Facing, FallDirection};
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, SerializeHierarchy, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, SerializeHierarchy)]
 pub enum FallState {
     Upright,
     Falling { direction: FallDirection },

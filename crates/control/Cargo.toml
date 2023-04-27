@@ -13,7 +13,6 @@ itertools = { workspace = true }
 filtering = { workspace = true }
 framework = { workspace = true }
 kinematics = { workspace = true }
-kira = { workspace = true }
 log = { workspace = true }
 nalgebra = { workspace = true }
 ordered-float = { workspace = true }
