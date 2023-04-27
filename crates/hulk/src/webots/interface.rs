@@ -23,7 +23,7 @@ use types::{
     messages::{IncomingMessage, OutgoingMessage},
     samples::Samples,
     ycbcr422_image::YCbCr422Image,
-    CameraPosition, Joints, Leds, SensorData,
+    Battery, CameraPosition, Joints, Leds, SensorData,
 };
 use webots::Robot;
 
@@ -180,6 +180,12 @@ impl hardware::Interface for Interface {
             sonar_sensors,
             force_sensitive_resistors,
             touch_sensors,
+            battery: Battery {
+                charge: 1.0,
+                status: 0.0,
+                current: 0.0,
+                temperature: 0.0,
+            },
         })
     }
 
