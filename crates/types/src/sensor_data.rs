@@ -57,10 +57,19 @@ pub struct TouchSensors {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
+pub struct Battery {
+    pub charge: f32,
+    pub status: f32,
+    pub current: f32,
+    pub temperature: f32,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
 pub struct SensorData {
     pub positions: Joints,
     pub inertial_measurement_unit: InertialMeasurementUnitData,
     pub sonar_sensors: SonarSensors,
     pub force_sensitive_resistors: ForceSensitiveResistors,
     pub touch_sensors: TouchSensors,
+    pub battery: Battery,
 }

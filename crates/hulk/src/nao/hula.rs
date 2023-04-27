@@ -145,6 +145,17 @@ impl From<TouchSensors> for types::TouchSensors {
     }
 }
 
+impl From<Battery> for types::Battery {
+    fn from(from: Battery) -> Self {
+        types::Battery {
+            charge: from.charge,
+            status: from.status,
+            current: from.current,
+            temperature: from.temperature,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct SonarSensors {
