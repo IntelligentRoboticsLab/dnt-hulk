@@ -616,7 +616,7 @@ dependencies = [
 [[package]]
 name = "bifrost"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#87338204b7778cf23253045128c6bcaa52ea6212"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#af5ab635d2d8756b3474ea0c274fd07712187d3c"
 dependencies = [
  "async-trait",
  "bifrost_derive",
@@ -631,7 +631,7 @@ dependencies = [
 [[package]]
 name = "bifrost_derive"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#87338204b7778cf23253045128c6bcaa52ea6212"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#af5ab635d2d8756b3474ea0c274fd07712187d3c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4315,6 +4315,7 @@ dependencies = [
 name = "spl_network"
 version = "0.1.0"
 dependencies = [
+ "bifrost",
  "color-eyre",
  "context_attribute",
  "framework",

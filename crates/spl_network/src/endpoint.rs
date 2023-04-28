@@ -10,10 +10,12 @@ use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
 
+use bifrost::communication::{Communicator, UdpBroadcastCommunicator};
+
 pub struct Endpoint {
     ports: Ports,
     game_controller_state_socket: UdpSocket,
-    spl_socket: UdpSocket,
+    spl_communicator: UdpBroadcastCommunicator,
     last_game_controller_address: Mutex<Option<SocketAddr>>,
 }
 
@@ -25,6 +27,8 @@ pub enum Error {
     EnableBroadcast(io::Error),
     #[error("failed to read from socket")]
     ReadError(io::Error),
+    #[error(transparent)]
+    CommunicatorError(#[from] bifrost::communication::Error),
 }
 
 impl Endpoint {
@@ -35,16 +39,11 @@ impl Endpoint {
         ))
         .await
         .map_err(Error::CannotBind)?;
-        let spl_socket = UdpSocket::bind(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, parameters.spl))
-            .await
-            .map_err(Error::CannotBind)?;
-        spl_socket
-            .set_broadcast(true)
-            .map_err(Error::EnableBroadcast)?;
+        let spl_communicator = UdpBroadcastCommunicator::new(parameters.spl)?;
         Ok(Self {
             ports: parameters,
             game_controller_state_socket,
-            spl_socket,
+            spl_communicator,
             last_game_controller_address: Mutex::new(None),
         })
     }
@@ -67,8 +66,8 @@ impl Endpoint {
                         }
                     }
                 },
-                result = self.spl_socket.recv_from(&mut spl_buffer) => {
-                    result.map_err(Error::ReadError)?;
+                result = self.spl_communicator.receive(&mut spl_buffer) => {
+                    result?;
                     match SplMessage::try_from(&mut spl_buffer.as_slice()) {
                         Ok(parsed_message) => {
                             break Ok(IncomingMessage::Spl(parsed_message));
@@ -108,14 +107,7 @@ impl Endpoint {
             }
             OutgoingMessage::Spl(message) => {
                 let message: Vec<u8> = message.try_into().expect("Failed to serialize SPL message");
-                if let Err(error) = self
-                    .spl_socket
-                    .send_to(
-                        message.as_slice(),
-                        SocketAddr::new(Ipv4Addr::BROADCAST.into(), self.ports.spl),
-                    )
-                    .await
-                {
+                if let Err(error) = self.spl_communicator.send(message.as_slice()).await {
                     warn!("Failed to send UDP datagram via SPL socket: {error:?}")
                 }
             }
