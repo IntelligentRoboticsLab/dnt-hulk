@@ -294,7 +294,7 @@
     "forward_foot_support_offset": 0.1,
     "gyro_balance_factor": 0.05,
     "gyro_low_pass_factor": 0.6,
-    "leg_stiffness_stand": 0.6,
+    "leg_stiffness_stand": 0.8,
     "leg_stiffness_walk": 1.0,
     "max_forward_acceleration": 0.01,
     "max_level_adjustment_velocity": 0.02,

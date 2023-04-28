@@ -588,7 +588,7 @@ version = "0.1.0"
 dependencies = [
  "build_script_helpers",
  "chrono",
- "clap 4.2.4",
+ "clap 4.2.5",
  "code_generation",
  "color-eyre",
  "communication",
@@ -616,11 +616,12 @@ dependencies = [
 [[package]]
 name = "bifrost"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#af5ab635d2d8756b3474ea0c274fd07712187d3c"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#a5689fe1c27668d00b9dc7e1ff89d8c2d71ad27a"
 dependencies = [
  "async-trait",
  "bifrost_derive",
  "byteorder",
+ "nalgebra",
  "net2",
  "num",
  "thiserror",
@@ -631,7 +632,7 @@ dependencies = [
 [[package]]
 name = "bifrost_derive"
 version = "0.1.0"
-source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#af5ab635d2d8756b3474ea0c274fd07712187d3c"
+source = "git+ssh://git@github.com/IntelligentRoboticsLab/bifrost.git?branch=gore#a5689fe1c27668d00b9dc7e1ff89d8c2d71ad27a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -976,9 +977,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.2.4"
+version = "4.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "956ac1f6381d8d82ab4684768f89c0ea3afe66925ceadb4eeb3fc452ffc55d62"
+checksum = "8a1f23fa97e1d1641371b51f35535cb26959b8e27ab50d167a8b996b5bada819"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -987,9 +988,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.2.4"
+version = "4.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84080e799e54cff944f4b4a4b0e71630b0e0443b25b985175c7dddc1a859b749"
+checksum = "0fdc5d93c358224b4d6867ef1356d740de2303e9892edc06c5340daeccd96bab"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1004,7 +1005,7 @@ version = "4.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a19591b2ab0e3c04b588a0e04ddde7b9eaa423646d1b4a8092879216bf47473"
 dependencies = [
- "clap 4.2.4",
+ "clap 4.2.5",
 ]
 
 [[package]]
@@ -1908,7 +1909,7 @@ dependencies = [
 name = "fanta"
 version = "0.1.0"
 dependencies = [
- "clap 4.2.4",
+ "clap 4.2.5",
  "color-eyre",
  "communication",
  "ctrlc",
@@ -1980,12 +1981,12 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 
 [[package]]
 name = "flate2"
-version = "1.0.25"
+version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8a2db397cb1c8772f31494cb8917e48cd1e64f0fa7efac59fbd741a0a8ce841"
+checksum = "3b9429470923de8e8cbd4d2dc513535400b4b3fef0319fb5c4e1f520a7bef743"
 dependencies = [
  "crc32fast",
- "miniz_oxide 0.6.2",
+ "miniz_oxide 0.7.1",
 ]
 
 [[package]]
@@ -2793,9 +2794,9 @@ checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.3.4"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36eb31c1778188ae1e64398743890d0877fef36d11521ac60406b42016e8c2cf"
+checksum = "b64f40e5e03e0d54f03845c8197d0291253cdbedfb1cb46b13c2c117554a9f4c"
 
 [[package]]
 name = "lock_api"
@@ -3385,14 +3386,11 @@ dependencies = [
 
 [[package]]
 name = "orbclient"
-version = "0.3.44"
+version = "0.3.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e9829e16c5e112e94efb5e2ad1fe17f8c1c99bb0fcdc8c65c44e935d904767d"
+checksum = "221d488cd70617f1bd599ed8ceb659df2147d9393717954d82a0f5e8032a6ab1"
 dependencies = [
- "cfg-if 1.0.0",
- "redox_syscall 0.2.16",
- "wasm-bindgen",
- "web-sys",
+ "redox_syscall 0.3.5",
 ]
 
 [[package]]
@@ -3485,7 +3483,7 @@ version = "2.4.1"
 dependencies = [
  "aliveness",
  "bat",
- "clap 4.2.4",
+ "clap 4.2.5",
  "clap_complete",
  "color-eyre",
  "colored 2.0.0",

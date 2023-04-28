@@ -253,7 +253,6 @@ impl RoleAssignment {
                                 ),
                             }))?;
                     } else {
-                        eprintln!("rolo assignment, send spl");
                         context
                             .hardware
                             .write_to_network(OutgoingMessage::Spl(SplMessage {
@@ -266,16 +265,9 @@ impl RoleAssignment {
                                 ),
                             }))?;
                     }
-                } else {
-                    eprintln!("no messages left to send");
                 }
-            } else {
-                eprintln!("there is no game controller state");
             }
-        } else {
-            eprintln!("we don't even wanna send spl messages");
         }
-
         if let Some(forced_role) = context.forced_role {
             self.role = *forced_role;
         } else {
