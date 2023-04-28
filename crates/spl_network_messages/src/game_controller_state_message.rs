@@ -46,10 +46,6 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
     type Error = Report;
 
     fn try_from(message: RoboCupGameControlData) -> Result<Self> {
-        eprintln!(
-            "Got team numbers: {:?} and {:?}",
-            message.teams[0], message.teams[1]
-        );
         let (hulks_team_index, opponent_team_index) =
             match (message.teams[0].team_number, message.teams[1].team_number) {
                 (DNT_TEAM_NUMBER, _) => (0, 1),
