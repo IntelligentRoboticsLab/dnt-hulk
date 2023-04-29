@@ -10,8 +10,7 @@ spawn_robot(2)
 spawn_robot(3)
 spawn_robot(4)
 spawn_robot(5)
-spawn_robot(6)
-spawn_robot(7)
+
 
 local game_end_time = -1.0
 
@@ -65,6 +64,15 @@ function on_cycle()
             }
         };
         set_robot_pose(1, { -3.2, 3 }, -1.5707963267948966);
+    end
+
+    if state.cycle_count == 2400 then
+        (1);
+        -- state.ball = {
+        --     position = { 6.5, 3.5 },
+        --     velocity = { 0.0, 0.0 },
+        -- }
+        -- set_robot_pose(2, { -0.0, 0.0 }, -1.5707963267948966);    
     end
 
     if state.cycle_count == 4000 then
