@@ -183,7 +183,8 @@ impl LedStatus {
         match primary_state {
             PrimaryState::Unstiff => {
                 let rainbow_eye = Self::get_rainbow_eye(cycle_start_time);
-                (rainbow_eye, rainbow_eye)
+                let dnt_eye = Self::get_dnt_eye_static();
+                (dnt_eye, rainbow_eye)
             }
             _ => {
                 let ball_background_color =
@@ -228,6 +229,18 @@ impl LedStatus {
         }
     }
 
+    fn get_dnt_eye_static() -> Eye {
+        Eye {
+            color_at_0 : Rgb::RED,
+            color_at_45 : Rgb::RED,
+            color_at_90 : Rgb::WHITE,
+            color_at_135 : Rgb::BLUE,
+            color_at_180 : Rgb::BLUE,
+            color_at_225 : Rgb::BLUE,
+            color_at_270 : Rgb::WHITE,
+            color_at_315 : Rgb::RED,
+        }
+    }
     fn get_rainbow_eye(cycle_start_time: SystemTime) -> Eye {
         let seconds = cycle_start_time
             .duration_since(UNIX_EPOCH)
