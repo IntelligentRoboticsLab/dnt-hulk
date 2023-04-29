@@ -337,9 +337,9 @@ impl LedStatus {
         // }
         let intensity =  (255.0 * intensity) as u8;
         match location {
-            0 | 7 => Rgb::new(intensity, 0, 0),
-            1 | 2 | 5 | 6 => Rgb::new(intensity, intensity, intensity),
-            3 | 4 => Rgb::new(0, 0, intensity),
+            0 | 7 | 1=> Rgb::new(intensity, 0, 0),
+            2 | 6 => Rgb::new(intensity, intensity, intensity),
+            3 | 4 | 5=> Rgb::new(0, 0, intensity),
             _ => unreachable!(),
         }
     }   
