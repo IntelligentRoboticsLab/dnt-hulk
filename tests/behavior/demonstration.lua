@@ -5,6 +5,7 @@ function spawn_robot(number)
   table.insert(state.robots, create_robot(number))
 end
 
+-- test with less robots
 spawn_robot(1)
 spawn_robot(2)
 -- spawn_robot(3)

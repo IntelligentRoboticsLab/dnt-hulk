@@ -65,9 +65,9 @@ function on_cycle()
         };
         set_robot_pose(1, { -3.2, 3 }, -1.5707963267948966);
     end
-
+    -- test with unpenalize of keeper
     if state.cycle_count == 2400 then
-        (1);
+        unpenalize(1);
         -- state.ball = {
         --     position = { 6.5, 3.5 },
         --     velocity = { 0.0, 0.0 },
