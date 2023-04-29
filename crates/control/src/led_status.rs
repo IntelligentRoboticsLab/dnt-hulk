@@ -3,7 +3,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use color_eyre::Result;
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
-use spl_network_messages::PlayerNumber;
 use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb, SensorData};
 
 pub struct LedStatus {
@@ -19,7 +18,6 @@ pub struct CreationContext {}
 #[context]
 pub struct CycleContext {
     pub sensor_data: Input<SensorData, "sensor_data">,
-    pub player_number: Parameter<PlayerNumber, "player_number">,
     pub primary_state: Input<PrimaryState, "primary_state">,
     pub cycle_time: Input<CycleTime, "cycle_time">,
     pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
@@ -151,7 +149,6 @@ impl LedStatus {
             last_ball_data_top_too_old,
             last_ball_data_bottom_too_old,
             context.sensor_data,
-            context.player_number,
         );
 
         let ears = if context.filtered_whistle.is_detected {
@@ -165,16 +162,8 @@ impl LedStatus {
             left_ear: ears,
             right_ear: ears,
             chest,
-            left_foot: if *context.player_number == PlayerNumber::One {
-                Rgb::BLUE
-            } else {
-                Rgb::DNT_ORANGE
-            },
-            right_foot: if *context.player_number == PlayerNumber::One {
-                Rgb::BLUE
-            } else {
-                Rgb::DNT_ORANGE
-            },
+            left_foot: Rgb::DNT_ORANGE,
+            right_foot: Rgb::DNT_ORANGE,
             left_eye,
             right_eye,
         };
@@ -190,7 +179,6 @@ impl LedStatus {
         last_ball_data_top_too_old: bool,
         last_ball_data_bottom_too_old: bool,
         sensor_data: &SensorData,
-        player_number: &PlayerNumber,
     ) -> (Eye, Eye) {
         match primary_state {
             PrimaryState::Unstiff => {
@@ -234,14 +222,7 @@ impl LedStatus {
                         color_at_315: ball_color_top
                             .unwrap_or_else(|| ball_background_color.unwrap_or(Rgb::BLACK)),
                     },
-                    get_filled_eye(
-                        battery_charge,
-                        if *player_number == PlayerNumber::One {
-                            Rgb::BLUE
-                        } else {
-                            Rgb::DNT_ORANGE
-                        },
-                    ),
+                    get_filled_eye(battery_charge, Rgb::DNT_ORANGE),
                 )
             }
         }
