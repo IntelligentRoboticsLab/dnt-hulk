@@ -280,55 +280,69 @@ impl LedStatus {
             .as_secs_f64();
         let fraction = 1.0 / 8.0;
         Eye {
-            color_at_0: Self::interval_ratio_to_rainbow_color({
+            color_at_0: Self::intensity_to_dnt_color(0, {
                 let offsetted_seconds = seconds - (0.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_45: Self::interval_ratio_to_rainbow_color({
+            color_at_45: Self::intensity_to_dnt_color(1, {
                 let offsetted_seconds = seconds - (1.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_90: Self::interval_ratio_to_rainbow_color({
+            color_at_90: Self::intensity_to_dnt_color(2, {
                 let offsetted_seconds = seconds - (2.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_135: Self::interval_ratio_to_rainbow_color({
+            color_at_135: Self::intensity_to_dnt_color(3, {
                 let offsetted_seconds = seconds - (3.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_180: Self::interval_ratio_to_rainbow_color({
+            color_at_180: Self::intensity_to_dnt_color(4, {
                 let offsetted_seconds = seconds - (4.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_225: Self::interval_ratio_to_rainbow_color({
+            color_at_225: Self::intensity_to_dnt_color(5, {
                 let offsetted_seconds = seconds - (5.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_270: Self::interval_ratio_to_rainbow_color({
+            color_at_270: Self::intensity_to_dnt_color(6, {
                 let offsetted_seconds = seconds - (6.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_315: Self::interval_ratio_to_rainbow_color({
+            color_at_315: Self::intensity_to_dnt_color(7, {
                 let offsetted_seconds = seconds - (7.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
         }
     }
 
-    /// interval_ratio in [0.0, 1.0)
-    pub fn interval_ratio_to_dnt_color(interval_ratio: f32) -> Rgb {
+    // /// interval_ratio in [0.0, 1.0)
+    // pub fn interval_ratio_to_dnt_color(interval_ratio: f32) -> Rgb {
+    //     // if interval_ratio > 1.0 || interval_ratio < 0.0 {
+
+    //     // }
+    //     let interval_ratio_over_3 = interval_ratio * 6.0;
+    //     // let fraction = ((interval_ratio_over_3 - interval_ratio_over_3.floor()) * 255.0) as u8;
+    //     match interval_ratio_over_3 as u8 {
+    //         0 | 1 => Rgb::RED,
+    //         2 | 5 => Rgb::WHITE,
+    //         3 | 4 => Rgb::BLUE,
+    //         _ => unreachable!(),
+    //     }
+    // }
+
+    /// intensity in [0.0, 1.0)
+    pub fn intensity_to_dnt_color(location:i32, intensity: f32) -> Rgb {
         // if interval_ratio > 1.0 || interval_ratio < 0.0 {
 
         // }
-        let interval_ratio_over_3 = interval_ratio * 6.0;
-        // let fraction = ((interval_ratio_over_3 - interval_ratio_over_3.floor()) * 255.0) as u8;
-        match interval_ratio_over_3 as u8 {
-            0 | 1 => Rgb::RED,
-            2 | 5 => Rgb::WHITE,
-            3 | 4 => Rgb::BLUE,
+        let intensity =  255 * intensity as u8;
+        match location {
+            0 | 7 => Rgb::new(intensity, 0, 0),
+            1 | 2 | 5 | 6 => Rgb::new(intensity, intensity, intensity),
+            3 | 4 => Rgb::new(0, 0, intensity),
             _ => unreachable!(),
         }
-    }
+    }   
 
     /// interval_ratio in [0.0, 1.0)
     pub fn interval_ratio_to_rainbow_color(interval_ratio: f32) -> Rgb {
