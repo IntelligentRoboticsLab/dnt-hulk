@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use color_eyre::Result;
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
+use spl_network_messages::DNT_TEAM_NUMBER;
 use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb, SensorData};
 
 pub struct LedStatus {
@@ -182,8 +183,9 @@ impl LedStatus {
     ) -> (Eye, Eye) {
         match primary_state {
             PrimaryState::Unstiff => {
-                let rainbow_eye = Self::get_rainbow_eye(cycle_start_time);
-                (rainbow_eye, rainbow_eye)
+                let dnt_eye = Self::get_dnt_eye_dynamic(cycle_start_time);
+                let dnt_eye_static = Self::get_dnt_eye_static();
+                (dnt_eye, dnt_eye_static)
             }
             _ => {
                 let ball_background_color =
@@ -228,6 +230,49 @@ impl LedStatus {
         }
     }
 
+    //NOTE broken
+    fn get_dnt_eye_dynamic(cycle_start_time: SystemTime) -> Eye {
+        let seconds = cycle_start_time
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs_f64();
+        let fraction = 1.0 / 8.0;
+        Eye {
+            color_at_0: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (0.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_45: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (1.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_90: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (2.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_135: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (3.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_180: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (4.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_225: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (5.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_270: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (6.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+            color_at_315: Self::interval_ratio_to_dnt_color({
+                let offsetted_seconds = seconds - (7.0 * fraction);
+                (offsetted_seconds - offsetted_seconds.floor()) as f32
+            }),
+        }
+    }
+
     fn get_rainbow_eye(cycle_start_time: SystemTime) -> Eye {
         let seconds = cycle_start_time
             .duration_since(UNIX_EPOCH)
@@ -267,6 +312,21 @@ impl LedStatus {
                 let offsetted_seconds = seconds - (7.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
+        }
+    }
+
+    /// interval_ratio in [0.0, 1.0)
+    pub fn interval_ratio_to_dnt_color(interval_ratio: f32) -> Rgb {
+        // if interval_ratio > 1.0 || interval_ratio < 0.0 {
+
+        // }
+        let interval_ratio_over_3 = interval_ratio * 6.0;
+        // let fraction = ((interval_ratio_over_3 - interval_ratio_over_3.floor()) * 255.0) as u8;
+        match interval_ratio_over_3 as u8 {
+            0 | 1 => Rgb::RED,
+            2 | 5 => Rgb::WHITE,
+            3 | 4 => Rgb::BLUE,
+            _ => unreachable!(),
         }
     }
 
