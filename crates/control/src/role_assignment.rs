@@ -669,6 +669,7 @@ fn pick_role_with_penalties(
     };
 
     role_assignment[striker_player_number] = Some(Role::Striker);
+    role_assignment[PlayerNumber::One] = Some(Role::Keeper);
     let mut unassigned_robots = 6;
 
     unassigned_robots -= penalties
@@ -676,9 +677,9 @@ fn pick_role_with_penalties(
         .filter(|(_player, &penalty)| penalty.is_some())
         .count();
 
-    if unassigned_robots > 0 {
+    if unassigned_robots > 0 && penalties[PlayerNumber::One].is_some() {
         unassigned_robots =
-            assign_keeper_or_replacement_keeper(unassigned_robots, penalties, &mut role_assignment);
+            assign_replacement_keeper(unassigned_robots, penalties, &mut role_assignment);
     }
 
     for &optional_role in optional_roles.iter().take(unassigned_robots) {
@@ -700,24 +701,29 @@ fn pick_role_with_penalties(
     role_assignment[own_player_number].unwrap_or_default()
 }
 
+// fn needs_assignment(
+//     player_number: PlayerNumber,
+//     penalties: &Players<Penalty>,
+//     role_assignment: &Players<Option<Role>>,
+// ) -> bool {
+//     role_assignment[player_number].is_none() && penalties[player_number].is_none()
+// }
+
 fn needs_assignment(
     player_number: PlayerNumber,
     penalties: &Players<Penalty>,
     role_assignment: &Players<Option<Role>>,
 ) -> bool {
-    role_assignment[player_number].is_none() && penalties[player_number].is_none()
+    role_assignment[player_number].is_none()
+        && penalties[player_number].is_none()
+        && penalties[PlayerNumber::One].is_none()
 }
 
-fn assign_keeper_or_replacement_keeper(
+fn assign_replacement_keeper(
     unassigned_robots: usize,
     penalties: &Players<Penalty>,
     role_assignment: &mut Players<Option<Role>>,
 ) -> usize {
-    if needs_assignment(PlayerNumber::One, penalties, role_assignment) {
-        role_assignment[PlayerNumber::One] = Some(Role::Keeper);
-        return unassigned_robots - 1;
-    }
-
     if needs_assignment(PlayerNumber::Two, penalties, role_assignment) {
         role_assignment[PlayerNumber::Two] = Some(Role::ReplacementKeeper);
         return unassigned_robots - 1;
