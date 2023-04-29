@@ -335,7 +335,7 @@ impl LedStatus {
         // if interval_ratio > 1.0 || interval_ratio < 0.0 {
 
         // }
-        let intensity =  255 * intensity as u8;
+        let intensity =  (255.0 * intensity) as u8;
         match location {
             0 | 7 => Rgb::new(intensity, 0, 0),
             1 | 2 | 5 | 6 => Rgb::new(intensity, intensity, intensity),
