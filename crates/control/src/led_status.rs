@@ -238,35 +238,35 @@ impl LedStatus {
             .as_secs_f64();
         let fraction = 1.0 / 8.0;
         Eye {
-            color_at_0: Self::interval_ratio_to_dnt_color({
+            color_at_0: Self::intensity_to_dnt_color(0, {
                 let offsetted_seconds = seconds - (0.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_45: Self::interval_ratio_to_dnt_color({
+            color_at_45: Self::intensity_to_dnt_color(1, {
                 let offsetted_seconds = seconds - (1.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_90: Self::interval_ratio_to_dnt_color({
+            color_at_90: Self::intensity_to_dnt_color(2, {
                 let offsetted_seconds = seconds - (2.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_135: Self::interval_ratio_to_dnt_color({
+            color_at_135: Self::intensity_to_dnt_color(3, {
                 let offsetted_seconds = seconds - (3.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_180: Self::interval_ratio_to_dnt_color({
+            color_at_180: Self::intensity_to_dnt_color(4, {
                 let offsetted_seconds = seconds - (4.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_225: Self::interval_ratio_to_dnt_color({
+            color_at_225: Self::intensity_to_dnt_color(5, {
                 let offsetted_seconds = seconds - (5.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_270: Self::interval_ratio_to_dnt_color({
+            color_at_270: Self::intensity_to_dnt_color(6, {
                 let offsetted_seconds = seconds - (6.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
-            color_at_315: Self::interval_ratio_to_dnt_color({
+            color_at_315: Self::intensity_to_dnt_color(7, {
                 let offsetted_seconds = seconds - (7.0 * fraction);
                 (offsetted_seconds - offsetted_seconds.floor()) as f32
             }),
