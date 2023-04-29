@@ -184,7 +184,7 @@ impl LedStatus {
         match primary_state {
             PrimaryState::Unstiff => {
                 let dnt_eye = Self::get_dnt_eye_dynamic(cycle_start_time);
-                let dnt_eye_static = Self::get_dnt_eye_static();
+                let dnt_eye_static = Self::get_dnt_eye_dynamic(cycle_start_time);
                 (dnt_eye, dnt_eye_static)
             }
             _ => {
