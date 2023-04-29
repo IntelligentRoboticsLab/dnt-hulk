@@ -5,7 +5,8 @@ use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
 use nalgebra::{Isometry2, Point2};
 use spl_network_messages::{
-    GameControllerReturnMessage, GamePhase, Penalty, PlayerNumber, SplMessage, Team,
+    BallPositionMessage, GameControllerReturnMessage, GamePhase, Penalty, PlayerNumber, SplMessage,
+    SplMessage2, Team,
 };
 use types::{
     configuration::SplNetwork,
@@ -203,19 +204,24 @@ impl RoleAssignment {
                 context.optional_roles,
             );
         } else {
-            for spl_message in spl_messages {
+            for message in spl_messages.filter_map(|x| {
+                if let SplMessage2::BallPosition(message) = x {
+                    return Some(message);
+                }
+                None
+            }) {
                 self.last_received_spl_striker_message = Some(cycle_start_time);
                 let sender_position =
-                    (robot_to_field.inverse() * spl_message.robot_to_field) * Point2::origin();
-                if spl_message.player_number != *context.player_number {
+                    (robot_to_field.inverse() * robot_to_field) * Point2::origin();
+                if message.player_number != *context.player_number {
                     network_robot_obstacles.push(sender_position);
                 }
                 (role, send_spl_striker_message, team_ball) = process_role_state_machine(
                     role,
-                    robot_to_field,
+                    message.robot_to_field,
                     context.ball_position,
                     primary_state,
-                    Some(spl_message),
+                    Some(message),
                     send_spl_striker_message,
                     team_ball,
                     cycle_start_time,
@@ -240,9 +246,8 @@ impl RoleAssignment {
                         .remaining_amount_of_messages_to_stop_sending
                 {
                     if context.ball_position.is_none() && team_ball.is_some() {
-                        context
-                            .hardware
-                            .write_to_network(OutgoingMessage::Spl(SplMessage {
+                        context.hardware.write_to_network(OutgoingMessage::Spl(
+                            SplMessage2::BallPosition(BallPositionMessage {
                                 player_number: *context.player_number,
                                 fallen: matches!(context.fall_state, FallState::Fallen { .. }),
                                 robot_to_field,
@@ -251,11 +256,11 @@ impl RoleAssignment {
                                     robot_to_field,
                                     cycle_start_time,
                                 ),
-                            }))?;
+                            }),
+                        ))?;
                     } else {
-                        context
-                            .hardware
-                            .write_to_network(OutgoingMessage::Spl(SplMessage {
+                        context.hardware.write_to_network(OutgoingMessage::Spl(
+                            SplMessage2::BallPosition(BallPositionMessage {
                                 player_number: *context.player_number,
                                 fallen: matches!(context.fall_state, FallState::Fallen { .. }),
                                 robot_to_field,
@@ -263,7 +268,8 @@ impl RoleAssignment {
                                     context.ball_position,
                                     cycle_start_time,
                                 ),
-                            }))?;
+                            }),
+                        ))?;
                     }
                 }
             }
@@ -289,7 +295,7 @@ fn process_role_state_machine(
     current_pose: Isometry2<f32>,
     detected_own_ball: Option<&BallPosition>,
     primary_state: PrimaryState,
-    incoming_message: Option<&SplMessage>,
+    incoming_message: Option<&BallPositionMessage>,
     send_spl_striker_message: bool,
     team_ball: Option<BallPosition>,
     cycle_start_time: SystemTime,
@@ -347,7 +353,7 @@ fn process_role_state_machine(
         },
 
         // Striker maybe lost Ball but got a message (edge-case)
-        (Role::Striker, None, Some(spl_message)) => match &spl_message.ball_position {
+        (Role::Striker, None, Some(spl_message)) => match spl_message.ball_position {
             None => {
                 // another Striker became Loser
                 match team_ball {
@@ -368,7 +374,7 @@ fn process_role_state_machine(
             Some(spl_message_ball_position) => decide_if_claiming_striker_or_other_role(
                 current_pose,
                 spl_message,
-                spl_message_ball_position,
+                &spl_message_ball_position,
                 player_number,
                 cycle_start_time,
                 game_controller_state,
@@ -544,7 +550,7 @@ fn process_role_state_machine(
 
 fn decide_if_claiming_striker_or_other_role(
     current_pose: Isometry2<f32>,
-    spl_message: &SplMessage,
+    spl_message: &BallPositionMessage,
     spl_message_ball_position: &spl_network_messages::BallPosition,
     player_number: PlayerNumber,
     cycle_start_time: SystemTime,
@@ -600,7 +606,7 @@ fn team_ball_to_network_ball_position(
 
 fn team_ball_from_spl_message(
     cycle_start_time: SystemTime,
-    spl_message: &SplMessage,
+    spl_message: &BallPositionMessage,
 ) -> Option<BallPosition> {
     spl_message
         .ball_position

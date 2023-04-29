@@ -4,7 +4,7 @@ use std::{
 };
 
 use color_eyre::{eyre::bail, Report, Result};
-use nalgebra::{point, vector, Isometry2, Translation2};
+use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
@@ -15,25 +15,33 @@ use bifrost::communication::SPLStandardMessage;
 use bifrost::serialization::{Decode, Encode};
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
-pub struct SplMessage2 {
+pub struct SplMessage {
     pub player_number: PlayerNumber,
     pub fallen: bool,
     pub robot_to_field: Isometry2<f32>,
     pub ball_position: Option<BallPosition>,
 }
 
-#[derive(Encode, Decode)]
-pub enum SplMessage {
-    BallPosition {
-        player_number: PlayerNumber,
-        fallen: bool,
-        robot_to_field: Isometry2<f32>,
-        ball_position: Option<BallPosition>,
-    },
-    WhisleDetected {
-        player_number: PlayerNumber,
-        hypothesis: f32,
-    },
+#[derive(Encode, Decode, Clone, Copy, Debug, Serialize, Deserialize, SerializeHierarchy, Default)]
+pub struct BallPositionMessage {
+    pub player_number: PlayerNumber,
+    pub fallen: bool,
+    pub robot_to_field: Isometry2<f32>,
+    pub ball_position: Option<BallPosition>,
+}
+
+#[derive(Encode, Decode, Clone, Copy, Debug, Serialize, Deserialize, SerializeHierarchy, Default)]
+pub struct WhisleDetectedMessage {
+    pub player_number: PlayerNumber,
+    pub hypothesis: f32,
+}
+
+#[derive(Encode, Decode, Clone, Copy, Debug, Deserialize, Serialize, SerializeHierarchy, Default)]
+pub enum SplMessage2 {
+    #[default]
+    Empty,
+    BallPosition(BallPositionMessage),
+    WhisleDetected(WhisleDetectedMessage)
 }
 
 impl TryFrom<&mut &[u8]> for SplMessage {

@@ -5,12 +5,15 @@ use std::{
 
 use log::warn;
 use serde::Deserialize;
-use spl_network_messages::SplMessage;
+use spl_network_messages::{SplMessage, SplMessage2};
 use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
 
-use bifrost::communication::{Communicator, UdpBroadcastCommunicator};
+use bifrost::{
+    communication::{Communicator, UdpBroadcastCommunicator},
+    serialization::Encode,
+};
 
 pub struct Endpoint {
     ports: Ports,
@@ -51,7 +54,6 @@ impl Endpoint {
     pub async fn read(&self) -> Result<IncomingMessage, Error> {
         loop {
             let mut game_controller_state_buffer = [0; 1024];
-            let mut spl_buffer = [0; 1024];
             select! {
                 result = self.game_controller_state_socket.recv_from(&mut game_controller_state_buffer) => {
                     let (received_bytes, address) = result.map_err(Error::ReadError)?;
@@ -66,9 +68,8 @@ impl Endpoint {
                         }
                     }
                 },
-                result = self.spl_communicator.receive(&mut spl_buffer) => {
-                    result?;
-                    match SplMessage::try_from(&mut spl_buffer.as_slice()) {
+                result = self.spl_communicator.receive_decodable::<SplMessage2>() => {
+                    match result {
                         Ok(parsed_message) => {
                             break Ok(IncomingMessage::Spl(parsed_message));
                         }
@@ -106,9 +107,11 @@ impl Endpoint {
                 }
             }
             OutgoingMessage::Spl(message) => {
-                let message: Vec<u8> = message.try_into().expect("Failed to serialize SPL message");
-                if let Err(error) = self.spl_communicator.send(message.as_slice()).await {
-                    warn!("Failed to send UDP datagram via SPL socket: {error:?}")
+                let mut buf: Vec<u8> = Vec::with_capacity(message.encode_len());
+                if let Ok(()) = message.encode(&mut buf) {
+                    if let Err(error) = self.spl_communicator.send(buf.as_slice()).await {
+                        warn!("Failed to send UDP datagram via SPL socket: {error:?}")
+                    }
                 }
             }
         };

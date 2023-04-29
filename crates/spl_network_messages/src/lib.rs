@@ -11,6 +11,7 @@ use std::{
 
 use nalgebra::Point2;
 use serde::{Deserialize, Serialize};
+use bifrost::serialization::{Decode, Encode};
 
 pub use game_controller_return_message::GameControllerReturnMessage;
 pub use game_controller_state_conversion::{
@@ -18,9 +19,11 @@ pub use game_controller_state_conversion::{
 };
 pub use game_controller_state_message::GameControllerStateMessage;
 use serialize_hierarchy::SerializeHierarchy;
-pub use spl_message::SplMessage;
+pub use spl_message::{SplMessage, BallPositionMessage, WhisleDetectedMessage, SplMessage2};
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
+#[derive(
+    Decode, Encode, Clone, Copy, Debug, Default, Deserialize, Serialize, SerializeHierarchy,
+)]
 pub struct BallPosition {
     pub relative_position: Point2<f32>,
     pub age: Duration,
@@ -28,7 +31,6 @@ pub struct BallPosition {
 
 pub const DNT_TEAM_NUMBER: u8 = 8;
 
-use bifrost::serialization::{Decode, Encode};
 
 #[derive(
     Clone,
