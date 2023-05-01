@@ -3,7 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use color_eyre::Result;
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
-use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb, SensorData};
+use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb};
 
 pub struct LedStatus {
     blink_state: bool,
@@ -17,7 +17,6 @@ pub struct CreationContext {}
 
 #[context]
 pub struct CycleContext {
-    pub sensor_data: Input<SensorData, "sensor_data">,
     pub primary_state: Input<PrimaryState, "primary_state">,
     pub cycle_time: Input<CycleTime, "cycle_time">,
     pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
@@ -148,7 +147,6 @@ impl LedStatus {
             at_least_one_ball_data_bottom,
             last_ball_data_top_too_old,
             last_ball_data_bottom_too_old,
-            context.sensor_data,
         );
 
         let ears = if context.filtered_whistle.is_detected {
@@ -162,8 +160,8 @@ impl LedStatus {
             left_ear: ears,
             right_ear: ears,
             chest,
-            left_foot: Rgb::DNT_ORANGE,
-            right_foot: Rgb::DNT_ORANGE,
+            left_foot: Rgb::GREEN,
+            right_foot: Rgb::GREEN,
             left_eye,
             right_eye,
         };
@@ -178,7 +176,6 @@ impl LedStatus {
         at_least_one_ball_data_bottom: bool,
         last_ball_data_top_too_old: bool,
         last_ball_data_bottom_too_old: bool,
-        sensor_data: &SensorData,
     ) -> (Eye, Eye) {
         match primary_state {
             PrimaryState::Unstiff => {
@@ -202,9 +199,6 @@ impl LedStatus {
                 } else {
                     None
                 };
-
-                let battery_charge = sensor_data.battery.charge;
-
                 (
                     Eye {
                         color_at_0: ball_color_top
@@ -222,7 +216,7 @@ impl LedStatus {
                         color_at_315: ball_color_top
                             .unwrap_or_else(|| ball_background_color.unwrap_or(Rgb::BLACK)),
                     },
-                    get_filled_eye(battery_charge, Rgb::DNT_ORANGE),
+                    Eye::default(),
                 )
             }
         }
@@ -285,33 +279,4 @@ impl LedStatus {
             _ => unreachable!(),
         }
     }
-}
-
-fn get_filled_eye(battery_charge: f32, color: Rgb) -> Eye {
-    let mut eye = Eye::default();
-
-    eye.color_at_0 = color;
-    if battery_charge >= 0.125 {
-        eye.color_at_45 = color;
-    }
-    if battery_charge >= 0.250 {
-        eye.color_at_90 = color;
-    }
-    if battery_charge >= 0.375 {
-        eye.color_at_135 = color;
-    }
-    if battery_charge >= 0.5 {
-        eye.color_at_180 = color;
-    }
-    if battery_charge >= 0.625 {
-        eye.color_at_225 = color;
-    }
-    if battery_charge >= 0.750 {
-        eye.color_at_270 = color;
-    }
-    if battery_charge >= 0.875 {
-        eye.color_at_315 = color;
-    }
-
-    eye
 }
