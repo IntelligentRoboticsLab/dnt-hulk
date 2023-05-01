@@ -8,6 +8,8 @@ use color_eyre::{
     eyre::{bail, eyre, WrapErr},
     Result,
 };
+use communication::client::Communication;
+use serde_json::Value;
 use tokio::process::Command;
 
 pub struct Nao {
@@ -211,6 +213,13 @@ impl Nao {
         if !status.success() {
             bail!("rsync command exited with {status}");
         }
+
+        Ok(())
+    }
+
+    pub async fn update_parameter_value(&self, path: &str, value: Value) -> Result<()> {
+        let communication = Communication::new(Some(self.host.to_string()), true);
+        communication.update_parameter_value(path, value).await;
 
         Ok(())
     }
