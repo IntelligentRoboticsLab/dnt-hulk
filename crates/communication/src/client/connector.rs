@@ -79,6 +79,8 @@ pub async fn connector(
     let mut subscribers = Vec::new();
 
     while let Some(message) = receiver.recv().await {
+        println!("Status1: {:?}", status);
+
         status = match status {
             ConnectionState::Disconnected {
                 connect: false,
@@ -330,6 +332,8 @@ pub async fn connector(
                 Message::ReconnectTimerElapsed => ConnectionState::Connected { address },
             },
         };
+        println!("Status2: {:?}", status);
+
         let status = match &status {
             ConnectionState::Disconnected { address, connect } => ConnectionStatus::Disconnected {
                 address: address.clone(),
@@ -345,6 +349,8 @@ pub async fn connector(
                 address: address.to_string(),
             },
         };
+        println!("Status3: {:?}", status);
+
         subscribers.retain(|sender| sender.try_send(status.clone()).is_ok())
     }
 }

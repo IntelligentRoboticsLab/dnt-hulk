@@ -10,6 +10,8 @@ use futures_util::{stream::FuturesUnordered, StreamExt};
 use nao::{Nao, SystemctlAction};
 use repository::{HardwareIds, Repository};
 
+use serde_json::json;
+
 use crate::{
     cargo::{cargo, Arguments as CargoArguments, Command},
     parsers::{NaoAddress, NaoNumber},
@@ -86,13 +88,16 @@ async fn upload_with_progress(
         .wrap_err_with(|| format!("failed to set communication enablement for {head_id}"))?;
 
     progress.set_message("Sitting down the robot...");
-    nao.update_parameter_value("behavior.injected_motion_command", "ArmsUpSquat".into())
-        .await
-        .wrap_err_with(|| format!("failed to sit {head_id} down"))?;
+    nao.update_parameter_value(
+        "behavior.injected_motion_command",
+        json!({"SitDown": {"head": "Unstiff"}}),
+    )
+    .await
+    .wrap_err_with(|| format!("failed to sit {nao_address} down"))?;
 
     // To give the robot time to sit down, use a timeout
     let mut sleep_command = std::process::Command::new("sleep")
-        .arg("5")
+        .arg("2")
         .spawn()
         .unwrap();
     let _result = sleep_command.wait().unwrap();

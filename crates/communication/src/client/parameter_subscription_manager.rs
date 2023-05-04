@@ -169,6 +169,8 @@ pub async fn parameter_subscription_manager(
                 }
             }
             Message::UpdateParameterValue { path, value } => {
+                println!("Reached here {:?}", requester);
+
                 if let Some(some_requester) = requester {
                     match update_parameter_value(
                         path,
@@ -179,8 +181,13 @@ pub async fn parameter_subscription_manager(
                     )
                     .await
                     {
-                        Ok(_) => requester = Some(some_requester),
+                        Ok(_) => {
+                            println!("Reached here after await");
+                            requester = Some(some_requester)
+                        }
                         Err(error) => {
+                            println!("Errrr");
+
                             error!("{error}");
                             requester = None
                         }
@@ -247,6 +254,8 @@ async fn update_parameter_value(
             data: value,
         }))
         .await?;
+    println!("Before spawn");
+
     spawn(async move {
         let response = response_receiver.await.unwrap();
         match response {

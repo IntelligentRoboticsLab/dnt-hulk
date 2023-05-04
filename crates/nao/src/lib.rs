@@ -217,8 +217,23 @@ impl Nao {
         Ok(())
     }
 
+    fn ip_to_socket_address(&self, ip_address: &str) -> String {
+        format!("ws://{ip_address}:1337")
+    }
+
     pub async fn update_parameter_value(&self, path: &str, value: Value) -> Result<()> {
-        let communication = Communication::new(Some(self.host.to_string()), true);
+        // let runtime = Builder::new_multi_thread().build().unwrap();
+        let addr = self.ip_to_socket_address(&self.host.to_string());
+
+        println!("Address: {:?}", addr);
+        let communication = Communication::new(Some(addr), true);
+
+        let mut sleep_command = std::process::Command::new("sleep")
+            .arg("2")
+            .spawn()
+            .unwrap();
+        let _result = sleep_command.wait().unwrap();
+
         communication.update_parameter_value(path, value).await;
 
         Ok(())
