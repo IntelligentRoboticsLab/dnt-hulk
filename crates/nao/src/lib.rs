@@ -8,7 +8,7 @@ use color_eyre::{
     eyre::{bail, eyre, WrapErr},
     Result,
 };
-use communication::client::Communication;
+use communication::client::{Communication, ConnectionStatus};
 use serde_json::Value;
 use tokio::process::Command;
 
@@ -228,13 +228,14 @@ impl Nao {
         println!("Address: {:?}", addr);
         let communication = Communication::new(Some(addr), true);
 
-        let mut sleep_command = std::process::Command::new("sleep")
-            .arg("2")
-            .spawn()
-            .unwrap();
-        let _result = sleep_command.wait().unwrap();
-
-        communication.update_parameter_value(path, value).await;
+        let mut connection_receiver = communication.subscribe_connection_updates().await;
+        while let Ok(status) = connection_receiver.try_recv() {
+            while let ConnectionStatus::Connected { .. } = status {
+                communication
+                    .update_parameter_value(path, value.clone())
+                    .await;
+            }
+        }
 
         Ok(())
     }
