@@ -222,19 +222,18 @@ impl Nao {
     }
 
     pub async fn update_parameter_value(&self, path: &str, value: Value) -> Result<()> {
-        // let runtime = Builder::new_multi_thread().build().unwrap();
         let addr = self.ip_to_socket_address(&self.host.to_string());
 
-        println!("Address: {:?}", addr);
         let communication = Communication::new(Some(addr), true);
 
         let mut connection_receiver = communication.subscribe_connection_updates().await;
-        while let Ok(status) = connection_receiver.try_recv() {
-            while let ConnectionStatus::Connected { .. } = status {
-                communication
-                    .update_parameter_value(path, value.clone())
-                    .await;
-            }
+
+        while let Ok(ConnectionStatus::Connected { .. }) = connection_receiver.try_recv() {
+            communication
+                .update_parameter_value(path, value.clone())
+                .await;
+
+            break;
         }
 
         Ok(())
