@@ -2,13 +2,17 @@ use std::{
     fmt::{self, Display, Formatter},
     net::Ipv4Addr,
     path::Path,
+    str::FromStr,
 };
 
 use color_eyre::{
     eyre::{bail, eyre, WrapErr},
     Result,
 };
-use communication::client::{Communication, ConnectionStatus};
+use communication::{
+    client::{Communication, ConnectionStatus, CyclerOutput, SubscriberMessage},
+    messages::Format,
+};
 use serde_json::Value;
 use tokio::process::Command;
 
@@ -221,20 +225,56 @@ impl Nao {
         format!("ws://{ip_address}:1337")
     }
 
-    pub async fn update_parameter_value(&self, path: &str, value: Value) -> Result<()> {
+    pub async fn update_parameter_value(&self, path: &str, new_value: Value) -> Result<()> {
         let addr = self.ip_to_socket_address(&self.host.to_string());
 
         let communication = Communication::new(Some(addr), true);
 
         let mut connection_receiver = communication.subscribe_connection_updates().await;
+        loop {
+            if let Ok(connection) = connection_receiver.try_recv() {
+                match connection {
+                    ConnectionStatus::Connected { .. } => {
+                        let (_uuid, mut receiver) = communication
+                            .subscribe_output(
+                                CyclerOutput::from_str(
+                                    "Control.main_outputs.motion_selection.current_motion",
+                                )
+                                .unwrap(),
+                                Format::Textual,
+                            )
+                            .await;
+                        while let Some(message) = receiver.recv().await {
+                            match message {
+                                SubscriberMessage::Update { value } => {
+                                    println!("VALOEEE{value:#}");
+                                    if value != "Unstiff" && value != "SitDownz" {
+                                        communication
+                                            .update_parameter_value(path, new_value.clone())
+                                            .await;
+                                        println!("SITTING THE FUCK DOWN");
+                                    }
+                                    break;
+                                }
+                                _ => {}
+                            }
+                        }
+                        // println!("Connection {:?}", connection);
+                        // println!("Current_motion: {:?}", current_motion);
 
-        while let Ok(ConnectionStatus::Connected { .. }) = connection_receiver.try_recv() {
-            communication
-                .update_parameter_value(path, value.clone())
-                .await;
-
-            break;
+                        break;
+                    }
+                    _ => {}
+                }
+            }
         }
+        // while let Ok(ConnectionStatus::Connected { .. }) = connection_receiver.try_recv() {
+        //     communication
+        //         .update_parameter_value(path, value.clone())
+        //         .await;
+
+        //     break;
+        // }
 
         Ok(())
     }
