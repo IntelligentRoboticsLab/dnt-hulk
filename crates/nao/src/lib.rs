@@ -248,7 +248,6 @@ impl Nao {
                             .update_parameter_value(path, new_value.clone())
                             .await;
                     }
-                    break;
                 }
 
                 break;
