@@ -221,60 +221,39 @@ impl Nao {
         Ok(())
     }
 
-    fn ip_to_socket_address(&self, ip_address: &str) -> String {
-        format!("ws://{ip_address}:1337")
+    fn websocket_address(&self) -> String {
+        format!("ws://{:?}:1337", &self.host)
     }
 
-    pub async fn update_parameter_value(&self, path: &str, new_value: Value) -> Result<()> {
-        let addr = self.ip_to_socket_address(&self.host.to_string());
+    pub async fn sitdown(&self, path: &str, new_value: Value) -> Result<()> {
+        let addr = self.websocket_address();
 
         let communication = Communication::new(Some(addr), true);
-
         let mut connection_receiver = communication.subscribe_connection_updates().await;
-        loop {
-            if let Ok(connection) = connection_receiver.try_recv() {
-                match connection {
-                    ConnectionStatus::Connected { .. } => {
-                        let (_uuid, mut receiver) = communication
-                            .subscribe_output(
-                                CyclerOutput::from_str(
-                                    "Control.main_outputs.motion_selection.current_motion",
-                                )
-                                .unwrap(),
-                                Format::Textual,
-                            )
-                            .await;
-                        while let Some(message) = receiver.recv().await {
-                            match message {
-                                SubscriberMessage::Update { value } => {
-                                    println!("VALOEEE{value:#}");
-                                    if value != "Unstiff" && value != "SitDownz" {
-                                        communication
-                                            .update_parameter_value(path, new_value.clone())
-                                            .await;
-                                        println!("SITTING THE FUCK DOWN");
-                                    }
-                                    break;
-                                }
-                                _ => {}
-                            }
-                        }
-                        // println!("Connection {:?}", connection);
-                        // println!("Current_motion: {:?}", current_motion);
 
-                        break;
+        while let Some(connection) = connection_receiver.recv().await {
+            if let ConnectionStatus::Connected { .. } = connection {
+                let (_uuid, mut receiver) = communication
+                    .subscribe_output(
+                        CyclerOutput::from_str(
+                            "Control.main_outputs.motion_selection.current_motion",
+                        )
+                        .unwrap(),
+                        Format::Textual,
+                    )
+                    .await;
+                while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
+                    if value != "Unstiff" && value != "SitDown" {
+                        communication
+                            .update_parameter_value(path, new_value.clone())
+                            .await;
                     }
-                    _ => {}
+                    break;
                 }
+
+                break;
             }
         }
-        // while let Ok(ConnectionStatus::Connected { .. }) = connection_receiver.try_recv() {
-        //     communication
-        //         .update_parameter_value(path, value.clone())
-        //         .await;
-
-        //     break;
-        // }
 
         Ok(())
     }
