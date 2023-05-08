@@ -491,7 +491,7 @@ impl Localization {
                 Some(*context.robot_to_field)
             }
 
-            PrimaryState::Unstiff | PrimaryState::Initial => {
+            PrimaryState::Unstiff | PrimaryState::Initial | PrimaryState::Finished => {
                 *context.robot_to_field = generate_initial_pose(
                     &context.initial_poses[*context.player_number],
                     context.field_dimensions,
