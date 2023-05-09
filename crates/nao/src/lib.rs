@@ -232,25 +232,31 @@ impl Nao {
         let mut connection_receiver = communication.subscribe_connection_updates().await;
 
         while let Some(connection) = connection_receiver.recv().await {
-            if let ConnectionStatus::Connected { .. } = connection {
-                let (_uuid, mut receiver) = communication
-                    .subscribe_output(
-                        CyclerOutput::from_str(
-                            "Control.main_outputs.motion_selection.current_motion",
+            match connection {
+                ConnectionStatus::Connected { .. } => {
+                    let (_uuid, mut receiver) = communication
+                        .subscribe_output(
+                            CyclerOutput::from_str(
+                                "Control.main_outputs.motion_selection.current_motion",
+                            )
+                            .unwrap(),
+                            Format::Textual,
                         )
-                        .unwrap(),
-                        Format::Textual,
-                    )
-                    .await;
-                while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
-                    if value != "Unstiff" && value != "SitDown" {
-                        communication
-                            .update_parameter_value(path, new_value.clone())
-                            .await;
+                        .await;
+                    while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
+                        if value != "Unstiff" && value != "SitDown" {
+                            communication
+                                .update_parameter_value(path, new_value.clone())
+                                .await;
+                        }
                     }
-                }
 
-                break;
+                    break;
+                }
+                ConnectionStatus::Disconnected { .. } => {
+                    return Err(eyre!("Couldn't connect to robot, is HULK service running?"));
+                }
+                _ => {}
             }
         }
 
