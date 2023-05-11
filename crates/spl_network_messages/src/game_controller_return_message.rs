@@ -1,16 +1,19 @@
-use std::{ffi::c_char, mem::size_of, ptr::read, slice::from_raw_parts, time::Duration};
+use std::time::Duration;
 
-use color_eyre::{eyre::bail, Report, Result};
-use nalgebra::Isometry2;
+use color_eyre::{Report, Result};
+use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 
 use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
 
-use bifrost::{communication::RoboCupGameControlReturnData, serialization::Encode};
+use bifrost::{
+    communication::RoboCupGameControlReturnData,
+    serialization::{Decode, Encode},
+};
 
 // Internal representation of the game controller return message,
 // with compacted data from the GameControllerReturnMessage.
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
 pub struct GameControllerReturnMessage {
     pub player_number: PlayerNumber,
     pub fallen: bool,
@@ -27,6 +30,51 @@ impl TryFrom<GameControllerReturnMessage> for Vec<u8> {
 
         message.encode(&mut buffer)?;
         Ok(buffer)
+    }
+}
+
+impl TryFrom<&[u8]> for GameControllerReturnMessage {
+    type Error = Report;
+
+    fn try_from(mut buffer: &[u8]) -> Result<Self> {
+        let message = RoboCupGameControlReturnData::decode(&mut buffer)?;
+        message.try_into()
+    }
+}
+
+impl TryFrom<RoboCupGameControlReturnData> for GameControllerReturnMessage {
+    type Error = Report;
+
+    fn try_from(message: RoboCupGameControlReturnData) -> Result<Self> {
+        Ok(Self {
+            player_number: match message.player_num {
+                1 => PlayerNumber::One,
+                2 => PlayerNumber::Two,
+                3 => PlayerNumber::Three,
+                4 => PlayerNumber::Four,
+                5 => PlayerNumber::Five,
+                6 => PlayerNumber::Six,
+                7 => PlayerNumber::Seven,
+                player_num => panic!("Invalid player number {player_num}"),
+            },
+            fallen: match message.fallen {
+                0 => false,
+                1 => true,
+                fallen => panic!("Invalid fallen value {fallen}"),
+            },
+            robot_to_field: Isometry2::new(
+                vector![message.pose[0] / 1000.0, message.pose[1] / 1000.0],
+                message.pose[2],
+            ),
+            ball_position: if message.ball_age == -1.0 {
+                None
+            } else {
+                Some(BallPosition {
+                    relative_position: point![message.ball[0] / 1000.0, message.ball[1] / 1000.0],
+                    age: Duration::from_secs_f32(message.ball_age),
+                })
+            },
+        })
     }
 }
 
@@ -70,7 +118,7 @@ mod test {
     use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, SQRT_2};
 
     use approx::assert_relative_eq;
-    use nalgebra::vector;
+    use nalgebra::{point, vector};
 
     use super::*;
 

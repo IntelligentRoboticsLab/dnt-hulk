@@ -7,6 +7,7 @@ use crate::DNT_TEAM_NUMBER;
 
 use bifrost::{
     communication::{
+        CompetitionPhase as BifrostCompetitionPhase, CompetitionType as BifrostCompetitionType,
         GamePhase as BifrostGamePhase, GameState as BifrostGameState, Half as BifrostHalf,
         Penalty as BifrostPenalty, RobotInfo, SetPlay as BifrostSetPlay,
         TeamColor as BifrostTeamColor,
@@ -230,5 +231,35 @@ impl Penalty {
 
     pub fn is_none(&self) -> bool {
         matches!(self, Penalty::None)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, SerializeHierarchy)]
+pub enum CompetitionPhase {
+    RoundRobin,
+    PlayOff,
+}
+
+impl From<BifrostCompetitionPhase> for CompetitionPhase {
+    fn from(competition_phase: BifrostCompetitionPhase) -> Self {
+        match competition_phase {
+            BifrostCompetitionPhase::RoundRobin => CompetitionPhase::RoundRobin,
+            BifrostCompetitionPhase::PlayOff => CompetitionPhase::PlayOff,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, SerializeHierarchy)]
+pub enum CompetitionType {
+    Normal,
+    DynamicBallHandling,
+}
+
+impl From<BifrostCompetitionType> for CompetitionType {
+    fn from(competition_type: BifrostCompetitionType) -> Self {
+        match competition_type {
+            BifrostCompetitionType::Normal => CompetitionType::Normal,
+            BifrostCompetitionType::DynamicBallHandling => CompetitionType::DynamicBallHandling,
+        }
     }
 }

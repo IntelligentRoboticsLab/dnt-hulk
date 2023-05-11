@@ -255,7 +255,6 @@ impl RoleAssignment {
                                     robot_to_field,
                                     cycle_start_time,
                                 ),
-                                packet: None,
                             }))?;
                     } else {
                         context
@@ -268,7 +267,6 @@ impl RoleAssignment {
                                     context.ball_position,
                                     cycle_start_time,
                                 ),
-                                packet: None,
                             }))?;
                     }
                 }

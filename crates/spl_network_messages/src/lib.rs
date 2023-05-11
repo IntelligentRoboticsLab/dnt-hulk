@@ -13,7 +13,8 @@ use serde::{Deserialize, Serialize};
 
 pub use game_controller_return_message::GameControllerReturnMessage;
 pub use game_controller_state_conversion::{
-    GamePhase, GameState, Half, Penalty, PenaltyShoot, Player, SubState, Team, TeamColor, TeamState,
+    CompetitionPhase, CompetitionType, GamePhase, GameState, Half, Penalty, PenaltyShoot, Player,
+    SubState, Team, TeamColor, TeamState,
 };
 pub use game_controller_state_message::GameControllerStateMessage;
 use serialize_hierarchy::SerializeHierarchy;

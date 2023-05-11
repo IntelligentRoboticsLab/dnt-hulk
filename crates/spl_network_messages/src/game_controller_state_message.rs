@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
-    GamePhase, GameState, Half, PenaltyShoot, Player, SubState, Team, TeamColor, TeamState,
-    DNT_TEAM_NUMBER,
+    CompetitionPhase, CompetitionType, GamePhase, GameState, Half, PenaltyShoot, Player, SubState,
+    Team, TeamColor, TeamState, DNT_TEAM_NUMBER,
 };
 use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
 
@@ -94,6 +94,8 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .collect::<Result<Vec<_>>>()?;
 
         Ok(GameControllerStateMessage {
+            competition_phase: CompetitionPhase::from(message.competition_phase),
+            competition_type: CompetitionType::from(message.competition_type),
             game_phase: GamePhase::from((message.game_phase, message.kicking_team)),
             game_state: GameState::from(message.state),
             sub_state: SubState::try_from(message.set_play)?,

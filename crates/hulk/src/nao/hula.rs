@@ -141,7 +141,7 @@ impl From<TouchSensors> for types::TouchSensors {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[repr(C)]
 pub struct SonarSensors {
     pub left: f32,
