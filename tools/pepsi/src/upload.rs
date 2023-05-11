@@ -87,15 +87,17 @@ async fn upload_with_progress(
         .await
         .wrap_err_with(|| format!("failed to set communication enablement for {head_id}"))?;
 
-    progress.set_message("Sitting down the robot...");
-    if let Err(_) = nao
+    progress.set_message("Trying to sit down...");
+    let sit_result = nao
         .sitdown(
             "behavior.injected_motion_command",
             json!({"SitDown": {"head": "Unstiff"}}),
         )
-        .await
-    {
-        println!("Failed to sit down robot; failed to connect to HULKs, is the service running?");
+        .await;
+
+    match sit_result {
+        Ok(_) => progress.set_message("Sitting down the robot..."),
+        Err(report) => progress.set_message(format!("{report}")),
     }
 
     thread::sleep(Duration::from_secs(4));

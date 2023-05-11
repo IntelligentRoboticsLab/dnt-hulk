@@ -245,22 +245,22 @@ impl Nao {
                         .await;
                     while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
                         if value != "Unstiff" && value != "SitDown" {
-                            communication
+                            return Ok(communication
                                 .update_parameter_value(path, new_value.clone())
-                                .await;
+                                .await);
                         }
+                        break;
                     }
 
                     break;
                 }
                 ConnectionStatus::Disconnected { .. } => {
-                    return Err(eyre!("Couldn't connect to robot, is HULK service running?"));
+                    break;
                 }
                 _ => {}
             }
         }
-
-        Ok(())
+        return Err(eyre!("Sitting down failed, continuing with shutdown soon!"));
     }
 
     pub async fn get_network_status(&self) -> Result<String> {
