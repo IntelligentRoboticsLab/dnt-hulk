@@ -264,8 +264,8 @@ impl LedStatus {
         }
     }
 
-    pub fn intensity_to_dnt_color(location:i32, intensity: f32) -> Rgb {
-        let intensity =  (255.0 * intensity) as u8;
+    pub fn intensity_to_dnt_color(location: i32, intensity: f32) -> Rgb {
+        let intensity = (255.0 * intensity) as u8;
         match location {
             0 | 7 | 1 => Rgb::new(intensity, 0, 0),
             2 | 6 => Rgb::new(intensity, intensity, intensity),
