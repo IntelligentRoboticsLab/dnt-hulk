@@ -245,11 +245,11 @@ impl Nao {
                         .await;
                     while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
                         if value != "Unstiff" && value != "SitDown" {
-                            return Ok(communication
+                            communication
                                 .update_parameter_value(path, new_value.clone())
-                                .await);
+                                .await;
+                            return Ok(());
                         }
-                        break;
                     }
 
                     break;
@@ -260,7 +260,8 @@ impl Nao {
                 _ => {}
             }
         }
-        return Err(eyre!("Sitting down failed, continuing with shutdown soon!"));
+
+        Err(eyre!("Sitting down failed, continuing with shutdown soon!"))
     }
 
     pub async fn get_network_status(&self) -> Result<String> {
