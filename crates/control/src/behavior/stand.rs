@@ -10,7 +10,10 @@ pub fn execute(
 ) -> Option<MotionCommand> {
     match world_state.robot.primary_state {
         PrimaryState::Initial | PrimaryState::Set => {
-            let robot_to_field = world_state.robot.robot_to_field?;
+            let robot_to_field = world_state
+                .robot
+                .robot_to_field
+                .expect("Failed to get robot_to_field.");
             let fallback_target = match world_state.game_controller_state {
                 Some(GameControllerState {
                     sub_state: Some(SubState::PenaltyKick),

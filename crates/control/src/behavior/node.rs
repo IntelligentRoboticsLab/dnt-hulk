@@ -176,6 +176,7 @@ impl Behavior {
                 let motion_command = match action {
                     Action::Unstiff => unstiff::execute(world_state),
                     Action::SitDown => sit_down::execute(world_state),
+                    Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::Penalize => penalize::execute(world_state),
                     Action::Initial => initial::execute(world_state),
                     Action::FallSafely => {
@@ -188,7 +189,6 @@ impl Behavior {
                     Action::DefendLeft => defend.left(&mut context.path_obstacles),
                     Action::DefendRight => defend.right(&mut context.path_obstacles),
                     Action::DefendPenaltyKick => defend.penalty_kick(&mut context.path_obstacles),
-                    Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::Dribble => dribble::execute(
                         world_state,
                         &walk_path_planner,
