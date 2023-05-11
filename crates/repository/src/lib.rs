@@ -40,7 +40,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 // https://drive.google.com/file/d/1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI/view?usp=sharing
 //                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ The file id
 const GOOGLE_DRIVE_FILE_ID: &str = "1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI";
-pub const SDK_VERSION: &str = "5.7.1";
+pub const SDK_VERSION: &str = "5.7.4";
 
 #[derive(Clone)]
 pub struct Repository {
@@ -311,6 +311,7 @@ impl Repository {
 
     pub async fn create_upload_directory(&self, profile: &str) -> Result<(TempDir, PathBuf)> {
         let upload_directory = tempdir().wrap_err("failed to create temporary directory")?;
+        println!("new tmp dir @ {upload_directory:?}");
         let hulk_directory = upload_directory.path().join("hulk");
 
         create_dir_all(hulk_directory.join("bin"))
