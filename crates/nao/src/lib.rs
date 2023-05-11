@@ -13,7 +13,8 @@ use communication::{
     client::{Communication, ConnectionStatus, CyclerOutput, SubscriberMessage},
     messages::Format,
 };
-use serde_json::Value;
+use serde_json::json;
+
 use tokio::process::Command;
 
 pub struct Nao {
@@ -225,7 +226,7 @@ impl Nao {
         format!("ws://{:?}:1337", &self.host)
     }
 
-    pub async fn sitdown(&self, path: &str, new_value: Value) -> Result<()> {
+    pub async fn sitdown(&self) -> Result<()> {
         let addr = self.websocket_address();
 
         let communication = Communication::new(Some(addr), true);
@@ -238,15 +239,18 @@ impl Nao {
                         .subscribe_output(
                             CyclerOutput::from_str(
                                 "Control.main_outputs.motion_selection.current_motion",
-                            )
-                            .unwrap(),
+                            )?,
                             Format::Textual,
                         )
                         .await;
+
                     while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
                         if value != "Unstiff" && value != "SitDown" {
                             communication
-                                .update_parameter_value(path, new_value.clone())
+                                .update_parameter_value(
+                                    "behavior.injected_motion_command",
+                                    json!({"SitDown": {"head": "Unstiff"}}),
+                                )
                                 .await;
                             return Ok(());
                         }

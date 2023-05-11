@@ -10,8 +10,6 @@ use futures_util::{stream::FuturesUnordered, StreamExt};
 use nao::{Nao, SystemctlAction};
 use repository::{HardwareIds, Repository};
 
-use serde_json::json;
-
 use crate::{
     cargo::{cargo, Arguments as CargoArguments, Command},
     parsers::{NaoAddress, NaoNumber},
@@ -88,14 +86,8 @@ async fn upload_with_progress(
         .wrap_err_with(|| format!("failed to set communication enablement for {head_id}"))?;
 
     progress.set_message("Trying to sit down...");
-    let sit_result = nao
-        .sitdown(
-            "behavior.injected_motion_command",
-            json!({"SitDown": {"head": "Unstiff"}}),
-        )
-        .await;
 
-    match sit_result {
+    match nao.sitdown().await {
         Ok(_) => progress.set_message("Sitting down the robot..."),
         Err(report) => progress.set_message(format!("{report}")),
     }
