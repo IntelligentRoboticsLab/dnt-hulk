@@ -330,6 +330,7 @@ pub async fn connector(
                 Message::ReconnectTimerElapsed => ConnectionState::Connected { address },
             },
         };
+
         let status = match &status {
             ConnectionState::Disconnected { address, connect } => ConnectionStatus::Disconnected {
                 address: address.clone(),
@@ -345,6 +346,7 @@ pub async fn connector(
                 address: address.to_string(),
             },
         };
+
         subscribers.retain(|sender| sender.try_send(status.clone()).is_ok())
     }
 }

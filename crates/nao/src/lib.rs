@@ -2,12 +2,19 @@ use std::{
     fmt::{self, Display, Formatter},
     net::Ipv4Addr,
     path::Path,
+    str::FromStr,
 };
 
 use color_eyre::{
     eyre::{bail, eyre, WrapErr},
     Result,
 };
+use communication::{
+    client::{Communication, ConnectionStatus, CyclerOutput, SubscriberMessage},
+    messages::Format,
+};
+use serde_json::json;
+
 use tokio::process::Command;
 
 pub struct Nao {
@@ -213,6 +220,52 @@ impl Nao {
         }
 
         Ok(())
+    }
+
+    fn websocket_address(&self) -> String {
+        format!("ws://{:?}:1337", &self.host)
+    }
+
+    pub async fn sitdown(&self) -> Result<()> {
+        let addr = self.websocket_address();
+
+        let communication = Communication::new(Some(addr), true);
+        let mut connection_receiver = communication.subscribe_connection_updates().await;
+
+        while let Some(connection) = connection_receiver.recv().await {
+            match connection {
+                ConnectionStatus::Connected { .. } => {
+                    let (_uuid, mut receiver) = communication
+                        .subscribe_output(
+                            CyclerOutput::from_str(
+                                "Control.main_outputs.motion_selection.current_motion",
+                            )?,
+                            Format::Textual,
+                        )
+                        .await;
+
+                    while let Some(SubscriberMessage::Update { value }) = receiver.recv().await {
+                        if value != "Unstiff" && value != "SitDown" {
+                            communication
+                                .update_parameter_value(
+                                    "behavior.injected_motion_command",
+                                    json!({"SitDown": {"head": "Unstiff"}}),
+                                )
+                                .await;
+                            return Ok(());
+                        }
+                    }
+
+                    break;
+                }
+                ConnectionStatus::Disconnected { .. } => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+
+        Err(eyre!("Sitting down failed, continuing with shutdown soon!"))
     }
 
     pub async fn get_network_status(&self) -> Result<String> {

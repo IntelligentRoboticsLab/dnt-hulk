@@ -8,11 +8,7 @@ use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
-use crate::{
-    BallPosition,
-    PlayerNumber,
-    DNT_TEAM_NUMBER,
-};
+use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
 
 use bifrost::communication::SPLStandardMessage;
 

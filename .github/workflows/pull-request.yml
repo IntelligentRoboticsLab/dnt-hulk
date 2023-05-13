@@ -9,7 +9,6 @@ jobs:
     name: Require all CI jobs
     runs-on:
       - self-hosted
-      - v2
     needs:
       - check
       - format
@@ -25,7 +24,6 @@ jobs:
     name: Check
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -37,7 +35,6 @@ jobs:
     name: Format
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -49,7 +46,6 @@ jobs:
     name: Test
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -66,7 +62,6 @@ jobs:
         profile: [release, dev]
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -89,7 +84,6 @@ jobs:
           ]
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -102,7 +96,6 @@ jobs:
     name: Build Aliveness
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:
@@ -115,7 +108,6 @@ jobs:
     name: Build HuLA
     runs-on:
       - self-hosted
-      - v2
     steps:
       - uses: actions/checkout@v3
         with:

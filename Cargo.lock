@@ -3129,7 +3129,9 @@ name = "nao"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "communication",
  "constants",
+ "serde_json",
  "tokio",
 ]
 
@@ -3685,6 +3687,7 @@ dependencies = [
  "spl_network_messages",
  "thiserror",
  "tokio",
+ "types",
 ]
 
 [[package]]

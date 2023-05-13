@@ -247,6 +247,7 @@ async fn update_parameter_value(
             data: value,
         }))
         .await?;
+
     spawn(async move {
         let response = response_receiver.await.unwrap();
         match response {

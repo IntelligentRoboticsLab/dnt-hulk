@@ -173,6 +173,6 @@ impl Communication {
                 },
             )
             .await
-            .unwrap();
+            .expect("Failed to update Parameter from communication");
     }
 }

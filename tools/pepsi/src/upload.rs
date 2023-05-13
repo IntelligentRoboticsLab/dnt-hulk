@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, path::Path, thread, time::Duration};
 
 use clap::Args;
 use color_eyre::{
@@ -84,6 +84,15 @@ async fn upload_with_progress(
         .set_communication(head_id, !arguments.no_communication)
         .await
         .wrap_err_with(|| format!("failed to set communication enablement for {head_id}"))?;
+
+    progress.set_message("Trying to sit down...");
+
+    match nao.sitdown().await {
+        Ok(_) => progress.set_message("Sitting down the robot..."),
+        Err(report) => progress.set_message(format!("{report}")),
+    }
+
+    thread::sleep(Duration::from_secs(4));
 
     progress.set_message("Stopping HULK...");
     nao.execute_systemctl(SystemctlAction::Stop, "hulk")
