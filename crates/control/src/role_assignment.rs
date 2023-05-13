@@ -15,8 +15,6 @@ use types::{
     PrimaryState, Role,
 };
 
-use crate::localization::generate_initial_pose;
-
 pub struct RoleAssignment {
     last_received_spl_striker_message: Option<SystemTime>,
     last_transmitted_game_controller_return_message: Option<SystemTime>,
@@ -78,17 +76,7 @@ impl RoleAssignment {
         let primary_state = *context.primary_state;
         let mut role = self.role;
 
-        let robot_to_field =
-            context
-                .robot_to_field
-                .copied()
-                .unwrap_or_else(|| match context.primary_state {
-                    PrimaryState::Initial => generate_initial_pose(
-                        &context.initial_poses[*context.player_number],
-                        context.field_dimensions,
-                    ),
-                    _ => Default::default(),
-                });
+        let robot_to_field = context.robot_to_field.copied().unwrap_or_default();
 
         if !self.role_initialized
             || primary_state == PrimaryState::Ready
