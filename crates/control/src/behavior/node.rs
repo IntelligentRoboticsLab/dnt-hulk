@@ -176,13 +176,13 @@ impl Behavior {
                 let motion_command = match action {
                     Action::Unstiff => unstiff::execute(world_state),
                     Action::SitDown => sit_down::execute(world_state),
-                    Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::Penalize => penalize::execute(world_state),
                     Action::Initial => initial::execute(world_state),
                     Action::FallSafely => {
                         fall_safely::execute(world_state, *context.has_ground_contact)
                     }
                     Action::StandUp => stand_up::execute(world_state),
+                    Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::LookAround => look_around::execute(world_state),
                     Action::DefendGoal => defend.goal(&mut context.path_obstacles),
                     Action::DefendKickOff => defend.kick_off(&mut context.path_obstacles),
