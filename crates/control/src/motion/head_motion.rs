@@ -5,7 +5,7 @@ use context_attribute::context;
 use framework::MainOutput;
 use types::{
     CycleTime, HeadJoints, HeadJointsCommand, HeadMotion as HeadMotionCommand, MotionCommand,
-    SensorData,
+    PrimaryState, SensorData,
 };
 
 #[derive(Default)]
@@ -36,6 +36,7 @@ pub struct CycleContext {
     pub sensor_data: Input<SensorData, "sensor_data">,
     pub cycle_time: Input<CycleTime, "cycle_time">,
     pub has_ground_contact: Input<bool, "has_ground_contact">,
+    pub primary_state: Input<PrimaryState, "primary_state">,
 }
 
 #[context]
@@ -52,11 +53,12 @@ impl HeadMotion {
     }
 
     pub fn cycle(&mut self, context: CycleContext) -> Result<MainOutputs> {
-        let raw_request = if *context.has_ground_contact {
-            Self::joints_from_motion(&context)
-        } else {
-            Default::default()
-        };
+        let raw_request =
+            if *context.has_ground_contact || *context.primary_state == PrimaryState::Initial {
+                Self::joints_from_motion(&context)
+            } else {
+                Default::default()
+            };
 
         let maximum_movement =
             *context.maximum_velocity * context.cycle_time.last_cycle_duration.as_secs_f32();
