@@ -287,7 +287,6 @@ impl Behavior {
                         context.field_dimensions,
                     ),
                 }?;
-                println!("action: {:?} motion_command: {:?}", action, motion_command);
                 Some((action, motion_command))
             })
             .unwrap_or_else(|| {

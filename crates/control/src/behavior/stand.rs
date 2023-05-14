@@ -8,8 +8,11 @@ pub fn execute(
     world_state: &WorldState,
     field_dimensions: &FieldDimensions,
 ) -> Option<MotionCommand> {
-    println!("robot_to_field");
-    let robot_to_field = world_state.robot.robot_to_field.unwrap();
+    let robot_to_field = world_state
+        .robot
+        .robot_to_field
+        .expect("Failed to get robot_to_field.");
+
     match world_state.robot.primary_state {
         PrimaryState::Initial | PrimaryState::Set => {
             let fallback_target = match world_state.game_controller_state {
