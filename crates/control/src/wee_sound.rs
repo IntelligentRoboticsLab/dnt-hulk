@@ -9,6 +9,8 @@ use kira::{
     tween::Tween,
 };
 
+const WEE_TIME: Duration = Duration::from_secs(3);
+
 pub struct PlaySound {
     sound_played: bool,
     manager: AudioManager<CpalBackend>,
@@ -44,7 +46,7 @@ impl PlaySound {
         }
 
         if let Some(last_played) = self.last_played {
-            if last_played.elapsed().unwrap() < Duration::from_secs(3) {
+            if last_played.elapsed()? < WEE_TIME {
                 return Ok(MainOutputs {});
             }
         }
