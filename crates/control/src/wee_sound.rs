@@ -1,5 +1,5 @@
 use context_attribute::context;
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, Instant};
 
 use types::{FallState, PrimaryState};
 
@@ -12,7 +12,7 @@ use kira::{
 pub struct PlaySound {
     sound_played: bool,
     manager: AudioManager<CpalBackend>,
-    last_played: Option<SystemTime>,
+    last_played: Option<Instant>,
 }
 
 #[context]
@@ -45,7 +45,7 @@ impl PlaySound {
         }
 
         if let Some(last_played) = self.last_played {
-            if last_played.elapsed()? < *context.wee_sound_timeout {
+            if last_played.elapsed() < *context.wee_sound_timeout {
                 return Ok(MainOutputs {});
             }
         }
@@ -55,7 +55,7 @@ impl PlaySound {
             && !self.sound_played
         {
             self.sound_played = true;
-            self.last_played = Some(SystemTime::now());
+            self.last_played = Some(Instant::now());
             let sound_data =
                 StaticSoundData::from_file("/etc/sounds/weeeee.wav", StaticSoundSettings::new())
                     .unwrap();
