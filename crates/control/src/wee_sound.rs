@@ -9,8 +9,6 @@ use kira::{
     tween::Tween,
 };
 
-const WEE_TIME: Duration = Duration::from_secs(3);
-
 pub struct PlaySound {
     sound_played: bool,
     manager: AudioManager<CpalBackend>,
@@ -25,6 +23,7 @@ pub struct CycleContext {
     pub fall_state: Input<FallState, "fall_state">,
     pub has_ground_contact: Input<bool, "has_ground_contact">,
     pub primary_state: Input<PrimaryState, "primary_state">,
+    pub wee_sound_timeout: Parameter<Duration, "wee_sound.timeout">,
 }
 
 #[context]
@@ -46,7 +45,7 @@ impl PlaySound {
         }
 
         if let Some(last_played) = self.last_played {
-            if last_played.elapsed()? < WEE_TIME {
+            if last_played.elapsed()? < *context.wee_sound_timeout {
                 return Ok(MainOutputs {});
             }
         }
