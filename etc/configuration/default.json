@@ -8,6 +8,12 @@
     "whistle_scaling": 3.8,
     "number_of_chunks": 16
   },
+  "wee_sound": {
+    "timeout": {
+        "nanos": 0,
+        "secs": 3
+    }
+  },
   "ball_detection": {
     "vision_top": {
       "minimal_radius": 42.0,
