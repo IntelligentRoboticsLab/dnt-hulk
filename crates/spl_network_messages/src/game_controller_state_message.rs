@@ -67,17 +67,17 @@ impl TryFrom<RoboCupGameControlData> for GameControllerStateMessage {
             .penalty_shot)
             .map(|shoot_index| {
                 // Get the bit corresponding to the shoot index, 1: successful, 0: unsuccessful
-                let shoot = message.teams[hulks_team_index].single_shots & (1 << shoot_index);
+                let shoot = (message.teams[hulks_team_index].single_shots >> shoot_index) & 1;
 
-                PenaltyShoot::decode(&mut &shoot.to_le_bytes()[..]).unwrap()
+                PenaltyShoot::decode(&mut shoot.to_le_bytes().as_slice()).unwrap()
             })
             .collect();
         let opponent_penalty_shoots: Vec<PenaltyShoot> = (0..message.teams[opponent_team_index]
             .penalty_shot)
             .map(|shoot_index| {
-                let shoot = message.teams[opponent_team_index].single_shots & (1 << shoot_index);
+                let shoot = (message.teams[hulks_team_index].single_shots >> shoot_index) & 1;
 
-                PenaltyShoot::decode(&mut &shoot.to_le_bytes()[..]).unwrap()
+                PenaltyShoot::decode(&mut shoot.to_le_bytes().as_slice()).unwrap()
             })
             .collect();
 
