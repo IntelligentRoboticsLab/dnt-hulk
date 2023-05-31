@@ -118,7 +118,7 @@ pub use path_obstacles::{PathObstacle, PathObstacleShape};
 pub use penalty_shot_direction::PenaltyShotDirection;
 pub use perspective_grid_candidates::PerspectiveGridCandidates;
 pub use planned_path::{direct_path, PathSegment, PlannedPath};
-pub use players::Players;
+pub use players::{Players, PLAYERS};
 pub use point_of_interest::PointOfInterest;
 pub use primary_state::PrimaryState;
 pub use robot_dimensions::RobotDimensions;

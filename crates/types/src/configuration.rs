@@ -7,7 +7,7 @@ use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
     ArmJoints, HeadJoints, InitialPose, KickStep, KickVariant, LegJoints, MotionCommand, Players,
-    Role, Step,
+    Role, Step, PLAYERS,
 };
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
@@ -32,7 +32,7 @@ pub struct Localization {
     pub hypothesis_retain_factor: f32,
     pub initial_hypothesis_covariance: Matrix3<f32>,
     pub initial_hypothesis_score: f32,
-    pub initial_poses: Players<InitialPose>,
+    pub initial_poses: Players<PLAYERS, InitialPose>,
     pub line_length_acceptance_factor: f32,
     pub line_measurement_noise: Vector2<f32>,
     pub maximum_amount_of_gradient_descent_iterations: usize,

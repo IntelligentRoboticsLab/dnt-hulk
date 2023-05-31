@@ -9,46 +9,55 @@ use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize, Serializ
 use serialize_hierarchy::{Error, SerializeHierarchy};
 use spl_network_messages::{Penalty, Player, PlayerNumber, TeamState};
 
-#[derive(Clone, Copy, Default, Debug, Deserialize, Serialize)]
-pub struct Players<T> {
-    pub one: T,
-    pub two: T,
-    pub three: T,
-    pub four: T,
-    pub five: T,
-    pub six: T,
-    pub seven: T,
+pub const PLAYERS: usize = 7;
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+pub struct Players<const D: usize, T: Serialize + Deserialize> {
+    // pub player_number: PlayerNumber,
+    #[serde(with = "serde_arrays")]
+    pub players: [T; D],
 }
+// pub struct Players<T> {
+//     pub one: T,
+//     pub two: T,
+//     pub three: T,
+//     pub four: T,
+//     pub five: T,
+//     pub six: T,
+//     pub seven: T,
+// }
 
-impl<T> Index<PlayerNumber> for Players<T> {
-    type Output = T;
-
-    fn index(&self, index: PlayerNumber) -> &Self::Output {
+impl<const D: usize, T: Serialize> Players<D, T> {
+    fn index(&self, index: PlayerNumber) -> &T {
         match index {
-            PlayerNumber::One => &self.one,
-            PlayerNumber::Two => &self.two,
-            PlayerNumber::Three => &self.three,
-            PlayerNumber::Four => &self.four,
-            PlayerNumber::Five => &self.five,
-            PlayerNumber::Six => &self.six,
-            PlayerNumber::Seven => &self.seven,
+            PlayerNumber::One => self.players.get(0).unwrap(),
+            PlayerNumber::Two => &self.players.get(1).unwrap(),
+            PlayerNumber::Three => &self.players.get(2).unwrap(),
+            PlayerNumber::Four => &self.players.get(3).unwrap(),
+            PlayerNumber::Five => &self.players.get(4).unwrap(),
+            PlayerNumber::Six => &self.players.get(5).unwrap(),
+            PlayerNumber::Seven => &self.players.get(6).unwrap(),
+        }
+    }
+
+    fn index_mut(&mut self, index: PlayerNumber) -> &mut Self {
+        match index {
+            PlayerNumber::One => &mut self.players.get(0),
+            PlayerNumber::Two => &mut self.players.get(1),
+            PlayerNumber::Three => &mut self.players.get(2),
+            PlayerNumber::Four => &mut self.players.get(3),
+            PlayerNumber::Five => &mut self.players.get(4),
+            PlayerNumber::Six => &mut self.players.get(5),
+            PlayerNumber::Seven => &mut self.players.get(6),
         }
     }
 }
 
-impl<T> IndexMut<PlayerNumber> for Players<T> {
-    fn index_mut(&mut self, index: PlayerNumber) -> &mut Self::Output {
-        match index {
-            PlayerNumber::One => &mut self.one,
-            PlayerNumber::Two => &mut self.two,
-            PlayerNumber::Three => &mut self.three,
-            PlayerNumber::Four => &mut self.four,
-            PlayerNumber::Five => &mut self.five,
-            PlayerNumber::Six => &mut self.six,
-            PlayerNumber::Seven => &mut self.seven,
-        }
-    }
-}
+// impl<T> Index<PlayerNumber> for Players<T> {
+//     type Output = T;
+// }
+
+// impl<T> IndexMut<PlayerNumber> for Players<T> {}
 
 trait PlayerPenalty {
     fn get_penalty(&self, player_index: usize) -> Penalty;
@@ -64,67 +73,21 @@ impl PlayerPenalty for Vec<Player> {
     }
 }
 
-impl From<TeamState> for Players<Penalty> {
+impl From<TeamState> for Players<PLAYERS, Penalty> {
     fn from(team_state: TeamState) -> Self {
         Self {
-            one: team_state.players.get_penalty(0),
-            two: team_state.players.get_penalty(1),
-            three: team_state.players.get_penalty(2),
-            four: team_state.players.get_penalty(3),
-            five: team_state.players.get_penalty(4),
-            six: team_state.players.get_penalty(5),
-            seven: team_state.players.get_penalty(6),
+            players: team_state
+                .players
+                .iter()
+                .map(|player| player.penalty)
+                .collect(),
         }
     }
 }
 
-pub struct PlayersIterator<'a, T> {
-    data: &'a Players<T>,
-    player_number: Option<PlayerNumber>,
-}
+// impl<'a, T> Iterator for Players<PLAYERS, T>
 
-impl<'a, T> PlayersIterator<'a, T> {
-    fn new(data: &'a Players<T>) -> Self {
-        Self {
-            data,
-            player_number: Some(PlayerNumber::One),
-        }
-    }
-}
-
-impl<'a, T> Iterator for PlayersIterator<'a, T> {
-    type Item = (PlayerNumber, &'a T);
-    fn next(&mut self) -> Option<Self::Item> {
-        let result = self.player_number.map(|number| match number {
-            PlayerNumber::One => (PlayerNumber::One, &self.data.one),
-            PlayerNumber::Two => (PlayerNumber::Two, &self.data.two),
-            PlayerNumber::Three => (PlayerNumber::Three, &self.data.three),
-            PlayerNumber::Four => (PlayerNumber::Four, &self.data.four),
-            PlayerNumber::Five => (PlayerNumber::Five, &self.data.five),
-            PlayerNumber::Six => (PlayerNumber::Six, &self.data.six),
-            PlayerNumber::Seven => (PlayerNumber::Seven, &self.data.seven),
-        });
-        self.player_number = match self.player_number {
-            Some(PlayerNumber::One) => Some(PlayerNumber::Two),
-            Some(PlayerNumber::Two) => Some(PlayerNumber::Three),
-            Some(PlayerNumber::Three) => Some(PlayerNumber::Four),
-            Some(PlayerNumber::Four) => Some(PlayerNumber::Five),
-            Some(PlayerNumber::Five) => Some(PlayerNumber::Six),
-            Some(PlayerNumber::Six) => Some(PlayerNumber::Seven),
-            Some(PlayerNumber::Seven) => None,
-            None => None,
-        };
-        result
-    }
-}
-
-impl<T> Players<T> {
-    pub fn iter(&self) -> PlayersIterator<'_, T> {
-        PlayersIterator::new(self)
-    }
-}
-
-impl<T> SerializeHierarchy for Players<T>
+impl<T> SerializeHierarchy for Players<PLAYERS, T>
 where
     T: Serialize + DeserializeOwned + SerializeHierarchy,
 {
@@ -135,44 +98,44 @@ where
         let split = path.split_once('.');
         match split {
             Some((name, suffix)) => match name {
-                "one" => self.one.serialize_path(suffix, serializer),
-                "two" => self.two.serialize_path(suffix, serializer),
-                "three" => self.three.serialize_path(suffix, serializer),
-                "four" => self.four.serialize_path(suffix, serializer),
-                "five" => self.five.serialize_path(suffix, serializer),
-                "six" => self.six.serialize_path(suffix, serializer),
-                "seven" => self.seven.serialize_path(suffix, serializer),
+                "one" => self.get(0).serialize_path(suffix, serializer),
+                "two" => self.get(1).serialize_path(suffix, serializer),
+                "three" => self.get(2).serialize_path(suffix, serializer),
+                "four" => self.get(3).serialize_path(suffix, serializer),
+                "five" => self.get(4).serialize_path(suffix, serializer),
+                "six" => self.get(5).serialize_path(suffix, serializer),
+                "seven" => self.get(6).serialize_path(suffix, serializer),
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
             },
             None => match path {
                 "one" => self
-                    .one
+                    .get(0)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "two" => self
-                    .two
+                    .get(1)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "three" => self
-                    .three
+                    .get(2)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "four" => self
-                    .four
+                    .get(3)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "five" => self
-                    .five
+                    .get(4)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "six" => self
-                    .six
+                    .get(5)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 "seven" => self
-                    .seven
+                    .get(6)
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
                 name => Err(Error::UnexpectedPathSegment {
@@ -193,50 +156,50 @@ where
         let split = path.split_once('.');
         match split {
             Some((name, suffix)) => match name {
-                "one" => self.one.deserialize_path(suffix, deserializer),
-                "two" => self.two.deserialize_path(suffix, deserializer),
-                "three" => self.three.deserialize_path(suffix, deserializer),
-                "four" => self.four.deserialize_path(suffix, deserializer),
-                "five" => self.five.deserialize_path(suffix, deserializer),
-                "six" => self.six.deserialize_path(suffix, deserializer),
-                "seven" => self.seven.deserialize_path(suffix, deserializer),
+                "one" => self.get(0).deserialize_path(suffix, deserializer),
+                "two" => self.get(1).deserialize_path(suffix, deserializer),
+                "three" => self.get(2).deserialize_path(suffix, deserializer),
+                "four" => self.get(3).deserialize_path(suffix, deserializer),
+                "five" => self.get(4).deserialize_path(suffix, deserializer),
+                "six" => self.get(5).deserialize_path(suffix, deserializer),
+                "seven" => self.get(6).deserialize_path(suffix, deserializer),
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
             },
             None => match path {
                 "one" => {
-                    self.one =
+                    self.get(0) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "two" => {
-                    self.two =
+                    self.get(1) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "three" => {
-                    self.three =
+                    self.get(2) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "four" => {
-                    self.four =
+                    self.get(3) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "five" => {
-                    self.five =
+                    self.get(4) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "six" => {
-                    self.six =
+                    self.get(5) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
                 "seven" => {
-                    self.seven =
+                    self.get(6) =
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }

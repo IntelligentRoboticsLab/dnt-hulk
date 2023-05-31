@@ -111,6 +111,7 @@ repository = { path = "crates/repository" }
 reqwest = { version = "0.11.16", features = ["stream"] }
 rustfft = "6.0.1"
 serde = { version = "1.0.145", features = ["derive", "rc"] }
+serde_arrays = "0.1.0"
 serde_bytes = "0.11.8"
 serde_json = "1.0.91"
 serde_test = "1.0.152"
