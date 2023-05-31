@@ -16,8 +16,6 @@ pub struct Players<T> {
     pub three: T,
     pub four: T,
     pub five: T,
-    pub six: T,
-    pub seven: T,
 }
 
 impl<T> Index<PlayerNumber> for Players<T> {
@@ -30,8 +28,6 @@ impl<T> Index<PlayerNumber> for Players<T> {
             PlayerNumber::Three => &self.three,
             PlayerNumber::Four => &self.four,
             PlayerNumber::Five => &self.five,
-            PlayerNumber::Six => &self.six,
-            PlayerNumber::Seven => &self.seven,
         }
     }
 }
@@ -44,8 +40,6 @@ impl<T> IndexMut<PlayerNumber> for Players<T> {
             PlayerNumber::Three => &mut self.three,
             PlayerNumber::Four => &mut self.four,
             PlayerNumber::Five => &mut self.five,
-            PlayerNumber::Six => &mut self.six,
-            PlayerNumber::Seven => &mut self.seven,
         }
     }
 }
@@ -72,8 +66,6 @@ impl From<TeamState> for Players<Penalty> {
             three: team_state.players.get_penalty(2),
             four: team_state.players.get_penalty(3),
             five: team_state.players.get_penalty(4),
-            six: team_state.players.get_penalty(5),
-            seven: team_state.players.get_penalty(6),
         }
     }
 }
@@ -101,17 +93,13 @@ impl<'a, T> Iterator for PlayersIterator<'a, T> {
             PlayerNumber::Three => (PlayerNumber::Three, &self.data.three),
             PlayerNumber::Four => (PlayerNumber::Four, &self.data.four),
             PlayerNumber::Five => (PlayerNumber::Five, &self.data.five),
-            PlayerNumber::Six => (PlayerNumber::Six, &self.data.six),
-            PlayerNumber::Seven => (PlayerNumber::Seven, &self.data.seven),
         });
         self.player_number = match self.player_number {
             Some(PlayerNumber::One) => Some(PlayerNumber::Two),
             Some(PlayerNumber::Two) => Some(PlayerNumber::Three),
             Some(PlayerNumber::Three) => Some(PlayerNumber::Four),
             Some(PlayerNumber::Four) => Some(PlayerNumber::Five),
-            Some(PlayerNumber::Five) => Some(PlayerNumber::Six),
-            Some(PlayerNumber::Six) => Some(PlayerNumber::Seven),
-            Some(PlayerNumber::Seven) => None,
+            Some(PlayerNumber::Five) => None,
             None => None,
         };
         result
@@ -140,8 +128,6 @@ where
                 "three" => self.three.serialize_path(suffix, serializer),
                 "four" => self.four.serialize_path(suffix, serializer),
                 "five" => self.five.serialize_path(suffix, serializer),
-                "six" => self.six.serialize_path(suffix, serializer),
-                "seven" => self.seven.serialize_path(suffix, serializer),
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
@@ -167,14 +153,6 @@ where
                     .five
                     .serialize(serializer)
                     .map_err(Error::SerializationFailed),
-                "six" => self
-                    .six
-                    .serialize(serializer)
-                    .map_err(Error::SerializationFailed),
-                "seven" => self
-                    .seven
-                    .serialize(serializer)
-                    .map_err(Error::SerializationFailed),
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
@@ -198,8 +176,6 @@ where
                 "three" => self.three.deserialize_path(suffix, deserializer),
                 "four" => self.four.deserialize_path(suffix, deserializer),
                 "five" => self.five.deserialize_path(suffix, deserializer),
-                "six" => self.six.deserialize_path(suffix, deserializer),
-                "seven" => self.seven.deserialize_path(suffix, deserializer),
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
@@ -230,16 +206,6 @@ where
                         T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
                     Ok(())
                 }
-                "six" => {
-                    self.six =
-                        T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
-                    Ok(())
-                }
-                "seven" => {
-                    self.seven =
-                        T::deserialize(deserializer).map_err(Error::DeserializationFailed)?;
-                    Ok(())
-                }
                 name => Err(Error::UnexpectedPathSegment {
                     segment: name.to_string(),
                 }),
@@ -256,14 +222,9 @@ where
                 "three" => T::exists(suffix),
                 "four" => T::exists(suffix),
                 "five" => T::exists(suffix),
-                "six" => T::exists(suffix),
-                "seven" => T::exists(suffix),
                 _ => false,
             },
-            None => matches!(
-                path,
-                "one" | "two" | "three" | "four" | "five" | "six" | "seven"
-            ),
+            None => matches!(path, "one" | "two" | "three" | "four" | "five"),
         }
     }
 
@@ -293,16 +254,6 @@ where
                 T::get_fields()
                     .into_iter()
                     .map(|name| format!("five.{name}")),
-            )
-            .chain(
-                T::get_fields()
-                    .into_iter()
-                    .map(|name| format!("six.{name}")),
-            )
-            .chain(
-                T::get_fields()
-                    .into_iter()
-                    .map(|name| format!("seven.{name}")),
             )
             .collect()
     }
