@@ -11,11 +11,11 @@ use crate::RuleObstacle;
 use super::{FallState, FilteredGameState, Obstacle, PrimaryState, Role, Side};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, SerializeHierarchy)]
-pub struct WorldState {
+pub struct WorldState<'a> {
     pub ball: Option<BallState>,
     pub rule_ball: Option<BallState>,
     pub filtered_game_state: Option<FilteredGameState>,
-    pub game_controller_state: Option<GameControllerState>,
+    pub game_controller_state: Option<GameControllerState<'a>>,
     pub obstacles: Vec<Obstacle>,
     pub rule_obstacles: Vec<RuleObstacle>,
     pub position_of_interest: Point2<f32>,

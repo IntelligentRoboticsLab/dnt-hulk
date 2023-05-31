@@ -24,7 +24,7 @@ pub struct WhistleDetection {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
-pub struct Localization {
+pub struct Localization<'a> {
     pub circle_measurement_noise: Vector2<f32>,
     pub gradient_convergence_threshold: f32,
     pub gradient_descent_step_size: f32,
@@ -32,7 +32,7 @@ pub struct Localization {
     pub hypothesis_retain_factor: f32,
     pub initial_hypothesis_covariance: Matrix3<f32>,
     pub initial_hypothesis_score: f32,
-    pub initial_poses: Players<PLAYERS, InitialPose>,
+    pub initial_poses: Players<'a, PLAYERS, InitialPose>,
     pub line_length_acceptance_factor: f32,
     pub line_measurement_noise: Vector2<f32>,
     pub maximum_amount_of_gradient_descent_iterations: usize,
