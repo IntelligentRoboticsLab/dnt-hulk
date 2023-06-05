@@ -534,7 +534,7 @@
       },
       "four": {
         "center_line_offset_x": -1.0,
-        "side": "Right"
+        "side": "Left"
       },
       "five": {
         "center_line_offset_x": -1.0,
