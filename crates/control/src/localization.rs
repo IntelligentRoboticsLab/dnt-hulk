@@ -485,13 +485,44 @@ impl Localization {
             self.was_picked_up_while_penalized_with_motion_in_set = true;
         }
 
-        let robot_to_field = match primary_state {
-            PrimaryState::Ready | PrimaryState::Set | PrimaryState::Playing => {
+        let robot_to_field = match (primary_state, context.game_controller_state) {
+            (
+                PrimaryState::Initial | PrimaryState::Set | PrimaryState::Finished,
+                Some(GameControllerState {
+                    game_phase:
+                        GamePhase::PenaltyShootout {
+                            kicking_team: Team::Hulks,
+                        },
+                    ..
+                }),
+            ) => {
+                let penalty_shoot_out_striker_pose = Isometry2::translation(
+                    -context.field_dimensions.penalty_area_length
+                        + (context.field_dimensions.length / 2.0),
+                    0.0,
+                );
+                Some(penalty_shoot_out_striker_pose)
+            }
+            (
+                PrimaryState::Initial | PrimaryState::Set | PrimaryState::Finished,
+                Some(GameControllerState {
+                    game_phase:
+                        GamePhase::PenaltyShootout {
+                            kicking_team: Team::Opponent,
+                        },
+                    ..
+                }),
+            ) => {
+                let penalty_shoot_out_keeper_pose =
+                    Isometry2::translation(-context.field_dimensions.length / 2.0, 0.0);
+                Some(penalty_shoot_out_keeper_pose)
+            }
+            (PrimaryState::Ready | PrimaryState::Set | PrimaryState::Playing, _) => {
                 self.update_state(&mut context)?;
                 Some(*context.robot_to_field)
             }
 
-            PrimaryState::Unstiff | PrimaryState::Initial | PrimaryState::Finished => {
+            (PrimaryState::Unstiff | PrimaryState::Initial | PrimaryState::Finished, _) => {
                 *context.robot_to_field = generate_initial_pose(
                     &context.initial_poses[*context.player_number],
                     context.field_dimensions,
