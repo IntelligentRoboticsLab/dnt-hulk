@@ -13,7 +13,6 @@ use communication::{
     client::{Communication, ConnectionStatus, CyclerOutput, SubscriberMessage},
     messages::Format,
 };
-use constants::DNT_TEAM_NUMBER;
 use serde_json::json;
 
 use tokio::process::Command;
@@ -305,13 +304,13 @@ impl Nao {
         String::from_utf8(output.stdout).wrap_err("failed to decode UTF-8")
     }
 
-    pub async fn set_last_ip_octet(&self, octet: u8) -> Result<String> {
+    pub async fn set_last_ip_octet(&self, frist_octet: u8, second_octet: u8) -> Result<String> {
         self.ssh_to_nao()
             .arg("sudo")
             .arg("sh")
             .arg("~/configure_network")
-            .arg(octet.to_string())
-            .arg(DNT_TEAM_NUMBER.to_string())
+            .arg(frist_octet.to_string())
+            .arg(second_octet.to_string())
             .spawn()
             .wrap_err("failed to execute configure_network ssh command")?;
 

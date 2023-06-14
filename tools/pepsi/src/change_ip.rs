@@ -11,13 +11,20 @@ pub struct Arguments {
     #[arg(required = true)]
     pub nao: NaoAddress,
 
+    /// The third octet of the new ip address for the robot.
+    pub first_octet: u8,
+
     /// The last octet of the new ip address for the robot.
-    pub octet: u8,
+    pub second_octet: u8,
 }
 
 pub async fn change_ip(arguments: Arguments) -> Result<()> {
     let nao = Nao::new(arguments.nao.ip);
-    println!("{}", nao.set_last_ip_octet(arguments.octet).await?);
+    println!(
+        "{}",
+        nao.set_last_ip_octet(arguments.first_octet, arguments.second_octet)
+            .await?
+    );
 
     Ok(())
 }
