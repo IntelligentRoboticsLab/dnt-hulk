@@ -55,8 +55,6 @@ impl TryFrom<SPLStandardMessage<SPLPacket>> for SplMessage {
                 3 => PlayerNumber::Three,
                 4 => PlayerNumber::Four,
                 5 => PlayerNumber::Five,
-                6 => PlayerNumber::Six,
-                7 => PlayerNumber::Seven,
                 _ => bail!("unexpected player number {}", message.player_num),
             },
             fallen: match message.fallen {
@@ -110,8 +108,6 @@ impl From<SplMessage> for SPLStandardMessage<SPLPacket> {
                 PlayerNumber::Three => 3,
                 PlayerNumber::Four => 4,
                 PlayerNumber::Five => 5,
-                PlayerNumber::Six => 6,
-                PlayerNumber::Seven => 7,
             },
             DNT_TEAM_NUMBER,
             u8::from(message.fallen),

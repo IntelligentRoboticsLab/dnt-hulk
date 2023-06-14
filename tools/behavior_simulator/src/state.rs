@@ -55,8 +55,6 @@ impl State {
                 three: Penalty::None,
                 four: Penalty::None,
                 five: Penalty::None,
-                six: Penalty::None,
-                seven: Penalty::None,
             },
             remaining_amount_of_messages: 1200,
             sub_state: None,

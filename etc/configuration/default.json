@@ -529,22 +529,14 @@
         "side": "Left"
       },
       "three": {
-        "center_line_offset_x": -3.5,
-        "side": "Right"
-      },
-      "four": {
         "center_line_offset_x": -2.0,
         "side": "Right"
       },
-      "five": {
-        "center_line_offset_x": -3.0,
-        "side": "Right"
-      },
-      "six": {
+      "four": {
         "center_line_offset_x": -1.0,
         "side": "Left"
       },
-      "seven": {
+      "five": {
         "center_line_offset_x": -1.0,
         "side": "Right"
       }
@@ -956,7 +948,7 @@
     "goal_post_diameter": 0.1,
     "goal_depth": 0.5
   },
-  "player_number": "Seven",
+  "player_number": "Five",
   "spl_network": {
     "game_controller_return_message_interval": {
       "nanos": 0,
