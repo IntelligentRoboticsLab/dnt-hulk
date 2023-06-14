@@ -1,6 +1,7 @@
 use std::{iter::once, ops::Range};
 
 use communication::messages::Fields;
+use constants::DNT_TEAM_NUMBER;
 use eframe::egui::{
     text::CCursor, text_edit::CCursorRange, Area, Context, Frame, Id, Key, Modifiers, Order,
     Response, ScrollArea, TextEdit, Ui, Widget,
@@ -41,8 +42,10 @@ impl<'key> CompletionEdit<'key> {
     pub fn addresses(key: &'key mut String, numbers: Range<u8>) -> Self {
         let completion_items = chain!(
             once("localhost".to_string()),
-            numbers.clone().map(|number| format!("10.1.8.{number}")),
-            numbers.map(|number| format!("10.0.8.{number}"))
+            numbers
+                .clone()
+                .map(|number| format!("10.1.{DNT_TEAM_NUMBER}.{number}")),
+            numbers.map(|number| format!("10.0.{DNT_TEAM_NUMBER}.{number}"))
         )
         .collect();
 
