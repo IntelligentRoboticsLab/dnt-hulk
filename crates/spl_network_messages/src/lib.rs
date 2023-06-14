@@ -27,8 +27,6 @@ pub struct BallPosition {
     pub age: Duration,
 }
 
-pub const DNT_TEAM_NUMBER: u8 = 8;
-
 use bifrost::serialization::{Decode, Encode};
 
 #[derive(

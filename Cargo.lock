@@ -4496,6 +4496,7 @@ dependencies = [
  "bindgen 0.61.0",
  "byteorder",
  "color-eyre",
+ "constants",
  "nalgebra",
  "serde",
  "serialize_hierarchy",

@@ -13,6 +13,7 @@ approx = { workspace = true }
 bifrost = { workspace = true }
 byteorder = { workspace = true }
 color-eyre = { workspace = true }
+constants = { workspace = true }
 nalgebra = { workspace = true }
 serde = { workspace = true }
 serialize_hierarchy = { workspace = true }

@@ -4,12 +4,13 @@ use std::{
 };
 
 use color_eyre::{eyre::bail, Report, Result};
+use constants::DNT_TEAM_NUMBER;
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
 use crate::{
     CompetitionPhase, CompetitionType, GamePhase, GameState, Half, PenaltyShoot, Player, SubState,
-    Team, TeamColor, TeamState, DNT_TEAM_NUMBER,
+    Team, TeamColor, TeamState,
 };
 use bifrost::{communication::RoboCupGameControlData, serialization::Decode};
 

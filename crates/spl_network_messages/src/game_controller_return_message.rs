@@ -1,10 +1,11 @@
 use std::time::Duration;
 
 use color_eyre::{Report, Result};
+use constants::DNT_TEAM_NUMBER;
 use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 
-use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
+use crate::{BallPosition, PlayerNumber};
 
 use bifrost::{
     communication::RoboCupGameControlReturnData,
