@@ -326,6 +326,7 @@ impl Nao {
             Network::SplD,
             Network::SplE,
             Network::SplF,
+            Network::Dnt5G,
         ]
         .into_iter()
         .map(|possible_network| {
