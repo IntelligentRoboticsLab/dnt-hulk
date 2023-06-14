@@ -19,6 +19,11 @@ pub fn execute(
                     sub_state: Some(SubState::PenaltyKick),
                     kicking_team,
                     ..
+                })
+                | Some(GameControllerState {
+                    game_phase: GamePhase::PenaltyShootout { .. },
+                    kicking_team,
+                    ..
                 }) => {
                     let side_factor = match kicking_team {
                         Team::Opponent => -1.0,
