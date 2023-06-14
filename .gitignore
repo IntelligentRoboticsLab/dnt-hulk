@@ -7,6 +7,7 @@
 
 settings.json
 /naosdk
+/etc/configuration/nao_location
 
 *.edited
 *~
