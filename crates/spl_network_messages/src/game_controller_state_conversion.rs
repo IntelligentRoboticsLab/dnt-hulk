@@ -1,9 +1,8 @@
 use color_eyre::{Report, Result};
+use constants::DNT_TEAM_NUMBER;
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 use std::time::Duration;
-
-use crate::DNT_TEAM_NUMBER;
 
 use bifrost::{
     communication::{

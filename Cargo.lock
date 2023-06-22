@@ -4477,6 +4477,7 @@ name = "spl_network"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "constants",
  "context_attribute",
  "framework",
  "log",
@@ -4496,6 +4497,7 @@ dependencies = [
  "bindgen 0.61.0",
  "byteorder",
  "color-eyre",
+ "constants",
  "nalgebra",
  "serde",
  "serialize_hierarchy",
@@ -5113,6 +5115,7 @@ dependencies = [
  "bincode",
  "color-eyre",
  "communication",
+ "constants",
  "convert_case",
  "eframe",
  "egui_dock",

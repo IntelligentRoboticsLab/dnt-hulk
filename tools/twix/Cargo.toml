@@ -9,6 +9,7 @@ homepage = "https://github.com/hulks/hulk"
 bincode = { workspace = true }
 color-eyre = { workspace = true }
 communication = { workspace = true }
+constants = { workspace = true }
 convert_case = { workspace = true }
 eframe = { workspace = true }
 egui_dock = { workspace = true }

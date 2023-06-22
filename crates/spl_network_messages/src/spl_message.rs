@@ -4,11 +4,12 @@ use std::{
 };
 
 use color_eyre::{eyre::bail, Report, Result};
+use constants::DNT_TEAM_NUMBER;
 use nalgebra::{point, vector, Isometry2};
 use serde::{Deserialize, Serialize};
 use serialize_hierarchy::SerializeHierarchy;
 
-use crate::{BallPosition, PlayerNumber, DNT_TEAM_NUMBER};
+use crate::{BallPosition, PlayerNumber};
 
 use bifrost::communication::SPLStandardMessage;
 
