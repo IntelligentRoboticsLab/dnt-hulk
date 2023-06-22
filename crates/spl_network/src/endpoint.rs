@@ -9,6 +9,10 @@ use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
 
+use constants::DNT_TEAM_NUMBER;
+
+const SPL_PORT: u16 = 10000 + (DNT_TEAM_NUMBER as u16);
+
 pub struct Endpoint {
     ports: Ports,
     game_controller_state_socket: UdpSocket,
@@ -34,7 +38,7 @@ impl Endpoint {
         ))
         .await
         .map_err(Error::CannotBind)?;
-        let spl_socket = UdpSocket::bind(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, parameters.spl))
+        let spl_socket = UdpSocket::bind(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, SPL_PORT))
             .await
             .map_err(Error::CannotBind)?;
         spl_socket
@@ -111,7 +115,7 @@ impl Endpoint {
                     .spl_socket
                     .send_to(
                         message.as_slice(),
-                        SocketAddr::new(Ipv4Addr::BROADCAST.into(), self.ports.spl),
+                        SocketAddr::new(Ipv4Addr::BROADCAST.into(), SPL_PORT),
                     )
                     .await
                 {
@@ -126,5 +130,4 @@ impl Endpoint {
 pub struct Ports {
     game_controller_state: u16,
     game_controller_return: u16,
-    spl: u16,
 }

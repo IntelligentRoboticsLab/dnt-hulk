@@ -4477,6 +4477,7 @@ name = "spl_network"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "constants",
  "context_attribute",
  "framework",
  "log",
