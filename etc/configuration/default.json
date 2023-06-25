@@ -10,8 +10,8 @@
   },
   "wee_sound": {
     "timeout": {
-        "nanos": 0,
-        "secs": 3
+      "nanos": 0,
+      "secs": 3
     }
   },
   "ball_detection": {
@@ -521,24 +521,24 @@
     "initial_hypothesis_score": 10.0,
     "initial_poses": {
       "one": {
-        "center_line_offset_x": -3.0,
+        "center_line_offset_x": -3.5,
         "side": "Left"
       },
       "two": {
-        "center_line_offset_x": -2.0,
+        "center_line_offset_x": -3.0,
         "side": "Left"
       },
       "three": {
-        "center_line_offset_x": -2.0,
+        "center_line_offset_x": -3.0,
         "side": "Right"
       },
       "four": {
         "center_line_offset_x": -1.0,
-        "side": "Left"
+        "side": "Right"
       },
       "five": {
         "center_line_offset_x": -1.0,
-        "side": "Right"
+        "side": "Left"
       }
     },
     "line_length_acceptance_factor": 1.5,
