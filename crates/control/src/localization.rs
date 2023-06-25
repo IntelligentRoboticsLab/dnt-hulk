@@ -529,6 +529,10 @@ impl Localization {
                 );
                 Some(*context.robot_to_field)
             }
+            (PrimaryState::Calibration, _) => {
+                *context.robot_to_field = Isometry2::identity();
+                Some(*context.robot_to_field)
+            }
             _ => None,
         };
         Ok(MainOutputs {
