@@ -20,11 +20,20 @@ pub struct Arguments {
 
 pub async fn change_ip(arguments: Arguments) -> Result<()> {
     let nao = Nao::new(arguments.nao.ip);
-    println!(
-        "{}",
-        nao.set_last_ip_octet(arguments.first_octet, arguments.second_octet)
-            .await?
-    );
 
-    Ok(())
+    let res = nao
+        .set_last_ip_octets(arguments.first_octet, arguments.second_octet)
+        .await;
+
+    if let Ok(_) = res {
+        println!(
+            "The new IP address is: {}.{}.{}.{}",
+            arguments.nao.ip.octets()[0],
+            arguments.nao.ip.octets()[1],
+            arguments.first_octet,
+            arguments.second_octet
+        );
+    }
+
+    res
 }

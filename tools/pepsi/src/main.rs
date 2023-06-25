@@ -60,9 +60,9 @@ async fn main() -> Result<()> {
     let repository = repository_root.map(Repository::new);
 
     match arguments.command {
-        Command::Changeip(arguments) => change_ip(arguments)
+        Command::ChangeIp(arguments) => change_ip(arguments)
             .await
-            .context("Failed to execute change_ip command")?,
+            .wrap_err("failed to execute change_ip command")?,
         Command::Analyze(arguments) => analyze(arguments, &repository?)
             .await
             .wrap_err("failed to execute analyze command")?,
@@ -144,7 +144,7 @@ struct Arguments {
 #[derive(Subcommand)]
 enum Command {
     /// Change ip address of NAOs
-    Changeip(ChangeIpArguments),
+    ChangeIp(ChangeIpArguments),
     /// Analyze source code
     #[clap(subcommand)]
     Analyze(AnalyzeArguments),

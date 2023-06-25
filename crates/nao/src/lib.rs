@@ -304,7 +304,7 @@ impl Nao {
         String::from_utf8(output.stdout).wrap_err("failed to decode UTF-8")
     }
 
-    pub async fn set_last_ip_octet(&self, first_octet: u8, second_octet: u8) -> Result<String> {
+    pub async fn set_last_ip_octets(&self, first_octet: u8, second_octet: u8) -> Result<()> {
         self.ssh_to_nao()
             .arg("sudo")
             .arg("sh")
@@ -314,7 +314,7 @@ impl Nao {
             .spawn()
             .wrap_err("failed to execute configure_network ssh command")?;
 
-        Ok("Updated the IP address, please reconnect!".into())
+        Ok(())
     }
 
     pub async fn set_network(&self, network: Network) -> Result<()> {
