@@ -115,6 +115,14 @@ impl RoleAssignment {
             }
         };
 
+        let loser_timeout = match self.last_received_spl_striker_message {
+            None => false,
+            Some(last_received_spl_striker_message) => {
+                cycle_start_time.duration_since(last_received_spl_striker_message)? + Duration::new(7, 0)
+                    > context.spl_network.spl_striker_message_receive_timeout
+            }
+        };
+
         let silence_interval_has_passed = match self.last_transmitted_spl_striker_message {
             Some(last_transmitted_spl_striker_message) => {
                 cycle_start_time.duration_since(last_transmitted_spl_striker_message)?
@@ -149,7 +157,7 @@ impl RoleAssignment {
             match role {
                 Role::Keeper => {
                     team_ball = None;
-                }
+                }   
                 Role::ReplacementKeeper => {
                     team_ball = None;
                 }
@@ -158,7 +166,12 @@ impl RoleAssignment {
                     team_ball = None;
                     role = Role::Loser;
                 }
+                Role::Loser if loser_timeout => {
+                    team_ball = None;
+                    role = Role::Searcher;
+                }
                 _ => {
+                    println!("General transition");
                     send_spl_striker_message = false;
                     team_ball = None;
                     role = Role::Searcher
@@ -289,6 +302,7 @@ fn process_role_state_machine(
     striker_trusts_team_ball: Duration,
     optional_roles: &[Role],
 ) -> (Role, bool, Option<BallPosition>) {
+    // Returns (role, send_spl_striker_message, team_ball)
     if let Some(game_controller_state) = game_controller_state {
         match game_controller_state.game_phase {
             GamePhase::PenaltyShootout {

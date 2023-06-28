@@ -8,5 +8,6 @@
       ]
     }
   },
+  "disable_communication_acceptor": true,
   "player_number": "One"
 }
