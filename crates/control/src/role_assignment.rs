@@ -3,7 +3,7 @@ use std::time::{Duration, SystemTime};
 use color_eyre::{eyre::WrapErr, Result};
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
-use nalgebra::{Isometry2, Point2};
+use nalgebra::{Isometry2, Point2, Vector2};
 use spl_network_messages::{
     GameControllerReturnMessage, GamePhase, HulkMessage, Penalty, PlayerNumber, Team,
 };
@@ -636,7 +636,7 @@ fn am_better_striker(
 ) -> bool {
         let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
         // Distance calculation
-        let our_distance = relative_ball.coords.norm()
+        let our_distance = relative_ball.coords.norm();
         let other_distance = spl_message_ball_position.relative_position.coords.norm();
         // Angle calculation
         let ball_to_us = Vector2::new(relative_ball.x, relative_ball.y);
@@ -649,11 +649,11 @@ fn am_better_striker(
         // m/s: 0.175
         // 2pi turn: 8 sec.
         // 1 turn equals 1.4 meters
-        let our_estimated_time: f32 = (our_angle / (2*PI)) * 8.0 + our_distance * 1.75;
-        let other_estimated_time: f32 = (other_angle / (2*PI)) * 8.0 + other_distance * 1.75;
+        let our_estimated_time: f32 = (our_angle / (2.0*3.14)) * 8.0 + our_distance * 1.75;
+        let other_estimated_time: f32 = (other_angle / (2.0*3.14)) * 8.0 + other_distance * 1.75;
         println!("Starting calculation");
         println!("{ball_to_us}: the distance from the ball to us (presumably in meters)");
-        println!("{angle}: the angle between us and the angle, in rad.");
+        println!("{our_angle}: the angle between us and the angle, in rad.");
         println!("{our_estimated_time}: our estimated time.");
         return our_estimated_time < other_estimated_time;
         
