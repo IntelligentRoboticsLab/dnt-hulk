@@ -634,10 +634,29 @@ fn am_better_striker(
     origin_pose: Isometry2<f32>,
     spl_message_ball_position: &spl_network_messages::BallPosition,
 ) -> bool {
-    (current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position)
-        .coords
-        .norm()
-        < spl_message_ball_position.relative_position.coords.norm()
+        let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
+        // Distance calculation
+        let our_distance = relative_ball.coords.norm()
+        let other_distance = spl_message_ball_position.relative_position.coords.norm();
+        // Angle calculation
+        let ball_to_us = Vector2::new(relative_ball.x, relative_ball.y);
+        let ball_to_other = Vector2::new(spl_message_ball_position.relative_position.x, spl_message_ball_position.relative_position.y);
+        let forward = Vector2::x();
+        let our_angle = forward.angle(&ball_to_us);
+        let other_angle = forward.angle(&ball_to_other);
+
+        // Creating the overall score
+        // m/s: 0.175
+        // 2pi turn: 8 sec.
+        // 1 turn equals 1.4 meters
+        let our_estimated_time: f32 = (our_angle / (2*PI)) * 8.0 + our_distance * 1.75;
+        let other_estimated_time: f32 = (other_angle / (2*PI)) * 8.0 + other_distance * 1.75;
+        println!("Starting calculation");
+        println!("{ball_to_us}: the distance from the ball to us (presumably in meters)");
+        println!("{angle}: the angle between us and the angle, in rad.");
+        println!("{our_estimated_time}: our estimated time.");
+        return our_estimated_time < other_estimated_time;
+        
 }
 
 fn generate_role(
