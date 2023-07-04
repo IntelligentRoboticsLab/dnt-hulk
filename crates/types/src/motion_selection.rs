@@ -11,6 +11,7 @@ pub struct MotionSelection {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, SerializeHierarchy)]
 pub enum MotionType {
+    Split,
     ArmsUpSquat,
     Dispatching,
     EnergySavingStand,
@@ -34,6 +35,7 @@ impl Default for MotionType {
 
 #[derive(Clone, Debug, Deserialize, Serialize, SerializeHierarchy)]
 pub struct MotionSafeExits {
+    split: bool,
     arms_up_squat: bool,
     dispatching: bool,
     energy_saving_stand: bool,
@@ -52,6 +54,7 @@ pub struct MotionSafeExits {
 impl Default for MotionSafeExits {
     fn default() -> Self {
         Self {
+            split: true,
             arms_up_squat: true,
             dispatching: false,
             energy_saving_stand: true,
@@ -74,6 +77,7 @@ impl Index<MotionType> for MotionSafeExits {
 
     fn index(&self, motion_type: MotionType) -> &Self::Output {
         match motion_type {
+            MotionType::Split => &self.split,
             MotionType::ArmsUpSquat => &self.arms_up_squat,
             MotionType::Dispatching => &self.dispatching,
             MotionType::EnergySavingStand => &self.energy_saving_stand,
@@ -94,6 +98,7 @@ impl Index<MotionType> for MotionSafeExits {
 impl IndexMut<MotionType> for MotionSafeExits {
     fn index_mut(&mut self, motion_type: MotionType) -> &mut Self::Output {
         match motion_type {
+            MotionType::Split => &mut self.split,
             MotionType::ArmsUpSquat => &mut self.arms_up_squat,
             MotionType::Dispatching => &mut self.dispatching,
             MotionType::EnergySavingStand => &mut self.energy_saving_stand,

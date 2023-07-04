@@ -1,3 +1,4 @@
+pub mod split;
 pub mod arms_up_squat;
 pub mod condition_input_provider;
 pub mod dispatching_interpolator;

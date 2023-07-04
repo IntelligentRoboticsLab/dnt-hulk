@@ -21,6 +21,7 @@ pub struct CycleContext {
     pub penalized_pose: Parameter<Joints<f32>, "penalized_pose">,
     pub ready_pose: Parameter<Joints<f32>, "ready_pose">,
 
+    pub split_joints_command: Input<JointsCommand<f32>, "split_joints_command">,    
     pub arms_up_squat_joints_command: Input<JointsCommand<f32>, "arms_up_squat_joints_command">,
     pub dispatching_command: Input<JointsCommand<f32>, "dispatching_command">,
     pub energy_saving_stand_command: Input<BodyJointsCommand<f32>, "energy_saving_stand_command">,
@@ -54,6 +55,7 @@ impl JointCommandSender {
         let fall_protection_stiffnesses = context.fall_protection_command.stiffnesses;
         let head_joints_command = context.head_joints_command;
         let motion_selection = context.motion_selection;
+        let split = context.split_joints_command;
         let arms_up_squat = context.arms_up_squat_joints_command;
         let jump_left = context.jump_left_joints_command;
         let jump_right = context.jump_right_joints_command;
@@ -63,6 +65,7 @@ impl JointCommandSender {
         let walk = context.walk_joints_command;
 
         let (positions, stiffnesses) = match motion_selection.current_motion {
+            MotionType::Split => (split.positions, split.stiffnesses),
             MotionType::ArmsUpSquat => (arms_up_squat.positions, arms_up_squat.stiffnesses),
             MotionType::Dispatching => (
                 dispatching_command.positions,

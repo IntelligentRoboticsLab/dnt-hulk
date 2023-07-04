@@ -21,6 +21,7 @@ pub struct CreationContext {}
 
 #[context]
 pub struct CycleContext {
+    pub split_joints_command: Input<JointsCommand<f32>, "split_joints_command">,
     pub arms_up_squat_joints_command: Input<JointsCommand<f32>, "arms_up_squat_joints_command">,
     pub condition_input: Input<ConditionInput, "condition_input">,
     pub energy_saving_stand: Input<BodyJointsCommand<f32>, "energy_saving_stand_command">,
@@ -80,6 +81,7 @@ impl DispatchingInterpolator {
 
         if interpolator_reset_required {
             let target_position = match dispatching_motion {
+                MotionType::Split => context.split_joints_command.positions,
                 MotionType::ArmsUpSquat => context.arms_up_squat_joints_command.positions,
                 MotionType::Dispatching => panic!("Dispatching cannot dispatch itself"),
                 MotionType::FallProtection => panic!("Is executed immediately"),

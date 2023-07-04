@@ -13,6 +13,7 @@ pub enum OrientationMode {
 #[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
 pub enum MotionCommand {
     ArmsUpSquat,
+    Split,
     FallProtection {
         direction: FallDirection,
     },
@@ -56,6 +57,7 @@ impl MotionCommand {
             MotionCommand::Penalized => Some(HeadMotion::ZeroAngles),
             MotionCommand::Unstiff => Some(HeadMotion::Unstiff),
             MotionCommand::ArmsUpSquat
+            | MotionCommand::Split
             | MotionCommand::FallProtection { .. }
             | MotionCommand::Jump { .. }
             | MotionCommand::StandUp { .. } => None,
