@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "walking_engine": {
     "base_foot_lift": 0.012500000186264517,
     "walk_hip_height": 0.16500000655651093
@@ -12,4 +13,74 @@
       ]
     }
   }
+=======
+  "disable_communication_acceptor": true,
+  "field_color_detection": {
+    "vision_bottom": {
+      "blue_chromaticity_threshold": 0.3799999952316284,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.4000000059604645,
+      "red_chromaticity_threshold": 0.3700000047683716,
+      "upper_green_chromaticity_threshold": 0.4149999916553498
+    },
+    "vision_top": {
+      "blue_chromaticity_threshold": 0.5999999642372131,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.38999783992767334,
+      "red_chromaticity_threshold": 0.800000011920929,
+      "upper_green_chromaticity_threshold": 0.3149999976158142
+    }
+  },
+  "image_segmenter": {
+    "vision_bottom": {
+      "horizontal_stride": 3,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 45,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 10
+    },
+    "vision_top": {
+      "horizontal_stride": 2,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 17,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 1
+    }
+  },
+  "line_detection": {
+    "vision_bottom": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
+      },
+      "check_line_distance": false,
+      "check_line_length": false,
+      "check_line_segments_projection": true,
+      "gradient_alignment": -0.949999988079071,
+      "maximum_distance_to_robot": 8.0,
+      "maximum_fit_distance_in_pixels": 7.0,
+      "maximum_gap_on_line": 75.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 4
+    },
+    "vision_top": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
+      },
+      "check_line_distance": true,
+      "check_line_length": false,
+      "check_line_segments_projection": true,
+      "gradient_alignment": -0.949999988079071,
+      "maximum_distance_to_robot": 7.0,
+      "maximum_fit_distance_in_pixels": 3.0,
+      "maximum_gap_on_line": 25.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 4
+    }
+  },
+  "player_number": "Four"
+>>>>>>> 1e4a4199 (calibration for field A B C)
 }

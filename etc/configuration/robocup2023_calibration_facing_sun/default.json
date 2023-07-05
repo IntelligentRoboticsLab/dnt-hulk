@@ -1,7 +1,11 @@
 {
   "camera_matrix_parameters": {
     "vision_top": {
-      "extrinsic_rotations": [-0.0, -3.9800000190734863, -1.2200000286102295]
+      "extrinsic_rotations": [
+        -0.029294192790985107,
+        -3.6775660514831543,
+        -0.25999999046325684
+      ]
     }
   },
   "field_color_detection": {
@@ -31,7 +35,7 @@
     "vision_top": {
       "horizontal_stride": 3,
       "vertical_edge_detection_source": "Luminance",
-      "vertical_edge_threshold": 17,
+      "vertical_edge_threshold": 12,
       "vertical_median_mode": "ThreePixels",
       "vertical_stride": 1
     }
