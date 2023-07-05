@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use color_eyre::Result;
 use context_attribute::context;
@@ -7,17 +7,17 @@ use nalgebra::{point, Point2};
 use spl_network_messages::{GamePhase, GameState, SubState, Team};
 use types::{
     configuration::{Behavior as BehaviorConfiguration, InWalkKicks, LostBall},
-    Action, CycleTime, FieldDimensions, FilteredGameState, GameControllerState, MotionCommand,
-    PathObstacle, PrimaryState, Role, Side, WorldState, FilteredWhistle
+    Action, CycleTime, FieldDimensions, FilteredGameState, FilteredWhistle, GameControllerState,
+    MotionCommand, PathObstacle, PrimaryState, Role, Side, WorldState,
 };
 
 use super::{
     calibrate,
     defend::Defend,
-    dribble, fall_safely,
+    detect_ref_signal, dribble, fall_safely,
     head::LookAction,
     initial, jump, look_around, lost_ball, penalize, prepare_jump, search, sit_down, stand,
-    stand_up, support, unstiff, walk_to_kick_off, walk_to_penalty_kick, detect_ref_signal,
+    stand_up, support, unstiff, walk_to_kick_off, walk_to_penalty_kick,
     walk_to_pose::{WalkAndStand, WalkPathPlanner},
 };
 
@@ -25,6 +25,7 @@ pub struct Behavior {
     last_motion_command: MotionCommand,
     absolute_last_known_ball_position: Point2<f32>,
     active_since: Option<SystemTime>,
+    active_since_visref: Option<SystemTime>,
 }
 
 #[context]
@@ -42,13 +43,12 @@ pub struct CycleContext {
     pub has_ground_contact: Input<bool, "has_ground_contact">,
     pub world_state: Input<WorldState, "world_state">,
     pub cycle_time: Input<CycleTime, "cycle_time">,
+    pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
 
     pub configuration: Parameter<BehaviorConfiguration, "behavior">,
     pub in_walk_kicks: Parameter<InWalkKicks, "in_walk_kicks">,
     pub field_dimensions: Parameter<FieldDimensions, "field_dimensions">,
     pub lost_ball_parameters: Parameter<LostBall, "behavior.lost_ball">,
-
-    pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
 }
 
 #[context]
@@ -63,6 +63,7 @@ impl Behavior {
             last_motion_command: MotionCommand::Unstiff,
             absolute_last_known_ball_position: point![0.0, 0.0],
             active_since: None,
+            active_since_visref: None,
         })
     }
 
@@ -92,6 +93,23 @@ impl Behavior {
             (Some(_), _) => self.active_since = None,
         }
 
+        match (
+            self.active_since_visref,
+            world_state.robot.primary_state,
+            context.filtered_whistle,
+        ) {
+            (
+                None,
+                PrimaryState::Set { .. } | PrimaryState::Playing { .. },
+                FilteredWhistle {
+                    is_detected: true, ..
+                },
+            ) => self.active_since_visref = Some(now),
+            (None, _, _) => {}
+            (Some(_), PrimaryState::Set { .. } | PrimaryState::Playing { .. }, _) => {}
+            (Some(_), _, _) => self.active_since_visref = None,
+        }
+
         let mut actions = vec![
             Action::Unstiff,
             Action::SitDown,
@@ -101,13 +119,18 @@ impl Behavior {
             Action::StandUp,
             Action::Stand,
             Action::Calibrate,
-            Action::DetectRefSignal
         ];
 
         if let Some(active_since) = self.active_since {
             if now.duration_since(active_since)? < context.configuration.initial_lookaround_duration
             {
                 actions.push(Action::LookAround);
+            }
+        }
+
+        if let Some(active_since_visref) = self.active_since_visref {
+            if now.duration_since(active_since_visref)? < Duration::from_secs(15) {
+                actions.push(Action::DetectRefSignal);
             }
         }
 
@@ -179,7 +202,6 @@ impl Behavior {
             .iter()
             .find_map(|action| {
                 let motion_command = match action {
-                    Action::DetectRefSignal => detect_ref_signal::execute(world_state, context.filtered_whistle),
                     Action::Unstiff => unstiff::execute(world_state),
                     Action::SitDown => sit_down::execute(world_state),
                     Action::Penalize => penalize::execute(world_state),
@@ -188,6 +210,9 @@ impl Behavior {
                         fall_safely::execute(world_state, *context.has_ground_contact)
                     }
                     Action::StandUp => stand_up::execute(world_state),
+                    Action::DetectRefSignal => {
+                        detect_ref_signal::execute(world_state, context.field_dimensions)
+                    }
                     Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::LookAround => look_around::execute(world_state),
                     Action::Calibrate => calibrate::execute(world_state),

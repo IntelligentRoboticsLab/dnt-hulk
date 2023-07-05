@@ -274,6 +274,7 @@ where
                     field_dimensions: &configuration.field_dimensions,
                     lost_ball_parameters: &configuration.behavior.lost_ball,
                     has_ground_contact: &true,
+                    filtered_whistle: &own_database.main_outputs.filtered_whistle,
                 })
                 .wrap_err("failed to execute cycle of node `Behavior`")?;
             own_database.main_outputs.motion_command = main_outputs.motion_command.value;

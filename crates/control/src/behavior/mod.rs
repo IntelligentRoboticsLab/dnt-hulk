@@ -1,5 +1,6 @@
 mod calibrate;
 mod defend;
+mod detect_ref_signal;
 mod dribble;
 mod fall_safely;
 mod head;
@@ -19,4 +20,3 @@ mod unstiff;
 mod walk_to_kick_off;
 mod walk_to_penalty_kick;
 mod walk_to_pose;
-mod detect_ref_signal;
