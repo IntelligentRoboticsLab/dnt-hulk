@@ -521,11 +521,11 @@
     "initial_hypothesis_score": 10.0,
     "initial_poses": {
       "one": {
-        "center_line_offset_x": -3.5,
+        "center_line_offset_x": -2.8499999046325684,
         "side": "Left"
       },
       "two": {
-        "center_line_offset_x": -2.8499999046325684,
+        "center_line_offset_x": -1.375,
         "side": "Left"
       },
       "three": {
