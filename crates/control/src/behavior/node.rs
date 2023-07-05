@@ -57,6 +57,11 @@ pub struct MainOutputs {
     pub motion_command: MainOutput<MotionCommand>,
 }
 
+pub enum VisRefFieldSide {
+    Left,
+    Right,            
+}
+
 impl Behavior {
     pub fn new(_context: CreationContext) -> Result<Self> {
         Ok(Self {
@@ -67,7 +72,7 @@ impl Behavior {
         })
     }
 
-    pub fn cycle(&mut self, mut context: CycleContext) -> Result<MainOutputs> {
+    pub fn cycle(&mut self, mut context: CycleContext) -> Result<MainOutputs> {       
         let world_state = context.world_state;
 
         if let Some(command) = &context.configuration.injected_motion_command {
@@ -130,7 +135,10 @@ impl Behavior {
 
         if let Some(active_since_visref) = self.active_since_visref {
             if now.duration_since(active_since_visref)? < Duration::from_secs(15) {
-                actions.push(Action::DetectRefSignal);
+                match world_state.robot.role {
+                    Role::DefenderLeft | Role::DefenderRight => actions.push(Action::DetectRefSignal),
+                    _ => (),
+                }
             }
         }
 
@@ -211,7 +219,7 @@ impl Behavior {
                     }
                     Action::StandUp => stand_up::execute(world_state),
                     Action::DetectRefSignal => {
-                        detect_ref_signal::execute(world_state, context.field_dimensions)
+                        detect_ref_signal::execute(world_state, context.field_dimensions, VisRefFieldSide::Right)
                     }
                     Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::LookAround => look_around::execute(world_state),
