@@ -520,24 +520,24 @@
     ],
     "initial_hypothesis_score": 10.0,
     "initial_poses": {
-      "five": {
-        "center_line_offset_x": -0.75,
-        "side": "Left"
-      },
-      "four": {
-        "center_line_offset_x": -0.75,
-        "side": "Right"
-      },
       "one": {
         "center_line_offset_x": -3.5,
+        "side": "Left"
+      },
+      "two": {
+        "center_line_offset_x": -2.8499999046325684,
         "side": "Left"
       },
       "three": {
         "center_line_offset_x": -2.8499999046325684,
         "side": "Right"
       },
-      "two": {
-        "center_line_offset_x": -2.8499999046325684,
+      "four": {
+        "center_line_offset_x": -0.75,
+        "side": "Right"
+      },
+      "five": {
+        "center_line_offset_x": -0.75,
         "side": "Left"
       }
     },
