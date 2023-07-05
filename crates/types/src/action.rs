@@ -27,4 +27,5 @@ pub enum Action {
     SearchForLostBall,
     WalkToKickOff,
     WalkToPenaltyKick,
+    DetectRefSignal,
 }

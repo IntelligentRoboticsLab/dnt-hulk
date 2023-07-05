@@ -8,7 +8,7 @@ use spl_network_messages::{GamePhase, GameState, SubState, Team};
 use types::{
     configuration::{Behavior as BehaviorConfiguration, InWalkKicks, LostBall},
     Action, CycleTime, FieldDimensions, FilteredGameState, GameControllerState, MotionCommand,
-    PathObstacle, PrimaryState, Role, Side, WorldState,
+    PathObstacle, PrimaryState, Role, Side, WorldState, FilteredWhistle
 };
 
 use super::{
@@ -17,7 +17,7 @@ use super::{
     dribble, fall_safely,
     head::LookAction,
     initial, jump, look_around, lost_ball, penalize, prepare_jump, search, sit_down, stand,
-    stand_up, support, unstiff, walk_to_kick_off, walk_to_penalty_kick,
+    stand_up, support, unstiff, walk_to_kick_off, walk_to_penalty_kick, detect_ref_signal,
     walk_to_pose::{WalkAndStand, WalkPathPlanner},
 };
 
@@ -47,6 +47,8 @@ pub struct CycleContext {
     pub in_walk_kicks: Parameter<InWalkKicks, "in_walk_kicks">,
     pub field_dimensions: Parameter<FieldDimensions, "field_dimensions">,
     pub lost_ball_parameters: Parameter<LostBall, "behavior.lost_ball">,
+
+    pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
 }
 
 #[context]
@@ -99,6 +101,7 @@ impl Behavior {
             Action::StandUp,
             Action::Stand,
             Action::Calibrate,
+            Action::DetectRefSignal
         ];
 
         if let Some(active_since) = self.active_since {
@@ -176,6 +179,7 @@ impl Behavior {
             .iter()
             .find_map(|action| {
                 let motion_command = match action {
+                    Action::DetectRefSignal => detect_ref_signal::execute(world_state, context.filtered_whistle),
                     Action::Unstiff => unstiff::execute(world_state),
                     Action::SitDown => sit_down::execute(world_state),
                     Action::Penalize => penalize::execute(world_state),
