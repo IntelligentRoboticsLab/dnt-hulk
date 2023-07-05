@@ -1,4 +1,5 @@
 pub mod a_star;
+pub mod referee;
 pub mod active_vision;
 pub mod ball_filter;
 pub mod ball_state_composer;
