@@ -8,5 +8,30 @@
       ]
     }
   },
-  "player_number": "Two"
+  "disable_communication_acceptor": true,
+  "localization": {
+    "initial_poses": {
+      "five": {
+        "center_line_offset_x": -0.75,
+        "side": "Left"
+      },
+      "four": {
+        "center_line_offset_x": -0.75,
+        "side": "Right"
+      },
+      "one": {
+        "center_line_offset_x": -3.900000095367432,
+        "side": "Left"
+      },
+      "three": {
+        "center_line_offset_x": -2.8499999046325684,
+        "side": "Right"
+      },
+      "two": {
+        "center_line_offset_x": -2.8499999046325684,
+        "side": "Left"
+      }
+    }
+  },
+  "player_number": "One"
 }
