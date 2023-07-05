@@ -1,0 +1,77 @@
+{
+  "camera_matrix_parameters": {
+    "vision_top": {
+      "extrinsic_rotations": [
+        -0.029294192790985107,
+        -3.6775660514831543,
+        -0.25999999046325684
+      ]
+    }
+  },
+  "field_color_detection": {
+    "vision_bottom": {
+      "blue_chromaticity_threshold": 0.3799999952316284,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.4200000464916229,
+      "red_chromaticity_threshold": 0.8700000047683716,
+      "upper_green_chromaticity_threshold": 0.4499998390674591
+    },
+    "vision_top": {
+      "blue_chromaticity_threshold": 0.5999999642372131,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.38999783992767334,
+      "red_chromaticity_threshold": 0.800000011920929,
+      "upper_green_chromaticity_threshold": 0.3149999976158142
+    }
+  },
+  "image_segmenter": {
+    "vision_bottom": {
+      "horizontal_stride": 3,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 30,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 12
+    },
+    "vision_top": {
+      "horizontal_stride": 3,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 12,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 1
+    }
+  },
+  "line_detection": {
+    "vision_bottom": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
+      },
+      "check_line_distance": false,
+      "check_line_length": false,
+      "check_line_segments_projection": false,
+      "gradient_alignment": -0.6499999761581421,
+      "maximum_distance_to_robot": 5.0,
+      "maximum_fit_distance_in_pixels": 15.0,
+      "maximum_gap_on_line": 75.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 4
+    },
+    "vision_top": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
+      },
+      "check_line_distance": false,
+      "check_line_length": false,
+      "check_line_segments_projection": true,
+      "gradient_alignment": -0.9499999284744264,
+      "maximum_distance_to_robot": 5.0,
+      "maximum_fit_distance_in_pixels": 3.0,
+      "maximum_gap_on_line": 25.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 5
+    }
+  }
+}
