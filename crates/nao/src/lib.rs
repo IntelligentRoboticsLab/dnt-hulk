@@ -304,6 +304,19 @@ impl Nao {
         String::from_utf8(output.stdout).wrap_err("failed to decode UTF-8")
     }
 
+    pub async fn set_last_ip_octets(&self, first_octet: u8, second_octet: u8) -> Result<()> {
+        self.ssh_to_nao()
+            .arg("sudo")
+            .arg("sh")
+            .arg("~/configure_network")
+            .arg(first_octet.to_string())
+            .arg(second_octet.to_string())
+            .spawn()
+            .wrap_err("failed to execute configure_network ssh command")?;
+
+        Ok(())
+    }
+
     pub async fn set_network(&self, network: Network) -> Result<()> {
         let command_string = [
             Network::SplA,
@@ -312,6 +325,7 @@ impl Nao {
             Network::SplD,
             Network::SplE,
             Network::SplF,
+            Network::Dnt5G,
         ]
         .into_iter()
         .map(|possible_network| {
