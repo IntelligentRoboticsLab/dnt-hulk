@@ -762,6 +762,7 @@
       "MidfielderRight",
       "MidfielderLeft"
     ],
+    "loser_duration": 10,
     "injected_motion_command": null,
     "role_positions": {
       "defender_aggressive_ring_radius": 2.0,

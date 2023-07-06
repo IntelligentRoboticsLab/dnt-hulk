@@ -45,6 +45,7 @@ pub struct CycleContext {
     pub initial_poses: Parameter<Players<InitialPose>, "localization.initial_poses">,
     pub optional_roles: Parameter<Vec<Role>, "behavior.optional_roles">,
     pub player_number: Parameter<PlayerNumber, "player_number">,
+    pub loser_duration: Parameter<Duration, "behavior.loser_duration">,
     pub spl_network: Parameter<SplNetwork, "spl_network">,
     pub network_message: PerceptionInput<IncomingMessage, "SplNetwork", "message">,
 
@@ -120,7 +121,7 @@ impl RoleAssignment {
             None => false,
             Some(last_received_spl_striker_message) => {
                 let t = cycle_start_time.duration_since(last_received_spl_striker_message)?
-                    > context.spl_network.spl_striker_message_receive_timeout + Duration::new(7, 0);
+                    > *context.loser_duration;
 
                 println!(
                     "loser timeout passed: {:?}, threshold: {:?}: bool: {:?}",

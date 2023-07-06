@@ -1,3 +1,4 @@
 {
-  "player_number": "Five"
+  "disable_communication_acceptor": true,
+  "player_number": "Three"
 }
