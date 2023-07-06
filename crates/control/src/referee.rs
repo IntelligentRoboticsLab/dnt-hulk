@@ -23,12 +23,12 @@ pub struct CreationContext {
 
 #[context]
 pub struct CycleContext {
+    pub image: Input<YCbCr422Image, "image">,
     pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
     pub hardware: HardwareInterface,
     pub cycle_time: Input<CycleTime, "cycle_time">,
     pub player_number: Parameter<PlayerNumber, "player_number">,
     pub robot_to_field: Input<Option<Isometry2<f32>>, "robot_to_field?">,
-    // pub image: Input<YCbCr422Image, "image">,
 }
 
 impl Referee {
@@ -56,56 +56,57 @@ impl Referee {
             }
         }
 
-        // let input_img = resize_image(&context.image);
-        // let input = self.lstm.classifier.input_mut(0);
+        let input_img = self.resize_image(&context.image);
+        let input = self.lstm.input_mut(0);
 
-        // self.lstm.classifier.apply();
-        // self.lstm.classifier.output(0).data[0];
+        self.lstm.apply();
+        self.lstm.output(0).data[0];
 
         Ok(())
     }
 
-    // fn rgb_image_from_buffer_422(width_422: u32, height: u32, buffer: &[YCbCr422]) -> RgbImage {
-    //     let mut rgb_image = RgbImage::new(2 * width_422, height);
+    fn rgb_image_from_buffer_422(width_422: u32, height: u32, buffer: &[YCbCr422]) -> RgbImage {
+        let mut rgb_image = RgbImage::new(2 * width_422, height);
 
-    //     for y in 0..height {
-    //         for x in 0..width_422 {
-    //             let pixel = buffer[(y * width_422 + x) as usize];
-    //             let left_color: Rgb = YCbCr444 {
-    //                 y: pixel.y1,
-    //                 cb: pixel.cb,
-    //                 cr: pixel.cr,
-    //             }
-    //             .into();
-    //             let right_color: Rgb = YCbCr444 {
-    //                 y: pixel.y2,
-    //                 cb: pixel.cb,
-    //                 cr: pixel.cr,
-    //             }
-    //             .into();
-    //             rgb_image.put_pixel(
-    //                 x * 2,
-    //                 y,
-    //                 image::Rgb([left_color.r, left_color.g, left_color.b]),
-    //             );
-    //             rgb_image.put_pixel(
-    //                 x * 2 + 1,
-    //                 y,
-    //                 image::Rgb([right_color.r, right_color.g, right_color.b]),
-    //             );
-    //         }
-    //     }
+        for y in 0..height {
+            for x in 0..width_422 {
+                let pixel = buffer[(y * width_422 + x) as usize];
+                let left_color: Rgb = YCbCr444 {
+                    y: pixel.y1,
+                    cb: pixel.cb,
+                    cr: pixel.cr,
+                }
+                .into();
+                let right_color: Rgb = YCbCr444 {
+                    y: pixel.y2,
+                    cb: pixel.cb,
+                    cr: pixel.cr,
+                }
+                .into();
+                rgb_image.put_pixel(
+                    x * 2,
+                    y,
+                    image::Rgb([left_color.r, left_color.g, left_color.b]),
+                );
+                rgb_image.put_pixel(
+                    x * 2 + 1,
+                    y,
+                    image::Rgb([right_color.r, right_color.g, right_color.b]),
+                );
+            }
+        }
 
-    //     rgb_image
-    // }
+        rgb_image
+    }
 
-    // fn resize_image(src: &YCbCr422Image) -> Result<YCbCr422Image> {
-    //     let mut rgb:RgbImage = rgb_image_from_buffer_422(src.width() / 2, src.height());
+    fn resize_image(src: &YCbCr422Image) -> YCbCr422Image {
+        let mut rgb:RgbImage = rgb_image_from_buffer_422(src.width() / 2, src.height());
 
-    //     let resized_image = imageops::resize(&rgb, 256, 256, image::imageops::FilterType::Triangle);
-    //     resized_image.to_image();
-    //     YCbCr422Image::from_raw_buffer(256 / 2, 256,resized_image.as_raw());
-    // }
+        let resized_image = imageops::resize(&rgb, 256, 256, image::imageops::FilterType::Triangle);
+        resized_image.to_image();
+        let result = YCbCr422Image::from_raw_buffer(256 / 2, 256,resized_image.to_vec());
+        result
+    }
 
     fn send_referee_message(
         &mut self,
