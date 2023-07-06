@@ -8,6 +8,7 @@ use types::{hardware::Interface, messages::OutgoingMessage, CycleTime, FilteredW
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
+    sent: bool,
 }
 
 #[context]
@@ -28,6 +29,7 @@ impl Referee {
     pub fn new(_context: CreationContext) -> Result<Self> {
         Ok(Self {
             last_heard_timestamp: None,
+            sent: false,
         })
     }
 
@@ -36,10 +38,16 @@ impl Referee {
             if let Some(cycle_time) = self.last_heard_timestamp {
                 match cycle_time.duration_since(cycle_time) {
                     Ok(duration) => {
-                        if duration.as_secs() < 20 {
+                        if duration.as_secs() < 20 && !self.sent {
                             let mut rng_gen = rand::thread_rng();
                             let handsignal: u8 = rng_gen.gen_range(1..=16);
                             self.send_referee_message(&context, handsignal)?;
+                            self.sent = true;
+                            return Ok(());
+                        }
+                        else {
+                            self.sent = false;
+                            self.last_heard_timestamp = None;
                         }
                     }
                     Err(_err) => {}
