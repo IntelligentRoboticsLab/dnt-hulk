@@ -43,7 +43,6 @@ impl Referee {
                             let handsignal: u8 = rng_gen.gen_range(1..=16);
                             self.send_referee_message(&context, handsignal)?;
                             self.sent = true;
-                            return Ok(());
                         }
                         else if duration.as_secs() >= 20{
                             self.sent = false;
@@ -63,7 +62,6 @@ impl Referee {
         context: &CycleContext<impl Interface>,
         handsignal: u8,
     ) -> Result<()> {
-        // self.last_transmitted_game_controller_return_message = Some(cycle_start_time);
         context
             .hardware
             .write_to_network(OutgoingMessage::GameController(
