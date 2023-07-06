@@ -1,20 +1,23 @@
-use std::time::{SystemTime};
-use color_eyre::{eyre::WrapErr, Result};
+use color_eyre::{Result};
 use context_attribute::context;
+use framework::{MainOutput};
 use compiled_nn::CompiledNN;
 use types::{
-    ycbcr422_image::YCbCr422Image, YCbCr422, YCbCr444, Rgb,
+    ycbcr422_image::YCbCr422Image, YCbCr422, YCbCr444, Rgb, handsignal::HandSignal,
 };
 use image::{RgbImage, imageops};
 
 pub struct Referee {
-    last_heard_timestamp: Option<SystemTime>,
     cnn: CompiledNN
 }
 
 #[context]
-pub struct CreationContext {
-    pub player_number: Parameter<PlayerNumber, "player_number">,
+pub struct CreationContext {}
+
+#[context]
+#[derive(Default)]
+pub struct MainOutputs {
+    pub detected_handsignal: MainOutput<HandSignal>,
 }
 
 #[context]
@@ -28,19 +31,27 @@ impl Referee {
         network.compile("tools/machine-learning/referee_challange/conv_orig_aug.h5");
 
         Ok(Self {
-            last_heard_timestamp: None,
             cnn: network,
         })
     }
 
-    pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<()> {
-        let input_img = self.resize_image(&context.image);
-        let input = self.cnn.input_mut(0);
+    pub fn cycle(&mut self, mut context: CycleContext) -> Result<MainOutputs> {
+        // let input_img = self.resize_image(&context.image);
+        // let input_tensor = self.cnn.input_mut(0);
 
-        self.cnn.apply();
-        self.cnn.output(0).data[0];
+        // // for y in 0..input_img.height() {
+        // //     for x in 0..input_img.width() {
+        // //         input_tensor.data[(x + y * 256) as usize] = types::Rgb::from(input_img.at(x, y));
+        // //     }
+        // // }
 
-        Ok(())
+        // self.cnn.apply();
+        // self.cnn.output(0).data[0];
+
+        let temp = 8;
+        Ok(MainOutputs {
+            detected_handsignal: HandSignal { handsignal: temp }.into(),
+        })
     }
 
     fn rgb_image_from_buffer_422(&self, width_422: u32, height: u32, buffer: &[YCbCr422]) -> RgbImage {
@@ -81,7 +92,6 @@ impl Referee {
         let mut rgb:RgbImage = self.rgb_image_from_buffer_422(src.width() / 2, src.height(), src.buffer());
 
         let resized_image = imageops::resize(&rgb, 256, 256, image::imageops::FilterType::Triangle);
-        resized_image.to_image();
         let result = YCbCr422Image::from_raw_buffer(256 / 2, 256,resized_image.to_vec());
         result
     }
