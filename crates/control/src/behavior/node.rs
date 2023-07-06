@@ -135,10 +135,12 @@ impl Behavior {
 
         if let Some(active_since_visref) = self.active_since_visref {
             if now.duration_since(active_since_visref)? < Duration::from_secs(15) {
-                match world_state.robot.role {
-                    Role::DefenderLeft | Role::DefenderRight => actions.push(Action::DetectRefSignal),
-                    _ => (),
-                }
+                // match world_state.robot.role {
+                //     Role::DefenderLeft | Role::DefenderRight => actions.push(Action::DetectRefSignal),
+                //     _ => (),
+                // }
+                actions.push(Action::DetectRefSignal);
+                println!("Pushing detect ref signal action");
             }
         }
 

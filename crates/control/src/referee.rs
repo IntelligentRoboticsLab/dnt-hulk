@@ -4,6 +4,7 @@ use context_attribute::context;
 use compiled_nn::CompiledNN;
 use nalgebra::Isometry2;
 use spl_network_messages::{GameControllerReturnMessage, PlayerNumber};
+use tokio::task::{self, JoinHandle};
 use types::{
     hardware::Interface,
     messages::{OutgoingMessage},
@@ -13,7 +14,8 @@ use image::{RgbImage, ImageBuffer, Rgb, imageops};
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
-    lstm: CompiledNN
+    lstm: CompiledNN,
+    detect_task: Option<JoinHandle<u8>>
 }
 
 #[context]
@@ -34,34 +36,47 @@ pub struct CycleContext {
 impl Referee {
     pub fn new(_context: CreationContext) -> Result<Self> {
         let mut network = CompiledNN::default();
-        network.compile("tools/machine-learning/referee_challange/conv_orig_aug.h5");
+        // network.compile("tools/machine-learning/referee_challange/conv_orig_aug.h5");
 
         Ok(Self {
             last_heard_timestamp: None,
             lstm: network,
+            detect_task: None
         })
     }
 
     pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<()> {
         if context.filtered_whistle.started_this_cycle {
-            if let Some(cycle_time) = self.last_heard_timestamp {
-                match cycle_time.duration_since(cycle_time) {
-                    Ok(duration) => {
-                        if duration.as_secs() < 20 {
-                            self.send_referee_message(&context, 1)?;
+            self.last_heard_timestamp = Some(context.cycle_time.start_time);
+        }
+        if let Some(cycle_time) = self.last_heard_timestamp {
+            match cycle_time.duration_since(context.cycle_time.start_time) {
+                Ok(duration) => {
+                    // Kill the task after reports are no longer accepted (20 seconds)
+                    if duration.as_secs() > 20 {
+                        if let Some(detect_task) = &mut self.detect_task {
+                            detect_task.abort();
+                            self.detect_task = None;
                         }
                     }
-                    Err(_err) => {}
+                    // Start the detect task whens the signal is show
+                    else if duration.as_secs() > 5 {
+                        if self.detect_task.is_none() {
+                            self.detect_task = Some(task::spawn(async {
+                                detect_post(YCbCr422Image::zero(256, 256))
+                            }))
+                        }
+                    }
                 }
+                Err(_err) => {}
             }
         }
-
-        // let input_img = resize_image(&context.image);
-        // let input = self.lstm.classifier.input_mut(0);
-
-        // self.lstm.classifier.apply();
-        // self.lstm.classifier.output(0).data[0];
-
+        if let Some(detect_task) = &mut self.detect_task {
+            if detect_task.is_finished(){
+                self.send_referee_message(&context, 1)?;
+                self.last_heard_timestamp = None;
+            }
+        }
         Ok(())
     }
 
@@ -127,4 +142,15 @@ impl Referee {
 
         Ok(())
     }
+}
+
+fn detect_post(
+    image: YCbCr422Image
+) -> u8 {
+    // let input_img = resize_image(&context.image);
+    // let input = self.lstm.classifier.input_mut(0);
+
+    // self.lstm.classifier.apply();
+    // self.lstm.classifier.output(0).data[0];
+    1
 }

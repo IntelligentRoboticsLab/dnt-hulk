@@ -1286,6 +1286,7 @@ dependencies = [
  "smallvec",
  "spl_network_messages",
  "thiserror",
+ "tokio",
  "types",
 ]
 
