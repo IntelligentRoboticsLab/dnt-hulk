@@ -46,9 +46,9 @@
         "end": 4.0,
         "start": 0.15000000596046448
       },
-      "check_line_distance": false,
-      "check_line_length": false,
-      "check_line_segments_projection": false,
+      "check_line_distance": true,
+      "check_line_length": true,
+      "check_line_segments_projection": true,
       "gradient_alignment": -0.6499999761581421,
       "maximum_distance_to_robot": 5.0,
       "maximum_fit_distance_in_pixels": 15.0,
@@ -62,8 +62,8 @@
         "end": 4.0,
         "start": 0.15000000596046448
       },
-      "check_line_distance": false,
-      "check_line_length": false,
+      "check_line_distance": true,
+      "check_line_length": true,
       "check_line_segments_projection": true,
       "gradient_alignment": -0.9499999284744264,
       "maximum_distance_to_robot": 5.0,

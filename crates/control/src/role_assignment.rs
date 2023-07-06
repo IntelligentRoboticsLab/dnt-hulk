@@ -120,7 +120,7 @@ impl RoleAssignment {
             None => false,
             Some(last_received_spl_striker_message) => {
                 cycle_start_time.duration_since(last_received_spl_striker_message)?
-                    > *context.loser_duration;
+                    > *context.loser_duration
             }
         };
 
