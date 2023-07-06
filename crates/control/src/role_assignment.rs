@@ -11,6 +11,7 @@ use spl_network_messages::{
 use types::{
     configuration::SplNetwork,
     hardware::Interface,
+    // configuration::RoleAssignmentsSpeeds,
     messages::{IncomingMessage, OutgoingMessage},
     BallPosition, CycleTime, FallState, FieldDimensions, GameControllerState, InitialPose, Players,
     PrimaryState, Role,

@@ -766,6 +766,11 @@
       "nanos": 0,
       "secs": 10
     },
+    "role_assignment_speeds": {
+      "walking_speed": 0.175,
+      "rotation_axis_time": 8.0,
+      "rotation_ball_time": 12.0
+    },
     "injected_motion_command": null,
     "role_positions": {
       "defender_aggressive_ring_radius": 2.0,
