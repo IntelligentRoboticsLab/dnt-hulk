@@ -1,4 +1,5 @@
 use std::time::{Duration, SystemTime};
+use std::f32::consts::PI;
 
 use color_eyre::{eyre::WrapErr, Result};
 use context_attribute::context;
@@ -206,6 +207,7 @@ impl RoleAssignment {
                 *context.player_number,
                 context.spl_network.striker_trusts_team_ball,
                 context.optional_roles,
+                context.field_dimensions,
             );
         } else {
             for spl_message in spl_messages {
@@ -228,6 +230,7 @@ impl RoleAssignment {
                     *context.player_number,
                     context.spl_network.striker_trusts_team_ball,
                     context.optional_roles,
+                    context.field_dimensions,
                 );
             }
         }
@@ -303,6 +306,7 @@ fn process_role_state_machine(
     player_number: PlayerNumber,
     striker_trusts_team_ball: Duration,
     optional_roles: &[Role],
+    field_dimensions: &FieldDimensions // size = 8, align = 0x8,
 ) -> (Role, bool, Option<BallPosition>) {
     // Returns (role, send_spl_striker_message, team_ball)
     if let Some(game_controller_state) = game_controller_state {
@@ -380,6 +384,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -404,6 +409,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -420,6 +426,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -448,6 +455,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -464,6 +472,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -489,6 +498,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -512,6 +522,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
 
@@ -544,6 +555,7 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
             ),
         },
     }
@@ -557,11 +569,13 @@ fn decide_if_claiming_striker_or_other_role(
     cycle_start_time: SystemTime,
     game_controller_state: Option<&GameControllerState>,
     optional_roles: &[Role],
+    field_positions: &FieldDimensions // size = 8, align = 0x8,
 ) -> (Role, bool, Option<BallPosition>) {
     if am_better_striker(
         current_pose,
         spl_message.robot_to_field,
         spl_message_ball_position,
+        field_positions,
     ) {
         (
             Role::Striker,
@@ -633,6 +647,7 @@ fn am_better_striker(
     current_pose: Isometry2<f32>,
     origin_pose: Isometry2<f32>,
     spl_message_ball_position: &spl_network_messages::BallPosition,
+    field_dimensions: &FieldDimensions // size = 8, align = 0x8,
 ) -> bool {
         let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
         // Distance calculation
@@ -642,22 +657,35 @@ fn am_better_striker(
         let ball_to_us = Vector2::new(relative_ball.x, relative_ball.y);
         let ball_to_other = Vector2::new(spl_message_ball_position.relative_position.x, spl_message_ball_position.relative_position.y);
         let forward = Vector2::x();
-        let our_angle = forward.angle(&ball_to_us);
-        let other_angle = forward.angle(&ball_to_other);
+        let our_first_angle = forward.angle(&ball_to_us);
+        let other_first_angle = forward.angle(&ball_to_other);
+
+        let opponent_goal_center_us = current_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
+        let opponent_goal_center_other = origin_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
+
+        let ball_to_goal_us = opponent_goal_center_us - ball_to_us;
+        let ball_to_goal_other = opponent_goal_center_other - ball_to_other;
+
+        let our_ball_to_our_goal = ball_to_us.angle(&opponent_goal_center_us);
+        let other_ball_to_other_goal = ball_to_other.angle(&opponent_goal_center_other);
+
+        let mut our_second_angle: f32 = ball_to_us.angle(&ball_to_goal_us);
+        if our_ball_to_our_goal > 0.5 * PI  {
+            our_second_angle -= PI;
+        }
+
+        let mut other_second_angle = ball_to_other.angle(&ball_to_goal_other);
+        if other_ball_to_other_goal > 0.5 * PI  {
+            other_second_angle -= PI;
+        }
 
         // Creating the overall score
         // m/s: 0.175
-        // 2pi turn: 8 sec.
+        // 2pi turn (first, around own axis): 8 sec.
+        // 2pi turn (second, around ball): 12 sec (estimate).
         // 1 turn equals 1.4 meters
-        let our_estimated_time: f32 = (our_angle / (2.0*3.14)) * 8.0 + our_distance * 0.175;
-        let other_estimated_time: f32 = (other_angle / (2.0*3.14)) * 8.0 + other_distance * 0.175;
-        println!("Starting calculation");
-        println!("{our_distance}: the distance from the ball to us (presumably in meters)");
-        println!("{other_distance}: the distance from the ball to the others (presumably in meters)");
-        println!("{our_angle}: the angle between us and the ball, in rad.");
-        println!("{other_angle}: the angle between the other and the ball, in rad.");
-        println!("{our_estimated_time}: our estimated time.");
-        println!("{other_estimated_time}: other estimated time.");
+        let our_estimated_time: f32 = (our_first_angle / (2.0*PI)) * 8.0 + (our_second_angle / (2.0*PI)) * 12.0 + our_distance * 0.175;
+        let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * 8.0 + (other_second_angle / (2.0*PI)) * 12.0 + other_distance * 0.175;
         return our_estimated_time < other_estimated_time;
         
 }
