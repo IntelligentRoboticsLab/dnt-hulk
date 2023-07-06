@@ -2,18 +2,14 @@ use std::time::{SystemTime};
 use color_eyre::{eyre::WrapErr, Result};
 use context_attribute::context;
 use compiled_nn::CompiledNN;
-use nalgebra::Isometry2;
-use spl_network_messages::{GameControllerReturnMessage, PlayerNumber};
 use types::{
-    hardware::Interface,
-    messages::{OutgoingMessage},
-    CycleTime, FilteredWhistle, ycbcr422_image::YCbCr422Image, YCbCr422, YCbCr444, Rgb,
+    ycbcr422_image::YCbCr422Image, YCbCr422, YCbCr444, Rgb,
 };
 use image::{RgbImage, imageops};
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
-    lstm: CompiledNN
+    cnn: CompiledNN
 }
 
 #[context]
@@ -24,11 +20,6 @@ pub struct CreationContext {
 #[context]
 pub struct CycleContext {
     pub image: Input<YCbCr422Image, "image">,
-    pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
-    pub hardware: HardwareInterface,
-    pub cycle_time: Input<CycleTime, "cycle_time">,
-    pub player_number: Parameter<PlayerNumber, "player_number">,
-    pub robot_to_field: Input<Option<Isometry2<f32>>, "robot_to_field?">,
 }
 
 impl Referee {
@@ -38,29 +29,16 @@ impl Referee {
 
         Ok(Self {
             last_heard_timestamp: None,
-            lstm: network,
+            cnn: network,
         })
     }
 
     pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<()> {
-        if context.filtered_whistle.started_this_cycle {
-            if let Some(cycle_time) = self.last_heard_timestamp {
-                match cycle_time.duration_since(cycle_time) {
-                    Ok(duration) => {
-                        if duration.as_secs() < 20 {
-                            self.send_referee_message(&context, 1)?;
-                        }
-                    }
-                    Err(_err) => {}
-                }
-            }
-        }
+        let input_img = self.resize_image(&context.image);
+        let input = self.cnn.input_mut(0);
 
-        // let input_img = self.resize_image(&context.image);
-        // let input = self.lstm.input_mut(0);
-
-        // self.lstm.apply();
-        // self.lstm.output(0).data[0];
+        self.cnn.apply();
+        self.cnn.output(0).data[0];
 
         Ok(())
     }
@@ -106,26 +84,5 @@ impl Referee {
         resized_image.to_image();
         let result = YCbCr422Image::from_raw_buffer(256 / 2, 256,resized_image.to_vec());
         result
-    }
-
-    fn send_referee_message(
-        &mut self,
-        context: &CycleContext<impl Interface>,
-        handsignal: u8,
-    ) -> Result<()> {
-        // self.last_transmitted_game_controller_return_message = Some(cycle_start_time);
-        context
-            .hardware
-            .write_to_network(OutgoingMessage::GameController(
-                GameControllerReturnMessage {
-                    player_number: *context.player_number,
-                    fallen: unsafe { std::mem::transmute(handsignal) },
-                    robot_to_field: context.robot_to_field.copied().unwrap_or_default(),
-                    ball_position: None,
-                },
-            ))
-            .wrap_err("failed to write GameControllerReturnMessage to hardware")?;
-
-        Ok(())
     }
 }
