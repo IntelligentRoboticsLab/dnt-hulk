@@ -7,9 +7,9 @@ use spl_network_messages::{GameControllerReturnMessage, PlayerNumber};
 use types::{
     hardware::Interface,
     messages::{OutgoingMessage},
-    CycleTime, FilteredWhistle, ycbcr422_image::YCbCr422Image
+    CycleTime, FilteredWhistle, ycbcr422_image::YCbCr422Image, YCbCr422, YCbCr444, Rgb,
 };
-use image::{RgbImage, ImageBuffer, Rgb, imageops};
+use image::{RgbImage, imageops};
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
@@ -56,16 +56,16 @@ impl Referee {
             }
         }
 
-        let input_img = self.resize_image(&context.image);
-        let input = self.lstm.input_mut(0);
+        // let input_img = self.resize_image(&context.image);
+        // let input = self.lstm.input_mut(0);
 
-        self.lstm.apply();
-        self.lstm.output(0).data[0];
+        // self.lstm.apply();
+        // self.lstm.output(0).data[0];
 
         Ok(())
     }
 
-    fn rgb_image_from_buffer_422(width_422: u32, height: u32, buffer: &[YCbCr422]) -> RgbImage {
+    fn rgb_image_from_buffer_422(&self, width_422: u32, height: u32, buffer: &[YCbCr422]) -> RgbImage {
         let mut rgb_image = RgbImage::new(2 * width_422, height);
 
         for y in 0..height {
@@ -99,8 +99,8 @@ impl Referee {
         rgb_image
     }
 
-    fn resize_image(src: &YCbCr422Image) -> YCbCr422Image {
-        let mut rgb:RgbImage = rgb_image_from_buffer_422(src.width() / 2, src.height());
+    fn resize_image(&self, src: &YCbCr422Image) -> YCbCr422Image {
+        let mut rgb:RgbImage = self.rgb_image_from_buffer_422(src.width() / 2, src.height(), src.buffer());
 
         let resized_image = imageops::resize(&rgb, 256, 256, image::imageops::FilterType::Triangle);
         resized_image.to_image();

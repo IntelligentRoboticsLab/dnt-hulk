@@ -180,7 +180,7 @@ fn generate_luminance_image(image: &YCbCr422Image) -> Result<GrayscaleImage, Ima
         &grayscale_buffer,
     )?;
     let new_width = NonZeroU32::new(80).unwrap();
-    let new_height = NonZeroU32::new(60).unwrap();
+    let new_height: NonZeroU32 = NonZeroU32::new(60).unwrap();
     let mut new_image = fast_image_resize::Image::new(new_width, new_height, y_image.pixel_type());
     let mut resizer = Resizer::new(ResizeAlg::Convolution(FilterType::Hamming));
     resizer
