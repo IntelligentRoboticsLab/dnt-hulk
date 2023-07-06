@@ -649,12 +649,15 @@ fn am_better_striker(
         // m/s: 0.175
         // 2pi turn: 8 sec.
         // 1 turn equals 1.4 meters
-        let our_estimated_time: f32 = (our_angle / (2.0*3.14)) * 8.0 + our_distance * 1.75;
-        let other_estimated_time: f32 = (other_angle / (2.0*3.14)) * 8.0 + other_distance * 1.75;
+        let our_estimated_time: f32 = (our_angle / (2.0*3.14)) * 8.0 + our_distance * 0.175;
+        let other_estimated_time: f32 = (other_angle / (2.0*3.14)) * 8.0 + other_distance * 0.175;
         println!("Starting calculation");
-        println!("{ball_to_us}: the distance from the ball to us (presumably in meters)");
-        println!("{our_angle}: the angle between us and the angle, in rad.");
+        println!("{our_distance}: the distance from the ball to us (presumably in meters)");
+        println!("{other_distance}: the distance from the ball to the others (presumably in meters)");
+        println!("{our_angle}: the angle between us and the ball, in rad.");
+        println!("{other_angle}: the angle between the other and the ball, in rad.");
         println!("{our_estimated_time}: our estimated time.");
+        println!("{other_estimated_time}: other estimated time.");
         return our_estimated_time < other_estimated_time;
         
 }
