@@ -72,6 +72,7 @@ impl RoleAssignment {
     }
 
     pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<MainOutputs> {
+        println!("cycle");
         let cycle_start_time = context.cycle_time.start_time;
         let primary_state = *context.primary_state;
         let mut role = self.role;
@@ -118,8 +119,17 @@ impl RoleAssignment {
         let loser_timeout = match self.last_received_spl_striker_message {
             None => false,
             Some(last_received_spl_striker_message) => {
-                cycle_start_time.duration_since(last_received_spl_striker_message)? + Duration::new(7, 0)
-                    > context.spl_network.spl_striker_message_receive_timeout
+                let t = cycle_start_time.duration_since(last_received_spl_striker_message)?
+                    > context.spl_network.spl_striker_message_receive_timeout + Duration::new(7, 0);
+
+                println!(
+                    "loser timeout passed: {:?}, threshold: {:?}: bool: {:?}",
+                    cycle_start_time.duration_since(last_received_spl_striker_message)?,
+                    context.spl_network.spl_striker_message_receive_timeout + Duration::new(7, 0),
+                    t
+                );
+
+                t
             }
         };
 
@@ -154,6 +164,8 @@ impl RoleAssignment {
         let mut team_ball = self.team_ball;
 
         if spl_striker_message_timeout {
+            println!("striker message timeout");
+
             match role {
                 Role::Keeper => {
                     team_ball = None;
@@ -166,18 +178,25 @@ impl RoleAssignment {
                     team_ball = None;
                     role = Role::Loser;
                 }
-                Role::Loser if loser_timeout => {
-                    team_ball = None;
-                    role = Role::Searcher;
+                Role::Loser => {
+                    println!("in loser role");
+                    
+                    if loser_timeout {
+                        println!("transitioning");
+                        team_ball = None;
+                        role = Role::Searcher;
+                    }
                 }
                 _ => {
-                    println!("General transition");
+                    println!("transitioning general from {role:?}");
                     send_spl_striker_message = false;
                     team_ball = None;
                     role = Role::Searcher
                 }
             }
         }
+
+        println!("Role after timeout: {role:?}");
 
         let mut network_robot_obstacles = vec![];
         let mut spl_messages = context
@@ -278,6 +297,8 @@ impl RoleAssignment {
             self.role = role;
         }
         self.team_ball = team_ball;
+
+        println!("Final role: {:?}", self.role);
 
         Ok(MainOutputs {
             role: self.role.into(),
