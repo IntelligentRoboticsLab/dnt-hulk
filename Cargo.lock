@@ -1266,6 +1266,7 @@ name = "control"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "bifrost",
  "color-eyre",
  "compiled-nn",
  "context_attribute",
@@ -4479,6 +4480,7 @@ dependencies = [
 name = "spl_network"
 version = "0.1.0"
 dependencies = [
+ "bifrost",
  "color-eyre",
  "constants",
  "context_attribute",

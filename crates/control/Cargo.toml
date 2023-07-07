@@ -7,6 +7,7 @@ homepage = "https://github.com/hulks/hulk"
 
 [dependencies]
 approx = { workspace = true }
+bifrost = {workspace = true}
 color-eyre = { workspace = true }
 compiled-nn = { workspace = true }
 context_attribute = { workspace = true }
