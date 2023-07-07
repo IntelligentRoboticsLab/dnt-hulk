@@ -76,6 +76,7 @@ pub struct RoleAssignment {
 
 pub struct Behavior {
     pub injected_motion_command: Option<MotionCommand>,
+    pub loser_duration: Duration,
     pub lost_ball: LostBall,
     pub optional_roles: Vec<Role>,
     pub path_planning: PathPlanning,
