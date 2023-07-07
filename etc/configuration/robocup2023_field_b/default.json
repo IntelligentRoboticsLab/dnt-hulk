@@ -1,0 +1,34 @@
+{
+    "field_color_detection": {
+        "vision_bottom": {
+          "blue_chromaticity_threshold": 0.3799999952316284,
+          "green_luminance_threshold": 25,
+          "lower_green_chromaticity_threshold": 0.4000000059604645,
+          "red_chromaticity_threshold": 0.3700000047683716,
+          "upper_green_chromaticity_threshold": 0.4149999916553498
+        },
+        "vision_top": {
+          "blue_chromaticity_threshold": 0.4000000059604645,
+          "green_luminance_threshold": 25,
+          "lower_green_chromaticity_threshold": 0.3750000298023224,
+          "red_chromaticity_threshold": 0.35500001907348633,
+          "upper_green_chromaticity_threshold": 0.38999250531196594
+        }
+      },
+      "image_segmenter": {
+        "vision_bottom": {
+          "horizontal_stride": 4,
+          "vertical_edge_detection_source": "Luminance",
+          "vertical_edge_threshold": 32,
+          "vertical_median_mode": "ThreePixels",
+          "vertical_stride": 8
+        },
+        "vision_top": {
+          "horizontal_stride": 4,
+          "vertical_edge_detection_source": "Luminance",
+          "vertical_edge_threshold": 17,
+          "vertical_median_mode": "ThreePixels",
+          "vertical_stride": 1
+        }
+      }
+}
