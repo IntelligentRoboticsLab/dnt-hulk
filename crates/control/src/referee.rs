@@ -43,6 +43,7 @@ impl Referee {
                             let handsignal: u8 = rng_gen.gen_range(1..=16);
                             self.send_referee_message(&context, handsignal, duration)?;
                             self.sent = true;
+                            println!("sent referee handsignal message");
                         }
                         else if duration.as_secs() >= 20{
                             self.sent = false;
