@@ -664,10 +664,13 @@ fn am_better_striker(
     field_dimensions: &FieldDimensions,
     role_assignments_speeds: &RoleAssignmentsSpeeds,
 ) -> bool {
+        println!("starting calculation");
         let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
         // Distance calculation
         let our_distance = relative_ball.coords.norm();
         let other_distance = spl_message_ball_position.relative_position.coords.norm();
+        println!("{our_distance} our distance to the ball");
+        println!("{other_distance} other distance to the ball");
         // Angle calculation
         let ball_to_us = Vector2::new(relative_ball.x, relative_ball.y);
         let ball_to_other = Vector2::new(spl_message_ball_position.relative_position.x, spl_message_ball_position.relative_position.y);
@@ -675,24 +678,41 @@ fn am_better_striker(
         let our_first_angle = forward.angle(&ball_to_us);
         let other_first_angle = forward.angle(&ball_to_other);
 
+        println!("{our_first_angle} our angle to the ball-us line");
+        println!("{other_first_angle} other angle to the ball-other line");
+
         let opponent_goal_center_us = current_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
         let opponent_goal_center_other = origin_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
+
+        // println!("{opponent_goal_center_us.norm()} our distance to the goal");
+        // println!("{opponent_goal_center_other.norm()} other distance to the goal");
 
         let ball_to_goal_us = opponent_goal_center_us - ball_to_us;
         let ball_to_goal_other = opponent_goal_center_other - ball_to_other;
 
+        // println!("{ball_to_goal_us.norm()} our percieved distance ball and goal");
+        // println!("{ball_to_goal_other.norm()} other percieved distance ball and goal");
+
         let our_ball_to_our_goal = ball_to_us.angle(&opponent_goal_center_us);
         let other_ball_to_other_goal = ball_to_other.angle(&opponent_goal_center_other);
 
+        println!("{our_ball_to_our_goal} our shortest angle between the ball-us line and the us-goal line");
+        println!("{other_ball_to_other_goal} other shortest angle between the ball-us line and the other-goal line");
+
         let mut our_second_angle: f32 = ball_to_us.angle(&ball_to_goal_us);
         if our_ball_to_our_goal > 0.5 * PI  {
-            our_second_angle -= PI;
+            println!("changing our second angle to be -180 degrees");
+            our_second_angle = PI - our_second_angle;
         }
 
         let mut other_second_angle = ball_to_other.angle(&ball_to_goal_other);
         if other_ball_to_other_goal > 0.5 * PI  {
-            other_second_angle -= PI;
+            println!("changing other second angle to be -180 degrees");
+            other_second_angle = PI - other_second_angle;
         }
+
+        println!("{our_second_angle} our shortest angle between the ball-us line and the ball-goal line");
+        println!("{other_second_angle} other shortest angle between the ball-us line and the ball-goal line");
 
         // Creating the overall score
         // m/s: 0.175
@@ -701,6 +721,8 @@ fn am_better_striker(
         // 1 turn equals 1.4 meters
         let our_estimated_time: f32 = (our_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (our_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + our_distance * role_assignments_speeds.walking_speed;
         let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (other_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + other_distance * role_assignments_speeds.walking_speed;
+        println!("{our_estimated_time} our estimated time");
+        println!("{other_estimated_time} our estimated time");
         return our_estimated_time < other_estimated_time;
         
 }
