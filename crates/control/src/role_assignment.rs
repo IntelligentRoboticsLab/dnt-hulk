@@ -9,9 +9,8 @@ use spl_network_messages::{
     GameControllerReturnMessage, GamePhase, HulkMessage, Penalty, PlayerNumber, Team,
 };
 use types::{
-    configuration::SplNetwork,
+    configuration::{RoleAssignmentsSpeeds, SplNetwork},
     hardware::Interface,
-    // configuration::RoleAssignmentsSpeeds,
     messages::{IncomingMessage, OutgoingMessage},
     BallPosition, CycleTime, FallState, FieldDimensions, GameControllerState, InitialPose, Players,
     PrimaryState, Role,
@@ -46,6 +45,7 @@ pub struct CycleContext {
     pub forced_role: Parameter<Option<Role>, "role_assignment.forced_role?">,
     pub initial_poses: Parameter<Players<InitialPose>, "localization.initial_poses">,
     pub optional_roles: Parameter<Vec<Role>, "behavior.optional_roles">,
+    pub role_assignments_speeds: Parameter<RoleAssignmentsSpeeds, "behavior.role_assignments_speeds">,
     pub player_number: Parameter<PlayerNumber, "player_number">,
     pub loser_duration: Parameter<Duration, "behavior.loser_duration">,
     pub spl_network: Parameter<SplNetwork, "spl_network">,
@@ -209,6 +209,7 @@ impl RoleAssignment {
                 context.spl_network.striker_trusts_team_ball,
                 context.optional_roles,
                 context.field_dimensions,
+                context.role_assignments_speeds,
             );
         } else {
             for spl_message in spl_messages {
@@ -232,6 +233,7 @@ impl RoleAssignment {
                     context.spl_network.striker_trusts_team_ball,
                     context.optional_roles,
                     context.field_dimensions,
+                    context.role_assignments_speeds,
                 );
             }
         }
@@ -307,7 +309,8 @@ fn process_role_state_machine(
     player_number: PlayerNumber,
     striker_trusts_team_ball: Duration,
     optional_roles: &[Role],
-    field_dimensions: &FieldDimensions // size = 8, align = 0x8,
+    field_dimensions: &FieldDimensions,
+    role_assignments_speeds: &RoleAssignmentsSpeeds,
 ) -> (Role, bool, Option<BallPosition>) {
     // Returns (role, send_spl_striker_message, team_ball)
     if let Some(game_controller_state) = game_controller_state {
@@ -386,6 +389,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -411,6 +415,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -428,6 +433,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -457,6 +463,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -474,6 +481,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -500,6 +508,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -524,6 +533,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -557,6 +567,7 @@ fn process_role_state_machine(
                 game_controller_state,
                 optional_roles,
                 field_dimensions,
+                role_assignments_speeds,
             ),
         },
     }
@@ -570,13 +581,15 @@ fn decide_if_claiming_striker_or_other_role(
     cycle_start_time: SystemTime,
     game_controller_state: Option<&GameControllerState>,
     optional_roles: &[Role],
-    field_positions: &FieldDimensions // size = 8, align = 0x8,
+    field_positions: &FieldDimensions,
+    role_assignments_speeds:&RoleAssignmentsSpeeds, 
 ) -> (Role, bool, Option<BallPosition>) {
     if am_better_striker(
         current_pose,
         spl_message.robot_to_field,
         spl_message_ball_position,
         field_positions,
+        role_assignments_speeds,
     ) {
         (
             Role::Striker,
@@ -648,7 +661,8 @@ fn am_better_striker(
     current_pose: Isometry2<f32>,
     origin_pose: Isometry2<f32>,
     spl_message_ball_position: &spl_network_messages::BallPosition,
-    field_dimensions: &FieldDimensions // size = 8, align = 0x8,
+    field_dimensions: &FieldDimensions,
+    role_assignments_speeds: &RoleAssignmentsSpeeds,
 ) -> bool {
         let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
         // Distance calculation
@@ -685,8 +699,8 @@ fn am_better_striker(
         // 2pi turn (first, around own axis): 8 sec.
         // 2pi turn (second, around ball): 12 sec (estimate).
         // 1 turn equals 1.4 meters
-        let our_estimated_time: f32 = (our_first_angle / (2.0*PI)) * 8.0 + (our_second_angle / (2.0*PI)) * 12.0 + our_distance * 0.175;
-        let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * 8.0 + (other_second_angle / (2.0*PI)) * 12.0 + other_distance * 0.175;
+        let our_estimated_time: f32 = (our_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (our_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + our_distance * role_assignments_speeds.walking_speed;
+        let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (other_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + other_distance * role_assignments_speeds.walking_speed;
         return our_estimated_time < other_estimated_time;
         
 }

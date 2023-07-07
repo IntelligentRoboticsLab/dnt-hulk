@@ -766,7 +766,7 @@
       "nanos": 0,
       "secs": 10
     },
-    "role_assignment_speeds": {
+    "role_assignments_speeds": {
       "walking_speed": 0.175,
       "rotation_axis_time": 8.0,
       "rotation_ball_time": 12.0
