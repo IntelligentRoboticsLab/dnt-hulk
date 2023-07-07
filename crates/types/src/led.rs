@@ -26,6 +26,99 @@ pub struct Eye {
     pub color_at_315: Rgb,
 }
 
+impl Eye {
+    pub fn loser_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 150, 255),
+            color_at_45: Rgb::new(25, 0, 25),
+            color_at_90: Rgb::new(255, 200, 25),
+            color_at_135: Rgb::new(55, 0, 255),
+            color_at_180: Rgb::new(255, 0, 25),
+            color_at_225: Rgb::new(25, 30, 255),
+            color_at_270: Rgb::new(255, 0, 255),
+            color_at_315: Rgb::new(255, 10, 5),
+        }
+    }
+
+    pub fn striker_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 0, 0),
+            color_at_45: Rgb::new(255, 0, 0),
+            color_at_90: Rgb::new(255, 0, 0),
+            color_at_135: Rgb::new(255, 0, 0),
+            color_at_180: Rgb::new(255, 0, 0),
+            color_at_225: Rgb::new(255, 0, 0),
+            color_at_270: Rgb::new(255, 0, 0),
+            color_at_315: Rgb::new(255, 0, 0),
+        }
+    }
+
+    pub fn striker_support_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 255, 0),
+            color_at_45: Rgb::new(255, 255, 0),
+            color_at_90: Rgb::new(255, 255, 0),
+            color_at_135: Rgb::new(255, 255, 0),
+            color_at_180: Rgb::new(255, 255, 0),
+            color_at_225: Rgb::new(255, 255, 0),
+            color_at_270: Rgb::new(255, 255, 0),
+            color_at_315: Rgb::new(255, 255, 0),
+        }
+    }
+
+    pub fn defender_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 255, 255),
+            color_at_45: Rgb::new(255, 255, 255),
+            color_at_90: Rgb::new(255, 255, 255),
+            color_at_135: Rgb::new(255, 255, 255),
+            color_at_180: Rgb::new(255, 255, 255),
+            color_at_225: Rgb::new(255, 255, 255),
+            color_at_270: Rgb::new(255, 255, 255),
+            color_at_315: Rgb::new(255, 255, 255),
+        }
+    }
+
+    pub fn keeper_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(0, 0, 255),
+            color_at_45: Rgb::new(0, 0, 255),
+            color_at_90: Rgb::new(0, 0, 255),
+            color_at_135: Rgb::new(0, 0, 255),
+            color_at_180: Rgb::new(0, 0, 255),
+            color_at_225: Rgb::new(0, 0, 255),
+            color_at_270: Rgb::new(0, 0, 255),
+            color_at_315: Rgb::new(0, 0, 255),
+        }
+    }
+
+    pub fn keeper_replacement_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(0, 220, 255),
+            color_at_45: Rgb::new(0, 220, 255),
+            color_at_90: Rgb::new(0, 220, 255),
+            color_at_135: Rgb::new(0, 220, 255),
+            color_at_180: Rgb::new(0, 220, 255),
+            color_at_225: Rgb::new(0, 220, 255),
+            color_at_270: Rgb::new(0, 220, 255),
+            color_at_315: Rgb::new(0, 220, 255),
+        }
+    }
+
+    pub fn searcher_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 255, 0),
+            color_at_45: Rgb::new(0, 0, 255),
+            color_at_90: Rgb::new(255, 255, 0),
+            color_at_135: Rgb::new(0, 0, 255),
+            color_at_180: Rgb::new(255, 255, 0),
+            color_at_225: Rgb::new(0, 0, 255),
+            color_at_270: Rgb::new(255, 255, 0),
+            color_at_315: Rgb::new(0, 0, 255),
+        }
+    }
+}
+
 impl From<Rgb> for Eye {
     fn from(rgb: Rgb) -> Self {
         Self {

@@ -3,7 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use color_eyre::Result;
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
-use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb};
+use types::{Ball, CycleTime, Eye, FilteredWhistle, Leds, PrimaryState, Rgb, Role};
 
 pub struct LedStatus {
     blink_state: bool,
@@ -20,6 +20,7 @@ pub struct CycleContext {
     pub primary_state: Input<PrimaryState, "primary_state">,
     pub cycle_time: Input<CycleTime, "cycle_time">,
     pub filtered_whistle: Input<FilteredWhistle, "filtered_whistle">,
+    pub role: Input<Role, "role">,
 
     pub balls_bottom: PerceptionInput<Option<Vec<Ball>>, "VisionBottom", "balls?">,
     pub balls_top: PerceptionInput<Option<Vec<Ball>>, "VisionTop", "balls?">,
@@ -147,6 +148,7 @@ impl LedStatus {
             at_least_one_ball_data_bottom,
             last_ball_data_top_too_old,
             last_ball_data_bottom_too_old,
+            *context.role,
         );
 
         let ears = if context.filtered_whistle.is_detected {
@@ -176,6 +178,7 @@ impl LedStatus {
         at_least_one_ball_data_bottom: bool,
         last_ball_data_top_too_old: bool,
         last_ball_data_bottom_too_old: bool,
+        role: Role,
     ) -> (Eye, Eye) {
         match primary_state {
             PrimaryState::Unstiff => {
@@ -199,6 +202,16 @@ impl LedStatus {
                 } else {
                     None
                 };
+                let right_eye = match role {
+                    Role::Loser => Eye::loser_eye(),
+                    Role::Striker => Eye::striker_eye(),
+                    Role::StrikerSupporter => Eye::striker_support_eye(),
+                    Role::DefenderLeft | Role::DefenderRight => Eye::defender_eye(),
+                    Role::Keeper => Eye::keeper_eye(),
+                    Role::ReplacementKeeper => Eye::keeper_replacement_eye(),
+                    Role::Searcher => Eye::searcher_eye(),
+                    _ => Eye::default()
+                };
                 (
                     Eye {
                         color_at_0: ball_color_top
@@ -216,16 +229,7 @@ impl LedStatus {
                         color_at_315: ball_color_top
                             .unwrap_or_else(|| ball_background_color.unwrap_or(Rgb::BLACK)),
                     },
-                    Eye {
-                        color_at_0: Rgb::new(255, 150, 255),
-                        color_at_45: Rgb::new(25, 0, 25),
-                        color_at_90: Rgb::new(255, 200, 25),
-                        color_at_135: Rgb::new(55, 0, 255),
-                        color_at_180: Rgb::new(255, 0, 25),
-                        color_at_225: Rgb::new(25, 30, 255),
-                        color_at_270: Rgb::new(255, 0, 255),
-                        color_at_315: Rgb::new(255, 10, 5),
-                    },
+                    right_eye,
                 )
             }
         }
