@@ -45,6 +45,7 @@ pub struct CycleContext {
     pub initial_poses: Parameter<Players<InitialPose>, "localization.initial_poses">,
     pub optional_roles: Parameter<Vec<Role>, "behavior.optional_roles">,
     pub player_number: Parameter<PlayerNumber, "player_number">,
+    pub loser_duration: Parameter<Duration, "behavior.loser_duration">,
     pub spl_network: Parameter<SplNetwork, "spl_network">,
     pub network_message: PerceptionInput<IncomingMessage, "SplNetwork", "message">,
 
@@ -115,6 +116,14 @@ impl RoleAssignment {
             }
         };
 
+        let loser_timeout = match self.last_received_spl_striker_message {
+            None => false,
+            Some(last_received_spl_striker_message) => {
+                cycle_start_time.duration_since(last_received_spl_striker_message)?
+                    > *context.loser_duration
+            }
+        };
+
         let silence_interval_has_passed = match self.last_transmitted_spl_striker_message {
             Some(last_transmitted_spl_striker_message) => {
                 cycle_start_time.duration_since(last_transmitted_spl_striker_message)?
@@ -157,6 +166,12 @@ impl RoleAssignment {
                     send_spl_striker_message = true;
                     team_ball = None;
                     role = Role::Loser;
+                }
+                Role::Loser => {
+                    if loser_timeout {
+                        team_ball = None;
+                        role = Role::Searcher;
+                    }
                 }
                 _ => {
                     send_spl_striker_message = false;
@@ -289,6 +304,7 @@ fn process_role_state_machine(
     striker_trusts_team_ball: Duration,
     optional_roles: &[Role],
 ) -> (Role, bool, Option<BallPosition>) {
+    // Returns (role, send_spl_striker_message, team_ball)
     if let Some(game_controller_state) = game_controller_state {
         match game_controller_state.game_phase {
             GamePhase::PenaltyShootout {

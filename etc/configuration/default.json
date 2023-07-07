@@ -525,7 +525,7 @@
         "side": "Left"
       },
       "two": {
-        "center_line_offset_x": -1.375,
+        "center_line_offset_x": -1.8,
         "side": "Left"
       },
       "three": {
@@ -762,6 +762,10 @@
       "MidfielderRight",
       "MidfielderLeft"
     ],
+    "loser_duration": {
+      "nanos": 0,
+      "secs": 10
+    },
     "injected_motion_command": null,
     "role_positions": {
       "defender_aggressive_ring_radius": 2.0,
