@@ -6,7 +6,6 @@ use color_eyre::{config::HookBuilder, eyre::WrapErr, Result};
 use crate::aliveness::{aliveness, Arguments as AlivenessArguments};
 use analyze::{analyze, Arguments as AnalyzeArguments};
 use cargo::{cargo, Arguments as CargoArguments, Command as CargoCommand};
-use change_ip::{change_ip, Arguments as ChangeIpArguments};
 use communication::{communication, Arguments as CommunicationArguments};
 use completions::{completions, Arguments as CompletionArguments};
 use gammaray::{gammaray, Arguments as GammarayArguments};
@@ -27,7 +26,6 @@ use wireless::{wireless, Arguments as WirelessArguments};
 mod aliveness;
 mod analyze;
 mod cargo;
-mod change_ip;
 mod communication;
 mod completions;
 mod gammaray;
@@ -60,9 +58,6 @@ async fn main() -> Result<()> {
     let repository = repository_root.map(Repository::new);
 
     match arguments.command {
-        Command::ChangeIp(arguments) => change_ip(arguments)
-            .await
-            .wrap_err("failed to execute change_ip command")?,
         Command::Analyze(arguments) => analyze(arguments, &repository?)
             .await
             .wrap_err("failed to execute analyze command")?,
@@ -143,8 +138,6 @@ struct Arguments {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Change ip address of NAOs
-    ChangeIp(ChangeIpArguments),
     /// Analyze source code
     #[clap(subcommand)]
     Analyze(AnalyzeArguments),
