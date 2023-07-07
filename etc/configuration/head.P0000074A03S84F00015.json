@@ -1,4 +1,13 @@
 {
+  "camera_matrix_parameters": {
+    "vision_top": {
+      "extrinsic_rotations": [
+        0.07000000029802322,
+        -0.6499999761581421,
+        0.1599999964237213
+      ]
+    }
+  },
   "disable_communication_acceptor": true,
   "player_number": "One"
 }
