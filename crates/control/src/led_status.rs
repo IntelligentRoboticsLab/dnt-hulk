@@ -216,7 +216,16 @@ impl LedStatus {
                         color_at_315: ball_color_top
                             .unwrap_or_else(|| ball_background_color.unwrap_or(Rgb::BLACK)),
                     },
-                    Eye::default(),
+                    Eye {
+                        color_at_0: Rgb::new(255, 150, 255),
+                        color_at_45: Rgb::new(25, 0, 25),
+                        color_at_90: Rgb::new(255, 200, 25),
+                        color_at_135: Rgb::new(55, 0, 255),
+                        color_at_180: Rgb::new(255, 0, 25),
+                        color_at_225: Rgb::new(25, 30, 255),
+                        color_at_270: Rgb::new(255, 0, 255),
+                        color_at_315: Rgb::new(255, 10, 5),
+                    },
                 )
             }
         }
