@@ -39,7 +39,7 @@ impl Referee {
                 self.send_referee_message(&context, 0.0)?;
                 self.first = false;
             } else if let Some(cycle_time) = self.last_heard_timestamp {
-                match cycle_time.duration_since(cycle_time) {
+                match context.cycle_time.start_time.duration_since(cycle_time) {
                     Ok(duration) => {
                         if duration.as_secs() > 20 {
                             self.send_referee_message(&context, duration.as_secs_f32())?;
