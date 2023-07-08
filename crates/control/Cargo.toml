@@ -9,12 +9,10 @@ homepage = "https://github.com/hulks/hulk"
 approx = { workspace = true }
 bifrost = {workspace = true}
 color-eyre = { workspace = true }
-compiled-nn = { workspace = true }
 context_attribute = { workspace = true }
 itertools = { workspace = true }
 filtering = { workspace = true }
 framework = { workspace = true }
-image = { workspace = true }
 kinematics = { workspace = true }
 kira = { workspace = true }
 log = { workspace = true }
@@ -22,7 +20,7 @@ motionfile = { workspace = true }
 nalgebra = { workspace = true }
 ordered-float = { workspace = true }
 projection = { workspace = true }
-rand.workspace = true
+rand = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serialize_hierarchy = { workspace = true }
