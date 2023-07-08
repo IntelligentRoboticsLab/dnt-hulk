@@ -18,8 +18,8 @@ pub use game_controller_state_conversion::{
     SubState, Team, TeamColor, TeamState,
 };
 pub use game_controller_state_message::GameControllerStateMessage;
-use serialize_hierarchy::SerializeHierarchy;
 pub use referee_return_message::RefereeMessage;
+use serialize_hierarchy::SerializeHierarchy;
 
 pub type HulkMessage = GameControllerReturnMessage;
 

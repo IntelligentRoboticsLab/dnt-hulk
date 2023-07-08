@@ -1,13 +1,17 @@
 {
-  "walking_engine": {
-    "base_foot_lift": 0.012500000186264517,
-    "walk_hip_height": 0.16500000655651093
-  },
   "camera_matrix_parameters": {
     "vision_top": {
       "extrinsic_rotations": [
-        1.2699999809265137, -3.359999895095825, 0.2199999988079071
+        1.2699999809265137,
+        -3.359999895095825,
+        0.2199999988079071
       ]
     }
+  },
+  "disable_communication_acceptor": true,
+  "player_number": "Three",
+  "walking_engine": {
+    "base_foot_lift": 0.012500000186264517,
+    "walk_hip_height": 0.16500000655651093
   }
 }

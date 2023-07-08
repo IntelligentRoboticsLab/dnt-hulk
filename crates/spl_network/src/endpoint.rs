@@ -3,12 +3,12 @@ use std::{
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
 };
 
+use bifrost::serialization::Encode;
 use log::warn;
 use serde::Deserialize;
 use thiserror::Error;
 use tokio::{net::UdpSocket, select, sync::Mutex};
 use types::messages::{IncomingMessage, OutgoingMessage};
-use bifrost::serialization::Encode;
 
 use constants::DNT_TEAM_NUMBER;
 
