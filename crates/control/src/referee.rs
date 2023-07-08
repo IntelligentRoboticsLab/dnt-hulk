@@ -3,7 +3,7 @@ use context_attribute::context;
 use nalgebra::Isometry2;
 use rand::Rng;
 use spl_network_messages::{PlayerNumber, RefereeMessage};
-use std::time::{Duration, SystemTime};
+use std::time::{SystemTime};
 use types::{hardware::Interface, messages::OutgoingMessage, CycleTime, FilteredWhistle};
 
 pub struct Referee {
