@@ -35,7 +35,7 @@
     "focus_auto": false,
 
     "automatic_exposure_control_weights": [
-      1, 1, 1, 1, 5, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10
+      0, 0, 0, 0, 1, 1, 1, 1, 10, 10, 10, 10, 10, 10, 10, 10
     ],
     "disable_digital_effects": true,
     "flip_sensor": true,
