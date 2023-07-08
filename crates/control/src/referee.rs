@@ -8,7 +8,6 @@ use types::{hardware::Interface, messages::OutgoingMessage, CycleTime, FilteredW
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
-    sent: bool,
     first: bool,
 }
 
@@ -30,7 +29,6 @@ impl Referee {
     pub fn new(_context: CreationContext) -> Result<Self> {
         Ok(Self {
             last_heard_timestamp: None,
-            sent: false,
             first: true,
         })
     }
