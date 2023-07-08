@@ -30,3 +30,4 @@ serde-transcode = { workspace = true }
 spl_network_messages = { workspace = true }
 tokio = { workspace = true }
 types = { workspace = true }
+gilrs = { workspace = true }

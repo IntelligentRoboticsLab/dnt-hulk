@@ -6,6 +6,7 @@ mod map;
 mod parameter;
 mod plot;
 mod text;
+mod controller;
 
 pub use self::behavior_simulator::BehaviorSimulatorPanel;
 pub use self::image::ImagePanel;
@@ -15,3 +16,4 @@ pub use map::MapPanel;
 pub use parameter::ParameterPanel;
 pub use plot::PlotPanel;
 pub use text::TextPanel;
+pub use controller::ControllerPanel;

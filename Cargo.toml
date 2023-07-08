@@ -139,6 +139,7 @@ walkdir = "2.3.2"
 webots = { version = "0.7.0" }
 vision = { path = "crates/vision" }
 zbus = { version = "3.7.0", features = ["tokio"] }
+gilrs = { version =  "0.10.2" }
 
 [profile.incremental]
 inherits = "release"
