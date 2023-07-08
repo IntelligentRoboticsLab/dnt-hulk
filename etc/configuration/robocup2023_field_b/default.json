@@ -10,9 +10,9 @@
         "vision_top": {
           "blue_chromaticity_threshold": 0.4000000059604645,
           "green_luminance_threshold": 25,
-          "lower_green_chromaticity_threshold": 0.3750000298023224,
-          "red_chromaticity_threshold": 0.35500001907348633,
-          "upper_green_chromaticity_threshold": 0.38999250531196594
+          "lower_green_chromaticity_threshold": 0.3750000596046448,
+          "red_chromaticity_threshold": 0.38999998569488525,
+          "upper_green_chromaticity_threshold": 0.38999253511428833
         }
       },
       "image_segmenter": {
