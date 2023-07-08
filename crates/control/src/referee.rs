@@ -3,12 +3,11 @@ use context_attribute::context;
 use nalgebra::Isometry2;
 use rand::Rng;
 use spl_network_messages::{PlayerNumber, RefereeMessage};
-use std::time::{SystemTime};
+use std::time::SystemTime;
 use types::{hardware::Interface, messages::OutgoingMessage, CycleTime, FilteredWhistle};
 
 pub struct Referee {
     last_heard_timestamp: Option<SystemTime>,
-    first: bool,
 }
 
 #[context]
@@ -29,15 +28,13 @@ impl Referee {
     pub fn new(_context: CreationContext) -> Result<Self> {
         Ok(Self {
             last_heard_timestamp: None,
-            first: true,
         })
     }
 
     pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<()> {
         if context.filtered_whistle.started_this_cycle {
-            if self.first {
+            if self.last_heard_timestamp.is_none() {
                 self.send_referee_message(&context, 0.0)?;
-                self.first = false;
             } else if let Some(cycle_time) = self.last_heard_timestamp {
                 match context.cycle_time.start_time.duration_since(cycle_time) {
                     Ok(duration) => {
