@@ -723,7 +723,7 @@ fn am_better_striker(
         let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (other_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + other_distance * role_assignments_speeds.walking_speed;
         println!("{our_estimated_time} our estimated time");
         println!("{other_estimated_time} our estimated time");
-        return our_estimated_time < other_estimated_time;
+        return our_estimated_time < (other_estimated_time + 2.5);
         
 }
 
