@@ -203,14 +203,15 @@ impl LedStatus {
                     None
                 };
                 let right_eye = match role {
-                    Role::Loser => Eye::loser_eye(),
-                    Role::Striker => Eye::striker_eye(),
-                    Role::StrikerSupporter => Eye::striker_support_eye(),
-                    Role::DefenderLeft | Role::DefenderRight => Eye::defender_eye(),
-                    Role::Keeper => Eye::keeper_eye(),
-                    Role::ReplacementKeeper => Eye::keeper_replacement_eye(),
-                    Role::Searcher => Eye::searcher_eye(),
-                    _ => Eye::default()
+                    Role::Loser => Self::loser_eye(),
+                    Role::Striker => Eye::from(Rgb::RED),
+                    Role::StrikerSupporter => Eye::from(Rgb::ORANGE),
+                    Role::DefenderLeft => Self::defender_eye_left(),
+                    Role::DefenderRight => Self::defender_eye_right(),
+                    Role::Keeper => Eye::from(Rgb::BLUE),
+                    Role::ReplacementKeeper => Self::replacement_keeper_eye(),
+                    Role::Searcher => Self::searcher_eye(),
+                    _ => Eye::default(),
                 };
                 (
                     Eye {
@@ -232,6 +233,71 @@ impl LedStatus {
                     right_eye,
                 )
             }
+        }
+    }
+
+    fn loser_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 150, 255),
+            color_at_45: Rgb::new(25, 0, 25),
+            color_at_90: Rgb::new(255, 200, 25),
+            color_at_135: Rgb::new(55, 0, 255),
+            color_at_180: Rgb::new(255, 0, 25),
+            color_at_225: Rgb::new(25, 30, 255),
+            color_at_270: Rgb::new(255, 0, 255),
+            color_at_315: Rgb::new(255, 10, 5),
+        }
+    }
+
+    fn defender_eye_right() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(0, 0, 0),
+            color_at_45: Rgb::new(0, 0, 0),
+            color_at_90: Rgb::new(0, 0, 0),
+            color_at_135: Rgb::new(0, 0, 0),
+            color_at_180: Rgb::new(0, 0, 0),
+            color_at_225: Rgb::new(255, 255, 255),
+            color_at_270: Rgb::new(255, 255, 255),
+            color_at_315: Rgb::new(255, 255, 255),
+        }
+    }
+
+    fn defender_eye_left() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(0, 0, 0),
+            color_at_45: Rgb::new(255, 255, 255),
+            color_at_90: Rgb::new(255, 255, 255),
+            color_at_135: Rgb::new(255, 255, 255),
+            color_at_180: Rgb::new(0, 0, 0),
+            color_at_225: Rgb::new(0, 0, 0),
+            color_at_270: Rgb::new(0, 0, 0),
+            color_at_315: Rgb::new(0, 0, 0),
+        }
+    }
+
+    fn replacement_keeper_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(0, 220, 255),
+            color_at_45: Rgb::new(0, 220, 255),
+            color_at_90: Rgb::new(0, 220, 255),
+            color_at_135: Rgb::new(0, 220, 255),
+            color_at_180: Rgb::new(0, 220, 255),
+            color_at_225: Rgb::new(0, 220, 255),
+            color_at_270: Rgb::new(0, 220, 255),
+            color_at_315: Rgb::new(0, 220, 255),
+        }
+    }
+
+    fn searcher_eye() -> Eye {
+        Eye {
+            color_at_0: Rgb::new(255, 255, 0),
+            color_at_45: Rgb::new(0, 0, 255),
+            color_at_90: Rgb::new(255, 255, 0),
+            color_at_135: Rgb::new(0, 0, 255),
+            color_at_180: Rgb::new(255, 255, 0),
+            color_at_225: Rgb::new(0, 0, 255),
+            color_at_270: Rgb::new(255, 255, 0),
+            color_at_315: Rgb::new(0, 0, 255),
         }
     }
 
