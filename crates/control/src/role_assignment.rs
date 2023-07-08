@@ -1,14 +1,15 @@
 use std::time::{Duration, SystemTime};
+use std::f32::consts::PI;
 
 use color_eyre::{eyre::WrapErr, Result};
 use context_attribute::context;
 use framework::{MainOutput, PerceptionInput};
-use nalgebra::{Isometry2, Point2};
+use nalgebra::{Isometry2, Point2, Vector2};
 use spl_network_messages::{
     GameControllerReturnMessage, GamePhase, HulkMessage, Penalty, PlayerNumber, Team,
 };
 use types::{
-    configuration::SplNetwork,
+    configuration::{RoleAssignmentsSpeeds, SplNetwork},
     hardware::Interface,
     messages::{IncomingMessage, OutgoingMessage},
     BallPosition, CycleTime, FallState, FieldDimensions, GameControllerState, InitialPose, Players,
@@ -44,6 +45,7 @@ pub struct CycleContext {
     pub forced_role: Parameter<Option<Role>, "role_assignment.forced_role?">,
     pub initial_poses: Parameter<Players<InitialPose>, "localization.initial_poses">,
     pub optional_roles: Parameter<Vec<Role>, "behavior.optional_roles">,
+    pub role_assignments_speeds: Parameter<RoleAssignmentsSpeeds, "behavior.role_assignments_speeds">,
     pub player_number: Parameter<PlayerNumber, "player_number">,
     pub loser_duration: Parameter<Duration, "behavior.loser_duration">,
     pub spl_network: Parameter<SplNetwork, "spl_network">,
@@ -206,6 +208,8 @@ impl RoleAssignment {
                 *context.player_number,
                 context.spl_network.striker_trusts_team_ball,
                 context.optional_roles,
+                context.field_dimensions,
+                context.role_assignments_speeds,
             );
         } else {
             for spl_message in spl_messages {
@@ -228,6 +232,8 @@ impl RoleAssignment {
                     *context.player_number,
                     context.spl_network.striker_trusts_team_ball,
                     context.optional_roles,
+                    context.field_dimensions,
+                    context.role_assignments_speeds,
                 );
             }
         }
@@ -303,6 +309,8 @@ fn process_role_state_machine(
     player_number: PlayerNumber,
     striker_trusts_team_ball: Duration,
     optional_roles: &[Role],
+    field_dimensions: &FieldDimensions,
+    role_assignments_speeds: &RoleAssignmentsSpeeds,
 ) -> (Role, bool, Option<BallPosition>) {
     // Returns (role, send_spl_striker_message, team_ball)
     if let Some(game_controller_state) = game_controller_state {
@@ -380,6 +388,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -404,6 +414,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -420,6 +432,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -448,6 +462,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -464,6 +480,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -489,6 +507,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -512,6 +532,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
 
@@ -544,6 +566,8 @@ fn process_role_state_machine(
                 cycle_start_time,
                 game_controller_state,
                 optional_roles,
+                field_dimensions,
+                role_assignments_speeds,
             ),
         },
     }
@@ -557,11 +581,15 @@ fn decide_if_claiming_striker_or_other_role(
     cycle_start_time: SystemTime,
     game_controller_state: Option<&GameControllerState>,
     optional_roles: &[Role],
+    field_positions: &FieldDimensions,
+    role_assignments_speeds:&RoleAssignmentsSpeeds, 
 ) -> (Role, bool, Option<BallPosition>) {
     if am_better_striker(
         current_pose,
         spl_message.robot_to_field,
         spl_message_ball_position,
+        field_positions,
+        role_assignments_speeds,
     ) {
         (
             Role::Striker,
@@ -633,11 +661,70 @@ fn am_better_striker(
     current_pose: Isometry2<f32>,
     origin_pose: Isometry2<f32>,
     spl_message_ball_position: &spl_network_messages::BallPosition,
+    field_dimensions: &FieldDimensions,
+    role_assignments_speeds: &RoleAssignmentsSpeeds,
 ) -> bool {
-    (current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position)
-        .coords
-        .norm()
-        < spl_message_ball_position.relative_position.coords.norm()
+        println!("starting calculation");
+        let relative_ball = current_pose.inverse() * origin_pose * spl_message_ball_position.relative_position;
+        // Distance calculation
+        let our_distance = relative_ball.coords.norm();
+        let other_distance = spl_message_ball_position.relative_position.coords.norm();
+        println!("{our_distance} our distance to the ball");
+        println!("{other_distance} other distance to the ball");
+        // Angle calculation
+        let ball_to_us = Vector2::new(relative_ball.x, relative_ball.y);
+        let ball_to_other = Vector2::new(spl_message_ball_position.relative_position.x, spl_message_ball_position.relative_position.y);
+        let forward = Vector2::x();
+        let our_first_angle = forward.angle(&ball_to_us);
+        let other_first_angle = forward.angle(&ball_to_other);
+
+        println!("{our_first_angle} our angle to the ball-us line");
+        println!("{other_first_angle} other angle to the ball-other line");
+
+        let opponent_goal_center_us = current_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
+        let opponent_goal_center_other = origin_pose.inverse() * Vector2::new(field_dimensions.length / 2.0, 0.0);
+
+        // println!("{opponent_goal_center_us.norm()} our distance to the goal");
+        // println!("{opponent_goal_center_other.norm()} other distance to the goal");
+
+        let ball_to_goal_us = opponent_goal_center_us - ball_to_us;
+        let ball_to_goal_other = opponent_goal_center_other - ball_to_other;
+
+        // println!("{ball_to_goal_us.norm()} our percieved distance ball and goal");
+        // println!("{ball_to_goal_other.norm()} other percieved distance ball and goal");
+
+        let our_ball_to_our_goal = ball_to_us.angle(&opponent_goal_center_us);
+        let other_ball_to_other_goal = ball_to_other.angle(&opponent_goal_center_other);
+
+        println!("{our_ball_to_our_goal} our shortest angle between the ball-us line and the us-goal line");
+        println!("{other_ball_to_other_goal} other shortest angle between the ball-us line and the other-goal line");
+
+        let mut our_second_angle: f32 = ball_to_us.angle(&ball_to_goal_us);
+        if our_ball_to_our_goal > 0.5 * PI  {
+            println!("changing our second angle to be -180 degrees");
+            our_second_angle = PI - our_second_angle;
+        }
+
+        let mut other_second_angle = ball_to_other.angle(&ball_to_goal_other);
+        if other_ball_to_other_goal > 0.5 * PI  {
+            println!("changing other second angle to be -180 degrees");
+            other_second_angle = PI - other_second_angle;
+        }
+
+        println!("{our_second_angle} our shortest angle between the ball-us line and the ball-goal line");
+        println!("{other_second_angle} other shortest angle between the ball-us line and the ball-goal line");
+
+        // Creating the overall score
+        // m/s: 0.175
+        // 2pi turn (first, around own axis): 8 sec.
+        // 2pi turn (second, around ball): 12 sec (estimate).
+        // 1 turn equals 1.4 meters
+        let our_estimated_time: f32 = (our_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (our_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + our_distance * role_assignments_speeds.walking_speed;
+        let other_estimated_time: f32 = (other_first_angle / (2.0*PI)) * role_assignments_speeds.rotation_axis_time + (other_second_angle / (2.0*PI)) * role_assignments_speeds.rotation_ball_time + other_distance * role_assignments_speeds.walking_speed;
+        println!("{our_estimated_time} our estimated time");
+        println!("{other_estimated_time} our estimated time");
+        return our_estimated_time < (other_estimated_time + 2.5);
+        
 }
 
 fn generate_role(

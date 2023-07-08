@@ -80,6 +80,7 @@ pub struct Behavior {
     pub lost_ball: LostBall,
     pub optional_roles: Vec<Role>,
     pub path_planning: PathPlanning,
+    pub role_assignments_speeds: RoleAssignmentsSpeeds,
     pub role_positions: RolePositions,
     pub walk_and_stand: WalkAndStand,
     pub dribbling: Dribbling,
@@ -156,6 +157,13 @@ pub struct InWalkKickInfo {
     pub reached_thresholds: Vector3<f32>,
     pub shot_distance: f32,
     pub enabled: bool,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
+pub struct RoleAssignmentsSpeeds {
+    pub walking_speed: f32,
+    pub rotation_axis_time: f32,
+    pub rotation_ball_time: f32,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, SerializeHierarchy)]
