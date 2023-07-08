@@ -50,7 +50,7 @@ impl Split {
             self.interpolator.reset();
         }
 
-        context.motion_safe_exits[MotionType::SitDown] = self.interpolator.is_finished();
+        context.motion_safe_exits[MotionType::Split] = self.interpolator.is_finished();
 
         Ok(MainOutputs {
             split_joints_command: JointsCommand {

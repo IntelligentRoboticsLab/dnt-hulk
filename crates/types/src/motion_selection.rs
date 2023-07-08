@@ -54,7 +54,7 @@ pub struct MotionSafeExits {
 impl Default for MotionSafeExits {
     fn default() -> Self {
         Self {
-            split: true,
+            split: false,
             arms_up_squat: true,
             dispatching: false,
             energy_saving_stand: true,
