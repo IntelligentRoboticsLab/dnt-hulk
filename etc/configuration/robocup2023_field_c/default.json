@@ -1,34 +1,68 @@
 {
-    "field_color_detection": {
-        "vision_bottom": {
-          "blue_chromaticity_threshold": 0.3799999952316284,
-          "green_luminance_threshold": 25,
-          "lower_green_chromaticity_threshold": 0.4000000059604645,
-          "red_chromaticity_threshold": 0.3700000047683716,
-          "upper_green_chromaticity_threshold": 0.4149999916553498
-        },
-        "vision_top": {
-          "blue_chromaticity_threshold": 0.4000000059604645,
-          "green_luminance_threshold": 25,
-          "lower_green_chromaticity_threshold": 0.3750000298023224,
-          "red_chromaticity_threshold": 0.35500001907348633,
-          "upper_green_chromaticity_threshold": 0.38999250531196594
-        }
+  "field_color_detection": {
+    "vision_bottom": {
+      "blue_chromaticity_threshold": 0.3799999952316284,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.4000000059604645,
+      "red_chromaticity_threshold": 0.3700000047683716,
+      "upper_green_chromaticity_threshold": 0.4149999916553498
+    },
+    "vision_top": {
+      "blue_chromaticity_threshold": 0.4000000059604645,
+      "green_luminance_threshold": 25,
+      "lower_green_chromaticity_threshold": 0.37300044298172,
+      "red_chromaticity_threshold": 0.35500001907348633,
+      "upper_green_chromaticity_threshold": 0.3799925148487091
+    }
+  },
+  "image_segmenter": {
+    "vision_bottom": {
+      "horizontal_stride": 4,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 35,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 8
+    },
+    "vision_top": {
+      "horizontal_stride": 4,
+      "vertical_edge_detection_source": "Luminance",
+      "vertical_edge_threshold": 13,
+      "vertical_median_mode": "ThreePixels",
+      "vertical_stride": 1
+    }
+  },
+  "line_detection": {
+    "vision_bottom": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
       },
-      "image_segmenter": {
-        "vision_bottom": {
-          "horizontal_stride": 4,
-          "vertical_edge_detection_source": "Luminance",
-          "vertical_edge_threshold": 32,
-          "vertical_median_mode": "ThreePixels",
-          "vertical_stride": 8
-        },
-        "vision_top": {
-          "horizontal_stride": 4,
-          "vertical_edge_detection_source": "Luminance",
-          "vertical_edge_threshold": 13,
-          "vertical_median_mode": "ThreePixels",
-          "vertical_stride": 1
-        }
-      }
+      "check_line_distance": true,
+      "check_line_length": true,
+      "check_line_segments_projection": true,
+      "gradient_alignment": 0.0,
+      "maximum_distance_to_robot": 6.0,
+      "maximum_fit_distance_in_pixels": 5.0,
+      "maximum_gap_on_line": 50.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 4
+    },
+    "vision_top": {
+      "allowed_line_length_in_field": {
+        "end": 4.0,
+        "start": 0.15000000596046448
+      },
+      "check_line_distance": true,
+      "check_line_length": true,
+      "check_line_segments_projection": true,
+      "gradient_alignment": -0.949999988079071,
+      "maximum_distance_to_robot": 6.0,
+      "maximum_fit_distance_in_pixels": 3.0,
+      "maximum_gap_on_line": 30.0,
+      "maximum_number_of_lines": 10,
+      "maximum_projected_segment_length": 0.30000001192092896,
+      "minimum_number_of_points_on_line": 5
+    }
+  }
 }
