@@ -36,21 +36,13 @@ impl Referee {
     pub fn cycle(&mut self, context: CycleContext<impl Interface>) -> Result<()> {
         if context.filtered_whistle.started_this_cycle {
             if self.first {
-                let mut rng_gen = rand::thread_rng();
-                let handsignal: u8 = rng_gen.gen_range(1..=16);
-                self.send_referee_message(&context, handsignal, Duration::from_secs_f32(0.0))?;
-                self.last_heard_timestamp = Some(SystemTime::now());
+                self.send_referee_message(&context, Duration::from_secs_f32(0.0))?;
                 self.first = false;
-                // println!("sent referee handsignal message");
             } else if let Some(cycle_time) = self.last_heard_timestamp {
                 match cycle_time.duration_since(cycle_time) {
                     Ok(duration) => {
                         if duration.as_secs() > 20 {
-                            let mut rng_gen = rand::thread_rng();
-                            let handsignal: u8 = rng_gen.gen_range(1..=16);
-                            self.send_referee_message(&context, handsignal, duration)?;
-                            self.last_heard_timestamp = Some(SystemTime::now());
-                            // println!("sent referee handsignal message");
+                            self.send_referee_message(&context, duration)?;
                         }
                     }
                     Err(_err) => {}
@@ -64,9 +56,12 @@ impl Referee {
     fn send_referee_message(
         &mut self,
         context: &CycleContext<impl Interface>,
-        handsignal: u8,
         duration: Duration,
     ) -> Result<()> {
+        self.last_heard_timestamp = Some(SystemTime::now());
+        let mut rng_gen = rand::thread_rng();
+        let handsignal: u8 = rng_gen.gen_range(1..=16);
+
         context
             .hardware
             .write_to_network(OutgoingMessage::RefereeReturnData(RefereeMessage {
@@ -79,7 +74,9 @@ impl Referee {
                 ball_age: duration.as_secs_f32(),
                 ball: [0.0, 0.0],
             }))
-            .wrap_err("failed to write GameControllerReturnMessage to hardware")?;
+            .wrap_err("failed to write RefereeMessage to hardware")?;
+
+        println!("sent referee handsignal message");
 
         Ok(())
     }
