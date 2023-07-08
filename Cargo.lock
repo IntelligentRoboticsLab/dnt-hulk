@@ -1266,6 +1266,7 @@ name = "control"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "bifrost",
  "color-eyre",
  "context_attribute",
  "filtering",
@@ -1278,6 +1279,7 @@ dependencies = [
  "nalgebra",
  "ordered-float",
  "projection",
+ "rand",
  "serde",
  "serde_json",
  "serialize_hierarchy",
@@ -4476,6 +4478,7 @@ dependencies = [
 name = "spl_network"
 version = "0.1.0"
 dependencies = [
+ "bifrost",
  "color-eyre",
  "constants",
  "context_attribute",

@@ -3,6 +3,7 @@ use std::{
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
 };
 
+use bifrost::serialization::Encode;
 use log::warn;
 use serde::Deserialize;
 use thiserror::Error;
@@ -115,6 +116,21 @@ impl Endpoint {
                     .spl_socket
                     .send_to(
                         message.as_slice(),
+                        SocketAddr::new(Ipv4Addr::BROADCAST.into(), SPL_PORT),
+                    )
+                    .await
+                {
+                    warn!("Failed to send UDP datagram via SPL socket: {error:?}")
+                }
+            }
+            OutgoingMessage::RefereeReturnData(message) => {
+                let mut data: Vec<u8> = Vec::new();
+                message.encode(&mut data).unwrap();
+                // let message: Vec<u8> = message.try_into().expect("Failed to serialize SPL message");
+                if let Err(error) = self
+                    .spl_socket
+                    .send_to(
+                        data.as_slice(),
                         SocketAddr::new(Ipv4Addr::BROADCAST.into(), SPL_PORT),
                     )
                     .await

@@ -2,6 +2,7 @@ mod bindings;
 mod game_controller_return_message;
 mod game_controller_state_conversion;
 mod game_controller_state_message;
+pub mod referee_return_message;
 
 use std::{
     fmt::{self, Display, Formatter},
@@ -17,6 +18,7 @@ pub use game_controller_state_conversion::{
     SubState, Team, TeamColor, TeamState,
 };
 pub use game_controller_state_message::GameControllerStateMessage;
+pub use referee_return_message::RefereeMessage;
 use serialize_hierarchy::SerializeHierarchy;
 
 pub type HulkMessage = GameControllerReturnMessage;

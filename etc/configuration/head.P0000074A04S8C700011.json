@@ -2,10 +2,12 @@
   "camera_matrix_parameters": {
     "vision_top": {
       "extrinsic_rotations": [
-        0.30000001192092896, -3.369999885559082, 0.44699013233184814
+        0.30000001192092896,
+        -3.369999885559082,
+        0.44699013233184814
       ]
     }
   },
   "disable_communication_acceptor": true,
-  "player_number": "One"
+  "player_number": "Three"
 }
