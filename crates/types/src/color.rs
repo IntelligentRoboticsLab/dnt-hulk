@@ -124,6 +124,7 @@ pub struct Rgb {
 impl Rgb {
     pub const BLACK: Rgb = Rgb::new(0, 0, 0);
     pub const RED: Rgb = Rgb::new(255, 0, 0);
+    pub const ORANGE: Rgb = Rgb::new(255, 120, 0);
     pub const GREEN: Rgb = Rgb::new(0, 255, 0);
     pub const BLUE: Rgb = Rgb::new(0, 0, 255);
     pub const YELLOW: Rgb = Rgb::new(255, 220, 0);
