@@ -14,15 +14,15 @@ pub fn execute(
 
     // The refere will stand at the T junction of the field, so use field_dimensions to get the location of the T junction
     let visref_location = match visref_fieldside {
-        VisRefFieldSide::Left => point![0.0, field_dimensions.length / 2.0],
-        VisRefFieldSide::Right => point![field_dimensions.width, field_dimensions.length / 2.0]
+        VisRefFieldSide::Left => point![field_dimensions.length / 2.0, 0.0],
+        VisRefFieldSide::Right => point![field_dimensions.length / 2.0, field_dimensions.width]
     };
 
     let head_motion = HeadMotion::LookAt {
         target: robot_to_field.inverse() * visref_location,
     };
     match world_state.robot.primary_state {
-        PrimaryState::Set | PrimaryState::Playing => {
+        PrimaryState::Ready | PrimaryState::Set | PrimaryState::Playing => {
             println!("Ref signal");
             Some(MotionCommand::Stand {
                 head: head_motion,

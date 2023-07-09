@@ -2,9 +2,10 @@ use std::time::{Duration, SystemTime};
 
 use color_eyre::Result;
 use context_attribute::context;
-use framework::{AdditionalOutput, MainOutput};
+use framework::{AdditionalOutput, MainOutput, PerceptionInput};
 use nalgebra::{point, Point2};
-use spl_network_messages::{GamePhase, GameState, SubState, Team};
+use spl_network_messages::{GamePhase, GameState, SubState, Team, GameControllerReturnMessage, HulkMessage, Penalty, PlayerNumber};
+use types::messages::IncomingMessage;
 use types::{
     configuration::{Behavior as BehaviorConfiguration, InWalkKicks, LostBall},
     Action, CycleTime, FieldDimensions, FilteredGameState, FilteredWhistle, GameControllerState,
@@ -26,6 +27,8 @@ pub struct Behavior {
     absolute_last_known_ball_position: Point2<f32>,
     active_since: Option<SystemTime>,
     active_since_visref: Option<SystemTime>,
+    last_team_score: u8,
+    last_opponent_score: u8,
 }
 
 #[context]
@@ -49,6 +52,8 @@ pub struct CycleContext {
     pub in_walk_kicks: Parameter<InWalkKicks, "in_walk_kicks">,
     pub field_dimensions: Parameter<FieldDimensions, "field_dimensions">,
     pub lost_ball_parameters: Parameter<LostBall, "behavior.lost_ball">,
+    pub network_message: PerceptionInput<IncomingMessage, "SplNetwork", "message">,
+
 }
 
 #[context]
@@ -69,6 +74,8 @@ impl Behavior {
             absolute_last_known_ball_position: point![0.0, 0.0],
             active_since: None,
             active_since_visref: None,
+            last_team_score: 0,
+            last_opponent_score: 0,
         })
     }
 
@@ -98,23 +105,6 @@ impl Behavior {
             (Some(_), _) => self.active_since = None,
         }
 
-        match (
-            self.active_since_visref,
-            world_state.robot.primary_state,
-            context.filtered_whistle,
-        ) {
-            (
-                None,
-                PrimaryState::Set { .. } | PrimaryState::Playing { .. },
-                FilteredWhistle {
-                    is_detected: true, ..
-                },
-            ) => self.active_since_visref = Some(now),
-            (None, _, _) => {}
-            (Some(_), PrimaryState::Set { .. } | PrimaryState::Playing { .. }, _) => {}
-            (Some(_), _, _) => self.active_since_visref = None,
-        }
-
         let mut actions = vec![
             Action::Unstiff,
             Action::SitDown,
@@ -126,21 +116,55 @@ impl Behavior {
             Action::Calibrate,
         ];
 
+
+        let mut spl_messages = context
+            .network_message
+            .persistent
+            .values()
+            .flatten()
+            .filter_map(|message| match message {
+                IncomingMessage::GameController(message) => Some(message),
+                IncomingMessage::Spl(_) => None,
+            })
+            .peekable();
+        
+        let current_spl_message  = spl_messages.peek();
+
+        match self.active_since_visref {
+            // Visref was not active
+            None => {
+                // Active on whistle or if a goal is scored (based on gamecontroller data)
+                if context.filtered_whistle.is_detected
+                || (current_spl_message.is_some() &&  ((self.last_team_score != current_spl_message.as_ref().unwrap().hulks_team.score) || (self.last_opponent_score != current_spl_message.as_ref().unwrap().opponent_team.score))){
+                    self.active_since_visref = Some(now);
+                    // Set visref on active and push the action in the same cycle
+                    actions.push(Action::DetectRefSignal);
+                }current_spl_message.unwrap
+            },
+            // Visref was already active
+            Some(time) => {
+                // If visref active after 15 seconds set to inactive
+                if now.duration_since(self.active_since_visref.unwrap())? > Duration::from_secs(15) {
+                    self.active_since_visref = None;
+                }
+                // Visref started less than 15 seconds ago push the action
+                else {
+                    actions.push(Action::DetectRefSignal);
+                }
+
+            },
+            _ => {}
+        }
+
+        if current_spl_message.is_some() {
+            self.last_team_score = current_spl_message.as_ref().unwrap().hulks_team.score;
+            self.last_opponent_score = current_spl_message.as_ref().unwrap().opponent_team.score;
+        }
+
         if let Some(active_since) = self.active_since {
             if now.duration_since(active_since)? < context.configuration.initial_lookaround_duration
             {
                 actions.push(Action::LookAround);
-            }
-        }
-
-        if let Some(active_since_visref) = self.active_since_visref {
-            if now.duration_since(active_since_visref)? < Duration::from_secs(15) {
-                // match world_state.robot.role {
-                //     Role::DefenderLeft | Role::DefenderRight => actions.push(Action::DetectRefSignal),
-                //     _ => (),
-                // }
-                actions.push(Action::DetectRefSignal);
-                println!("Pushing detect ref signal action");
             }
         }
 
@@ -222,7 +246,7 @@ impl Behavior {
                     Action::StandUp => stand_up::execute(world_state),
                     Action::DetectRefSignal => {
                         detect_ref_signal::execute(world_state, context.field_dimensions, VisRefFieldSide::Right)
-                    }
+                    },
                     Action::Stand => stand::execute(world_state, context.field_dimensions),
                     Action::LookAround => look_around::execute(world_state),
                     Action::Calibrate => calibrate::execute(world_state),
