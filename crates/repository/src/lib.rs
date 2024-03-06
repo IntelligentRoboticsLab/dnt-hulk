@@ -492,9 +492,7 @@ pub async fn get_image_path(version: &str) -> Result<PathBuf> {
 }
 
 async fn download_sdk_from_dropbox(path: impl AsRef<Path>) -> Result<()> {
-    // https://ucc766f73b0765da91b88286df44.dl.dropboxusercontent.com/cd/0/get/COlXoSw89ohjXr-oYQOlp7iznmOWg8iq6mMMgPTVXCY8vbElGoVFc8RMlgEpn4mU3VHpEdc-VwRuknZ_wmZdJJVPp8DPZtWVlO9v9rTiB58GR6RonLJYu9RMfSdfgn7qe8luoDFhXXBZDpZk8DOJv3mVOZoQnrl5Nmyyw4MOlsxD3w/file#
     let fetch_url = "https://www.dropbox.com/scl/fi/esp0k9y76xwqfez0sfxvx/HULKs-DNT-OS-toolchain-5.7.1.sh?rlkey=io4od5q1cv59llfyqjr7ijpsc&dl=1";
-    // let fetch_url = format!("https://drive.google.com/uc?export=download&confirm&id={file_id}");
     let response = reqwest::get(fetch_url).await?;
 
     let file_size = response

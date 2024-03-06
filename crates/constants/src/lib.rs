@@ -5,4 +5,4 @@ pub const HULA_SOCKET_PATH: &str = "/tmp/hula";
 pub const OS_RELEASE_PATH: &str = "/etc/os-release";
 pub const OS_VERSION: &str = "5.7.1";
 pub const SDK_VERSION: &str = "5.7.0";
-pub const DNT_TEAM_NUMBER: u8 = 52;
+pub const DNT_TEAM_NUMBER: u8 = 8;
