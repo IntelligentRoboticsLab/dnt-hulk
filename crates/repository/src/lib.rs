@@ -527,8 +527,6 @@ async fn download_sdk(downloads_directory: impl AsRef<Path>, installer_name: &st
 
     let installer_path = downloads_directory.as_ref().join(installer_name);
 
-    // download_sdk_from_google_drive(GOOGLE_DRIVE_FILE_ID, &installer_path).await?;
-
     download_sdk_from_dropbox(&installer_path).await?;
 
     set_permissions(&installer_path, Permissions::from_mode(0o755))
