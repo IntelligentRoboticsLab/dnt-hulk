@@ -34,12 +34,6 @@ use spl_network_messages::PlayerNumber;
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 
-// How to obtain:
-// Right-click file > Under "general access" give view access to anyone with the link
-// After clicking copy link you should get a link in your clipboard like this:
-// https://drive.google.com/file/d/1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI/view?usp=sharing
-//                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ The file id
-const GOOGLE_DRIVE_FILE_ID: &str = "1QzK11VjOEOfCrsSLc2uoYO9UCoAZdirI";
 pub const SDK_VERSION: &str = "5.7.4";
 
 #[derive(Clone)]
@@ -497,8 +491,10 @@ pub async fn get_image_path(version: &str) -> Result<PathBuf> {
     Ok(image_path)
 }
 
-async fn download_sdk_from_google_drive(file_id: &str, path: impl AsRef<Path>) -> Result<()> {
-    let fetch_url = format!("https://drive.google.com/uc?export=download&confirm&id={file_id}");
+async fn download_sdk_from_dropbox(path: impl AsRef<Path>) -> Result<()> {
+    // https://ucc766f73b0765da91b88286df44.dl.dropboxusercontent.com/cd/0/get/COlXoSw89ohjXr-oYQOlp7iznmOWg8iq6mMMgPTVXCY8vbElGoVFc8RMlgEpn4mU3VHpEdc-VwRuknZ_wmZdJJVPp8DPZtWVlO9v9rTiB58GR6RonLJYu9RMfSdfgn7qe8luoDFhXXBZDpZk8DOJv3mVOZoQnrl5Nmyyw4MOlsxD3w/file#
+    let fetch_url = "https://www.dropbox.com/scl/fi/esp0k9y76xwqfez0sfxvx/HULKs-DNT-OS-toolchain-5.7.1.sh?rlkey=io4od5q1cv59llfyqjr7ijpsc&dl=1";
+    // let fetch_url = format!("https://drive.google.com/uc?export=download&confirm&id={file_id}");
     let response = reqwest::get(fetch_url).await?;
 
     let file_size = response
@@ -533,7 +529,9 @@ async fn download_sdk(downloads_directory: impl AsRef<Path>, installer_name: &st
 
     let installer_path = downloads_directory.as_ref().join(installer_name);
 
-    download_sdk_from_google_drive(GOOGLE_DRIVE_FILE_ID, &installer_path).await?;
+    // download_sdk_from_google_drive(GOOGLE_DRIVE_FILE_ID, &installer_path).await?;
+
+    download_sdk_from_dropbox(&installer_path).await?;
 
     set_permissions(&installer_path, Permissions::from_mode(0o755))
         .await
